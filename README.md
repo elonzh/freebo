@@ -5,6 +5,7 @@
 
 [![English](https://img.shields.io/badge/English-193C35?style=flat&logo=googletranslate&logoColor=white)](README.en.md)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-193C35?style=flat)](LICENSE)
+[![下载 Freebo](https://img.shields.io/badge/%E4%B8%8B%E8%BD%BD-Freebo-193C35?style=flat)](https://github.com/elonzh/freebo/releases/latest)
 [![macOS, Windows, Linux](https://img.shields.io/badge/Platforms-macOS%20%C2%B7%20Windows%20%C2%B7%20Linux-193C35?style=flat)](#功能)
 [![产品官网](https://img.shields.io/badge/%E5%AE%98%E7%BD%91-Freebo-193C35?style=flat)](https://elonzh.cn/toys/freebo)
 [![更新说明](https://img.shields.io/badge/%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E-193C35?style=flat)](CHANGELOG.md)
@@ -32,7 +33,7 @@ Freebo 将服务器管理、播放器选择和视频播放放在一个桌面应�
 
 ## 快速开始
 
-1. 打开 Freebo，在首次配置中选择已安装的播放器。
+1. [下载安装包](https://github.com/elonzh/freebo/releases/latest)，打开 Freebo，在首次配置中选择已安装的播放器。
 2. 添加 Emby 服务器地址，在服务器网页中登录。
 3. 在媒体库中点击播放，用地址栏旁的播放按钮打开控制浮窗。
 

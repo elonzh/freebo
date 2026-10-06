@@ -5,6 +5,7 @@
 
 [![中文](https://img.shields.io/badge/%E4%B8%AD%E6%96%87-193C35?style=flat&logo=googletranslate&logoColor=white)](README.md)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-193C35?style=flat)](LICENSE)
+[![Download Freebo](https://img.shields.io/badge/Download-Freebo-193C35?style=flat)](https://github.com/elonzh/freebo/releases/latest)
 [![macOS, Windows, Linux](https://img.shields.io/badge/Platforms-macOS%20%C2%B7%20Windows%20%C2%B7%20Linux-193C35?style=flat)](#features)
 [![Product website](https://img.shields.io/badge/Website-Freebo-193C35?style=flat)](https://elonzh.cn/en/toys/freebo)
 [![Changelog](https://img.shields.io/badge/Changelog-193C35?style=flat)](CHANGELOG.md)
@@ -32,7 +33,7 @@ Music and live TV continue to play on the Emby website.
 
 ## Quick start
 
-1. Open Freebo and select an installed player during initial setup.
+1. [Download the installer](https://github.com/elonzh/freebo/releases/latest), open Freebo, and select an installed player during initial setup.
 2. Add your Emby server address and sign in on its website.
 3. Press play in your library. Use the playback button beside the address bar to open the floating controls.
 
