@@ -10,15 +10,13 @@
 [![产品官网](https://img.shields.io/badge/%E5%AE%98%E7%BD%91-Freebo-193C35?style=flat)](https://elonzh.cn/toys/freebo)
 [![更新说明](https://img.shields.io/badge/%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E-193C35?style=flat)](CHANGELOG.md)
 
-**免费开源的 Emby 桌面客户端。在熟悉的网页里浏览，用喜欢的本地播放器观看。**
+**免费开源的桌面影音客户端。在熟悉的媒体库里浏览，用喜欢的本地播放器观看。**
 
 Freebo 的 **Free** 既是免费，也是自由选择播放器。软件没有订阅或播放格式解锁费用，支持 macOS、Windows 和 Linux。添加服务器，在网页中登录，点击播放即可打开本地播放器。
 
 ## 为什么做 Freebo
 
-只是想在电脑上看 Emby 媒体库里的影片，却可能遇到客户端或格式解锁的付费门槛：[Emby 的部分官方客户端](https://support.emby.media/support/articles/Premiere-Feature-Matrix.html)需要付费解锁完整播放，[Infuse Pro](https://firecore.com/infuse)将更多视频格式和无损音频支持放在付费版中，[VidHub](https://apps.apple.com/app/id1659622164)也提供 VIP 内购。
-
-Freebo 因此而生：保留 Emby 已经整理好的媒体库和网页，把视频交给 IINA、mpv、VLC 等成熟的本地播放器。无需再为 Freebo 的播放功能付费，也能沿用自己的播放器设置，并同步观看进度。视频格式与解码能力由所选播放器决定。
+媒体库已经整理好了影片，电脑上也有喜欢的播放器。做 Freebo，就是想把它们连接起来，让找影片、看片和续播顺畅衔接。保留媒体服务器的网页浏览体验，用自己选好的播放器观看，并将观看进度同步回媒体库。
 
 ## 功能
 
