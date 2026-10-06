@@ -10,9 +10,15 @@
 [![Product website](https://img.shields.io/badge/Website-Freebo-193C35?style=flat)](https://elonzh.cn/en/toys/freebo)
 [![Changelog](https://img.shields.io/badge/Changelog-193C35?style=flat)](CHANGELOG.md)
 
-Browse your familiar Emby website and watch with your favorite local player.
+**A free, open-source Emby desktop client. Browse your familiar library and watch with your favorite local player.**
 
-Freebo brings server management, player selection and video playback into one desktop app. Add a server, sign in on its website, and press play to open your local player.
+**Free** means both free of charge and free to choose your player. Freebo has no subscription or format unlock fees and runs on macOS, Windows and Linux. Add a server, sign in on its website, and press play to open your local player.
+
+## Why Freebo exists
+
+Watching your Emby library on a computer can come with a paid client or format unlock: [some official Emby clients](https://support.emby.media/support/articles/Premiere-Feature-Matrix.html) require payment for full playback, [Infuse Pro](https://firecore.com/infuse) puts additional video formats and lossless audio in its paid tier, and [VidHub](https://apps.apple.com/app/id1659622164) offers VIP in-app purchases.
+
+Freebo grew out of a simpler need: keep the library and website Emby already provides, and hand video playback to an established local player such as IINA, mpv or VLC. Use your own player settings and sync watch progress without paying for Freebo’s playback features. Format and decoding support come from the player you choose.
 
 ## Features
 

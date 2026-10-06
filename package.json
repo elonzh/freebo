@@ -2,7 +2,7 @@
   "name": "freebo",
   "version": "1.0.0",
   "private": true,
-  "description": "Open Emby videos in your local player, with playlists and watch progress.",
+  "description": "A free, open-source Emby desktop client. Choose your local player, without subscriptions or format unlock fees.",
   "homepage": "https://elonzh.cn/toys/freebo",
   "license": "Apache-2.0",
   "author": "elonzh",
