@@ -1,6 +1,6 @@
 # Freebo 品牌素材页
 
-本页用于预览和下载已选 Atma 品牌，规范见 [品牌说明](../README.md)，应用设计系统见 [DESIGN.md](../../../DESIGN.md)。入口是 `index.html` 与兼容原地址的 `brand.html`，共用同一页面实现。
+本页用于预览和下载已选 Atma 品牌，规范见 [品牌说明](../README.md)，应用设计系统见 [界面设计](../../design.md)。入口是 `index.html` 与兼容原地址的 `brand.html`，共用同一页面实现。
 
 页面保持深松绿 `#193C35`、青柠绿 `#BDE64D` 与浅底 `#FBFCF9`。辅助文字使用 `#52675B`，深色页头辅助文字使用 `#DCE8D0`，分隔线使用 `#D8E1D3`。控件沿用应用的 shadcn Button。
 

@@ -194,7 +194,7 @@ The identity sits within the user's confirmed Chrome desktop layout: tabs above 
 
 ## Colors
 
-The frontmatter extracts the current semantic palette from [src/style.css](src/style.css). The brand's three foundation colors and vector usage are recorded in [the brand specification](docs/brand/README.md); interface tokens derive the light and dark utility surfaces from that identity.
+The frontmatter extracts the current semantic palette from [src/style.css](../src/style.css). The brand's three foundation colors and vector usage are recorded in [the brand specification](brand/README.md); interface tokens derive the light and dark utility surfaces from that identity.
 
 ### Primary
 
@@ -245,7 +245,7 @@ The shell, utility pages and ordinary settings/server rows remain flat. Surface 
 
 Tabs have curved top corners; the active tab flares outward through concave curves at both bottom corners to join the toolbar. The scrollable tab list reserves space for these curves, and active curves stay above neighboring hover surfaces. The address field is a pill. Settings navigation has a straight left edge flush with the window and a rounded right end; the icon and label retain their inset padding. shadcn controls use the control radius; the server form uses the larger form radius. Close/new-tab buttons and switch thumbs are circular. Ordinary rows use dividers rather than repeated raised cards.
 
-The mark preserves the asymmetric ears, face and three-color silhouette in the editable [vector master](assets/brand/freebo/source/mark.svg). Horizontal lockups size the dog to 1.1 times the wordmark's visible ink height and separate it by 0.1 times that height. Center the visible dog and glyph bounds vertically. Use the supplied stacked and monochrome variants rather than altering the primary lockup. Detailed clear space and minimum-size rules live in [the brand specification](docs/brand/README.md).
+The mark preserves the asymmetric ears, face and three-color silhouette in the editable [vector master](../assets/brand/freebo/source/mark.svg). Horizontal lockups size the dog to 1.1 times the wordmark's visible ink height and separate it by 0.1 times that height. Center the visible dog and glyph bounds vertically. Use the supplied stacked and monochrome variants rather than altering the primary lockup. Detailed clear space and minimum-size rules live in [the brand specification](brand/README.md).
 
 ## Components
 
@@ -253,17 +253,19 @@ The mark preserves the asymmetric ears, face and three-color silhouette in the e
 
 Use shadcn Button default, outline, ghost and link variants for primary, supporting, icon and text actions. Default buttons are 36px tall; the selected icon surface uses `accent` with `primary` ink. Keep hover, disabled, destructive and keyboard-focus states in the shared components. Buttons default to `type="button"`; form saving explicitly uses submit.
 
-shadcn Input and Label supply field states and accessible labeling. OptionSelect uses shadcn Select with its Portal menu, selected-item check and keyboard behavior. The provider is disabled when only one exists or a server is edited. Credentials are entered on the Emby webpage. Keep field help beside the relevant field and saving feedback inside the action.
+shadcn Input and Label supply field states and accessible labeling. OptionSelect uses shadcn Select with its Portal menu, selected-item check and keyboard behavior. The provider is disabled when only one exists or a server is edited. The server form accepts optional credentials and exposes password visibility; saved credentials fill the Emby login page without submitting it. Keep field help beside the relevant field and saving feedback inside the action.
 
 ### Browser tabs and address toolbar
 
-The active tab takes the toolbar surface and foreground ink; inactive tabs use supporting ink with neutral hover. Server title and close actions remain separate. Closing a tab keeps its server registered. Settings has its own closable tab. The plus action opens Home.
+The active tab takes the toolbar surface and foreground ink; inactive tabs use supporting ink with neutral hover. Server title and close actions remain separate. Closing a tab keeps its server registered. Settings has its own closable tab. The plus action opens the server-selection popup.
 
 Back, forward, reload and Home precede the address field. The address is read-only and reflects the server URL or an internal Freebo page; it does not accept arbitrary URL entry. Media status and Settings actions sit after it. BrandName renders the home-tab name with the bundled Atma font; BrandLogo supplies identical light/dark vector geometry with an accessible Freebo name.
 
 ### Settings, players and first-use setup
 
 The rail selects servers, players, appearance, diagnostics or About. Soft green with primary ink marks selection. One player list presents every supported player for the current platform: detected paths use shadcn RadioGroup and a full clickable label with a selected surface; missing paths show an introduction and a globe button for the official download page. Preserve readable player names, paths and default markers, and display multiple installation paths separately. Manual path selection uses an independent folder button. Continuous playback and fullscreen switches follow the list. About presents the brand, version, license and product links without repeating provider support copy.
+
+Home server rows open the server from an area that includes its icon, name, address and whitespace; an independent edit icon opens its form. Management uses the same row geometry, with its main area opening the editor and separate icons for opening, signing out and removing. Server form headings sit outside the card; fields follow type, optional name, address and credentials. Connection results appear beside testing, with success and error colors and reserved space that keeps the action row stable.
 
 A first-use player scan runs once and persists its completed state; later scans are manual. Setup offers language selection, player discovery, a blank server registration form and completion. Server registration always starts with the new form, including when other servers are already saved; completion summarizes the server created in that run. Use Switch for boolean settings and separate Selects for theme and language, each with a system default. Locale changes affect owned shell and recovery messages; server-page language remains independent.
 
@@ -283,7 +285,7 @@ Recovery uses readable destructive text with an action named for reload, close o
 - Do keep shell and recovery geometry synchronized with native guest bounds.
 - Do use shadcn controls and existing semantic variables for both appearances.
 - Do keep translated labels, keyboard focus and action-specific icon names readable.
-- Do use clean actual-app screenshots and state their validation scope.
+- Do use clean actual-app screenshots and retain source information with the assets.
 
 ### Don't:
 
@@ -295,6 +297,4 @@ Recovery uses readable destructive text with an action named for reload, close o
 - Don't treat closing a tab as deletion of its registered server.
 - Don't infer native window resizing, real playback or cross-platform acceptance from CSS captures.
 
-The 2026-10-06 brand implementation replaces the former blue palette and provisional typography under the user's approved identity change. Current clean captures are [Chinese welcome](docs/assets/welcome.png), [English welcome](docs/assets/welcome-en.png), [Chinese settings](docs/assets/settings.png) and [English settings](docs/assets/settings-en.png). The scoped evidence is recorded in [validation](docs/validation.md); historical shell reviews remain evidence for their original iteration. The branding pass verifies actual Electron preload/IPC, appearance/language, IINA discovery and popup opening. Its 820 × 600 check is a CSS viewport exercise, not native window-resize acceptance, and it did not exercise server authentication or media playback. The separate site's existing design authority remains in force; [site-surface.md](docs/site-surface.md) specifies supplied materials only.
-
-Sources: [PRODUCT.md](PRODUCT.md), [brand specification](docs/brand/README.md), [app surface](docs/app-surface.md), [quality bar](docs/quality-bar.md), `src/style.css`, `src/components/ui/`, `src/components/Brand.tsx`, `src/App.tsx`, `src/components/SetupGuide.tsx`, `electron/main.ts` and `assets/brand/freebo/brand.json`. The sidecar's synthesized tonal ramps are preview metadata, not new runtime color tokens.
+Sources: [product design](product.md), [brand specification](brand/README.md), `src/style.css`, `src/components/ui/`, `src/App.tsx`, `src/components/SetupGuide.tsx` and `electron/main.ts`. Runtime behavior and verification boundaries are maintained in [architecture](architecture.md).

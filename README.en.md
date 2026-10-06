@@ -1,75 +1,85 @@
-# Freebo
-
-<picture>
+<picture style="align-items: center; display: flex; justify-content: center;">
   <source media="(prefers-color-scheme: dark)" srcset="assets/brand/freebo/svg/logo-on-dark.svg" />
   <img src="assets/brand/freebo/svg/logo.svg" width="280" alt="Freebo" />
 </picture>
 
-[中文](README.md)
+[![中文](https://img.shields.io/badge/%E4%B8%AD%E6%96%87-193C35?style=flat&logo=googletranslate&logoColor=white)](README.md)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-193C35?style=flat)](LICENSE)
+[![macOS, Windows, Linux](https://img.shields.io/badge/Platforms-macOS%20%C2%B7%20Windows%20%C2%B7%20Linux-193C35?style=flat)](#features)
+[![Product website](https://img.shields.io/badge/Website-Freebo-193C35?style=flat)](https://elonzh.cn/en/toys/freebo)
+[![Changelog](https://img.shields.io/badge/Changelog-193C35?style=flat)](CHANGELOG.md)
 
-Browse your Emby library on its website and watch videos in a local player.
+Browse your familiar Emby website and watch with your favorite local player.
 
-Freebo combines server management, player discovery and playback in a desktop app. Add your Emby address, sign in on the embedded website, and play a video. There is no browser extension, Python environment or separate service to start.
-
-See the [changelog](CHANGELOG.md) for version updates and the [validation record](docs/validation.md) for tested behavior and remaining work.
-
-## Interface and brand
-
-![Freebo first-use setup](docs/assets/welcome-en.png)
-
-[Player settings](docs/assets/settings-en.png) · [Brand assets and source](docs/brand/README.md) · [Brand kit ZIP](assets/brand/freebo/Freebo-brand-kit.zip) · [PDF guide](assets/brand/freebo/Freebo-brand-guide.pdf)
-
-These clean captures come from the actual macOS Electron app using an isolated profile. They show the chosen guide dog and Atma 600 identity; they do not establish real playback or cross-platform acceptance. The external project website was not updated in this branding pass.
+Freebo brings server management, player selection and video playback into one desktop app. Add a server, sign in on its website, and press play to open your local player.
 
 ## Features
 
-- The original Emby website for browsing, search and account management.
-- Multiple servers with separate persistent browser sessions.
-- Guided first-use discovery of IINA, mpv, mpv.net and VLC, followed by manual scans when needed; manual selection and installation guides.
-- Movies, episodes and video playlists, with continuous playback, resume and watch progress reporting.
-- Emby media versions, subtitle and audio track selection.
-- Home lists servers; Settings manages servers, players and preferences.
-- A media button beside the address bar opens controls and the queue in a separate floating panel, with a link to the current item’s page. The Emby view keeps its size.
-- A desktop tab bar, custom title bar, navigation toolbar and diagnostics.
-- Chinese, English or system language, with light and dark appearance.
+- Multiple server tabs with separate persistent sign-in sessions.
+- Movies, episodes and video playlists with resume, continuous playback and watch progress sync.
+- Emby audio, subtitle and video-version selections.
+- A floating panel for pause, seeking and queue navigation.
+- Installed player discovery and manual path selection.
+- English and Chinese, light and dark appearance, and remembered window size and position.
 
-Music and live TV continue to play on the Emby website. Local playback applies to the website inside Freebo. Players are installed separately.
+| System  | Players                                      |
+| ------- | -------------------------------------------- |
+| macOS   | IINA, mpv, VLC                               |
+| Windows | mpv.net, PotPlayer, MPC-HC, MPC-BE, mpv, VLC |
+| Linux   | mpv, VLC                                     |
 
-## Use
+Music and live TV continue to play on the Emby website.
 
-1. Install and open Freebo. Follow the first-use guide to choose a player and add an Emby address.
-2. If you need a player, follow an installation guide and scan again or select it manually. Setup can also be completed later.
-3. Open the server and sign in on its own website.
-4. Click a video’s play button to open your selected local player.
-5. Use the media button beside the address bar to open controls and the queue. The panel links directly to the current item’s page.
+## Quick start
 
-Later launches open Home. Add and edit servers or manage their sessions in Settings. Players are only scanned during initial setup or when you request a scan.
+1. Open Freebo and select an installed player during initial setup.
+2. Add your Emby server address and sign in on its website.
+3. Press play in your library. Use the playback button beside the address bar to open the floating controls.
 
-For a portable or custom player installation, select its application or executable in Settings. Server addresses support ports and reverse proxy subpaths.
+Servers and players can be changed in Settings. Server names are optional; saved credentials fill the sign-in form. Choose a path manually for portable players. Server addresses support ports and reverse proxy subpaths.
 
-## Development
-
-Requires Node.js 22.12 or later and pnpm.
+## Run from source
 
 ```sh
 pnpm install
 pnpm dev
-pnpm check
-pnpm package
 ```
 
-Run `prek install` to enable pre-commit checks for formatting, lint, types, tests and both builds.
+## Development guide
 
-Run `pnpm start` for the local production version. It builds the renderer, main process and preloads together before launching Electron to avoid mixed build versions.
+### Environment and startup
 
-The stack uses React, TypeScript, Electron, Vite, Vitest, Oxlint and Oxfmt. The main process handles browser sessions, media transport and player communication. React renders the app shell, while a separate `WebContentsView` loads the server website.
+Use Node.js 22.12 or later and the pnpm version specified in `package.json`.
 
-Media server providers own website injection, authentication, media resolution and progress reporting. Only Emby is currently registered. See [architecture](docs/architecture.md).
+```sh
+pnpm install
+prek install
+pnpm dev
+```
 
-GitHub Actions is configured to check macOS, Windows and Linux and build macOS arm64/x64, Windows x64 and Linux x64 packages. Version tags create a draft release with checksums. Packages are unsigned by default; signing and macOS notarization require maintainer credentials.
+`pnpm dev` builds the main process and preloads, then starts Vite and Electron. Restart after changing `electron/`; Vite hot-reloads React pages. The app depends on IPC, so connect to Electron’s browser engine for debugging.
 
-Brand assets are generated with `pnpm brand:generate`; `pnpm brand:preview` serves the local brand asset download page. See the [brand specification](docs/brand/README.md) for sources, licensing and regeneration.
+`pnpm start` builds the full app before launching the local production version. `pnpm dev:web` and `pnpm preview` serve only the renderer and do not replace Electron runtime checks.
 
-## License
+### Checks and commits
 
-[Apache-2.0](LICENSE). Thanks to [embyToLocalPlayer](https://github.com/kjtsune/embyToLocalPlayer) for protocol and behavior references.
+During development, run correctness checks relevant to your changes:
+
+| Command                            | Purpose                                   |
+| ---------------------------------- | ----------------------------------------- |
+| `pnpm typecheck`                   | TypeScript type checking                  |
+| `pnpm exec vitest run <test-file>` | Targeted tests                            |
+| `pnpm test`                        | All Vitest tests                          |
+| `pnpm build`                       | Renderer, main process and preload builds |
+
+Commit checks are configured in [prek.toml](prek.toml). Oxlint applies safe fixes, then Oxfmt formats the files in the commit. Application types, Vitest, the app build, brand-page types and the brand-page build run as separate steps. If automatic fixes change files, review and stage the changes before committing again. Use `prek run --all-files` to check the entire repository.
+
+Leave formatting and style-only checks to the commit hook. Use Conventional Commits with Chinese descriptions of the changes and validation.
+
+### Packaging and releases
+
+`pnpm package` builds the app and uses electron-builder to generate packages for the current platform in `release/`.
+
+## Acknowledgments
+
+Thanks to [embyToLocalPlayer](https://github.com/kjtsune/embyToLocalPlayer) for protocol and behavior references.

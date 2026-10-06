@@ -1,88 +1,85 @@
-# Freebo
-
-<picture>
+<picture style="align-items: center; display: flex; justify-content: center;">
   <source media="(prefers-color-scheme: dark)" srcset="assets/brand/freebo/svg/logo-on-dark.svg" />
   <img src="assets/brand/freebo/svg/logo.svg" width="280" alt="Freebo" />
 </picture>
 
-[English](README.en.md)
+[![English](https://img.shields.io/badge/English-193C35?style=flat&logo=googletranslate&logoColor=white)](README.en.md)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-193C35?style=flat)](LICENSE)
+[![macOS, Windows, Linux](https://img.shields.io/badge/Platforms-macOS%20%C2%B7%20Windows%20%C2%B7%20Linux-193C35?style=flat)](#功能)
+[![产品官网](https://img.shields.io/badge/%E5%AE%98%E7%BD%91-Freebo-193C35?style=flat)](https://elonzh.cn/toys/freebo)
+[![更新说明](https://img.shields.io/badge/%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E-193C35?style=flat)](CHANGELOG.md)
 
-在 Emby 网页中选择视频，用本地播放器观看。
+在熟悉的 Emby 网页里浏览，用喜欢的本地播放器观看。
 
-Freebo 把服务器管理、播放器发现和播放衔接放在一个桌面应用里。打开应用，添加 Emby 地址，在原有网页中登录，即可将视频交给本地播放器。无需安装浏览器脚本、配置 Python 或单独启动服务。
-
-版本更新见 [发布说明](CHANGELOG.md)。支持范围和实际验证结果见 [验证记录](docs/validation.md)。
-
-## 界面与品牌
-
-![Freebo 首次配置](docs/assets/welcome.png)
-
-[播放器设置](docs/assets/settings.png) · [品牌规范与源文件](docs/brand/README.md) · [品牌素材 ZIP](assets/brand/freebo/Freebo-brand-kit.zip) · [PDF 指南](assets/brand/freebo/Freebo-brand-guide.pdf)
-
-截图来自真实 macOS Electron 应用的干净隔离配置，展示已选导盲犬与 Atma 600 品牌；截图不扩大真实播放和跨平台验收结论。本轮品牌调整未更新外部项目网站。
+Freebo 将服务器管理、播放器选择和视频播放放在一个桌面应用中。添加服务器，在网页中登录，点击播放即可打开本地播放器。
 
 ## 功能
 
-- 使用 Emby 原有网页浏览媒体库、搜索和管理账户。
-- 多服务器管理，各服务器使用独立的持久化网页登录会话。
-- 首次配置引导并扫描 IINA、mpv、mpv.net、VLC，Windows 还支持 PotPlayer、MPC-HC、MPC-BE；之后按需手动扫描，提供默认播放器选择、手动定位和官网下载入口。
-- 电影、剧集、视频播放列表、连续播放、断点续播和观看进度回传。
-- 解析 Emby 视频版本、字幕和音轨选择。
-- 主页展示服务器列表，设置统一管理服务器与播放器。
-- 地址栏播放按钮打开独立浮窗，显示播放状态与队列，并可跳转到当前资源的网页详情；不改变 Emby 网页尺寸。
-- 点击播放后立即显示准备状态，并在视频就绪后激活播放器。诊断页可查看进度回传结果、复制信息、导出日志和打开 GitHub 问题创建页；关于页提供产品与仓库链接。
-- 图形化设置和诊断日志。
-- 接近 Chrome 的桌面标签栏、自定义标题栏和导航工具栏。
-- 中文、英文及跟随系统的界面语言，支持明暗外观。
+- 多服务器标签页，分别保留登录会话。
+- 电影、剧集和视频播放列表，支持续播、连续播放与观看进度同步。
+- 沿用 Emby 的音轨、字幕和视频版本选择。
+- 播放浮窗提供暂停、进度跳转和列表切换。
+- 自动查找已安装的播放器，也可手动选择路径。
+- 中英双语、浅色与深色外观，记住窗口大小和位置。
 
-音乐和直播使用 Emby 网页播放。首版的外部播放器接管只作用于应用内网页。应用不附带播放器，请先安装适合自己系统的播放器。
+| 系统    | 播放器                                       |
+| ------- | -------------------------------------------- |
+| macOS   | IINA、mpv、VLC                               |
+| Windows | mpv.net、PotPlayer、MPC-HC、MPC-BE、mpv、VLC |
+| Linux   | mpv、VLC                                     |
 
-## 使用
+音乐和直播继续使用 Emby 网页播放。
 
-1. 安装应用并打开，跟随首次配置指引选择播放器、添加 Emby 地址。
-2. 若没有播放器，点击播放器旁的地球图标前往官网下载，安装后重新扫描或手动选择；也可以稍后配置。
-3. 可以在服务器表单中保存账号密码并测试连接；打开服务器后，在原有网页确认登录。
-4. 点击 Emby 网页中的视频播放按钮，启动所选播放器。
-5. 点击地址栏旁的播放图标，打开控制与播放列表浮窗；点击标题右侧的服务器图标可跳转到对应详情页。
+## 快速开始
 
-Emby 的继续观看遵循媒体库的最小续播比例，短时播放可能有播放次数与最近播放时间，但不保留续播进度。停止后，设置中的诊断页会核对服务器保存的观看记录、进度及可读取的续播门槛。
+1. 打开 Freebo，在首次配置中选择已安装的播放器。
+2. 添加 Emby 服务器地址，在服务器网页中登录。
+3. 在媒体库中点击播放，用地址栏旁的播放按钮打开控制浮窗。
 
-之后打开应用进入主页。服务器添加、编辑和登录会话管理统一放在设置中；播放器不会在每次启动时重新扫描，安装或移动播放器后可在设置中手动触发。
+服务器和播放器可随时在设置中修改。服务器名称可留空；按需保存的账号密码会自动填入登录页。便携版播放器可手动指定路径，服务器地址支持端口和反向代理子路径。
 
-播放器在便携目录或自定义位置时，使用设置中的文件夹按钮选择应用。服务器地址支持端口和反向代理子路径。
-
-## 开发
-
-需要 Node.js 22.12 或更新版本，以及 pnpm。
+## 从源码运行
 
 ```sh
 pnpm install
 pnpm dev
 ```
 
-安装 prek 后，在每个新克隆的工作区运行 `prek install` 安装提交前检查。每次提交会统一执行应用与品牌预览的格式、lint、类型、测试和构建检查；检查失败会阻止提交。可用 `prek run --all-files` 手动执行同一套检查。
+## 开发指引
 
-开发过程中按改动范围执行必要的正确性验证，格式化、纯风格 lint 等检查交给提交钩子兜底，无需在每次改动后重复运行完整检查。
+### 环境与启动
 
-直接运行本地生产版使用 `pnpm start`，会先完整构建页面、主进程和预加载，再启动 Electron，避免新旧构建产物混用。
+使用 Node.js 22.12 或更新版本，以及 `package.json` 指定的 pnpm 版本。
 
 ```sh
-pnpm check
-pnpm package
+pnpm install
+prek install
+pnpm dev
 ```
 
-工具链：React、TypeScript、Electron、TanStack Router、TanStack Query、i18next／react-i18next、Vite、Vitest、Oxlint、Oxfmt。Electron 主进程负责会话、媒体传输和播放器通信，React 管理设置界面，独立的 `WebContentsView` 加载服务器网页。
+`pnpm dev` 构建主进程和预加载，启动 Vite 与 Electron。修改 `electron/` 后需重启；React 页面由 Vite 热更新。应用依赖 IPC，连接调试应使用 Electron 的浏览器引擎。
 
-媒体服务器通过 Provider 接口接入，网页注入、认证、媒体解析和进度回传由各 Provider 负责。当前只注册 Emby，扩展架构不改变首版的支持范围。详见 [架构说明](docs/architecture.md)。
+`pnpm start` 先完整构建，再启动本地生产版。单独的 `pnpm dev:web` 和 `pnpm preview` 只服务渲染页面，不能替代 Electron 运行验证。
 
-## 构建与发布
+### 检查与提交
 
-GitHub Actions 配置为在 macOS、Windows、Linux 上执行检查，分别生成 macOS arm64/x64、Windows x64、Linux x64 安装包。工作流运行后保留安装包供下载；`v*` 标签生成包含校验和的草稿 Release。
+开发中运行与改动相关的正确性检查：
 
-当前工作流默认生成未签名安装包。正式签名和 macOS 公证需要维护者配置证书与对应凭据。
+| 命令                              | 用途                         |
+| --------------------------------- | ---------------------------- |
+| `pnpm typecheck`                  | TypeScript 类型检查          |
+| `pnpm exec vitest run <测试文件>` | 定向测试                     |
+| `pnpm test`                       | 全部 Vitest 测试             |
+| `pnpm build`                      | 渲染页面、主进程与预加载构建 |
 
-品牌素材使用 `pnpm brand:generate` 生成，`pnpm brand:preview` 在本地提供品牌素材下载页。源文件、字体授权及复现说明见 [品牌规范](docs/brand/README.md)。
+提交检查由 [prek.toml](prek.toml) 配置：先由 Oxlint 安全修复可修复的问题，再由 Oxfmt 格式化本次提交的文件；随后分别执行应用类型检查、Vitest、应用构建、品牌页类型检查和品牌页构建。自动修复产生改动时，检查修改并重新暂存后再提交。可用 `prek run --all-files` 检查整个仓库。
 
-## 许可证
+纯格式和风格检查由提交钩子兜底。Git 提交使用约定式提交格式，中文说明改动与验证。
 
-[Apache-2.0](LICENSE)。感谢 [embyToLocalPlayer](https://github.com/kjtsune/embyToLocalPlayer) 提供的协议与行为参考。
+### 打包与发布
+
+`pnpm package` 构建应用并使用 electron-builder 生成当前平台产物，输出至 `release/`。
+
+## 致谢
+
+感谢 [embyToLocalPlayer](https://github.com/kjtsune/embyToLocalPlayer) 提供协议与行为参考。

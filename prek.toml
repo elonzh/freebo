@@ -1,0 +1,73 @@
+#:schema https://www.schemastore.org/prek.json
+
+default_install_hook_types = ["pre-commit"]
+default_stages = ["pre-commit"]
+
+[[repos]]
+repo = "local"
+
+[[repos.hooks]]
+id = "lint"
+name = "Oxlint (auto-fix)"
+entry = "pnpm lint"
+args = ["--fix"]
+language = "system"
+types = ["text"]
+files = '\.[cm]?[jt]sx?$'
+require_serial = true
+priority = 0
+
+[[repos.hooks]]
+id = "format"
+name = "Oxfmt (auto-format)"
+entry = "pnpm exec oxfmt --write --no-error-on-unmatched-pattern"
+language = "system"
+types = ["text"]
+files = '\.(?:[cm]?[jt]sx?|jsonc?|ya?ml|css|scss|md|html)$'
+require_serial = true
+priority = 10
+
+[[repos.hooks]]
+id = "typecheck"
+name = "Application types"
+entry = "pnpm typecheck"
+language = "system"
+pass_filenames = false
+always_run = true
+priority = 20
+
+[[repos.hooks]]
+id = "test"
+name = "Vitest"
+entry = "pnpm test"
+language = "system"
+pass_filenames = false
+always_run = true
+priority = 30
+
+[[repos.hooks]]
+id = "build"
+name = "Application build"
+entry = "pnpm build"
+language = "system"
+pass_filenames = false
+always_run = true
+priority = 40
+
+[[repos.hooks]]
+id = "brand-typecheck"
+name = "Brand page types"
+entry = "pnpm brand:typecheck"
+language = "system"
+pass_filenames = false
+always_run = true
+priority = 50
+
+[[repos.hooks]]
+id = "brand-build"
+name = "Brand page build"
+entry = "pnpm brand:build"
+language = "system"
+pass_filenames = false
+always_run = true
+priority = 60

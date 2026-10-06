@@ -1,6 +1,6 @@
 # Freebo 品牌规范与素材
 
-本文件是已选品牌的使用和复现依据。Freebo 使用友好的导盲犬标识与真实 Atma SemiBold 字标；应用设计系统见 [DESIGN.md](../../DESIGN.md)。仓库只保留正式品牌素材与下载预览，已移除历史概念板和字体比较工具。
+本文件是已选品牌的使用和复现依据。Freebo 使用友好的导盲犬标识与真实 Atma SemiBold 字标；应用设计系统见 [界面设计](../design.md)。正式素材位于 `assets/brand/freebo/`。
 
 ![Freebo](../../assets/brand/freebo/svg/logo.svg)
 
@@ -22,7 +22,7 @@
 
 ## 主稿与组合
 
-- [source/mark.svg](../../assets/brand/freebo/source/mark.svg)：可编辑路径主稿，来自已批准并修复左脸颊的 imagegen 犬头；原图摘要和追踪方法写在 SVG 元数据中，历史位图已在定稿后移除。主稿没有嵌入位图。
+- [source/mark.svg](../../assets/brand/freebo/source/mark.svg)：可编辑路径主稿；来源信息保留于 SVG 元数据，主稿为纯路径。
 - [source/wordmark-editable.svg](../../assets/brand/freebo/source/wordmark-editable.svg) 与 [source/logo-editable.svg](../../assets/brand/freebo/source/logo-editable.svg)：保留真实字体文字并内嵌对应字体的编辑源；它们是排版源，不是手绘字母。
 - [svg/logo.svg](../../assets/brand/freebo/svg/logo.svg) 等便携 SVG：用 HarfBuzz 排字、fontTools 转字形路径，无字体安装依赖，也不嵌入位图。
 - [brand.json](../../assets/brand/freebo/brand.json)：字体摘要、配色、组合几何和 PNG 渲染任务的机器可读记录。
@@ -58,20 +58,12 @@ pnpm brand:generate
 pnpm brand:preview
 ```
 
-`brand:generate` 依次运行 `uv run scripts/generate-brand.py`、Electron 渲染和 `uv run scripts/package-brand.py`：从路径主稿和固定字体生成便携/编辑 SVG、栅格 PNG、PDF、原生图标容器、清单与 ZIP，并同步运行副本。`source/mark.svg`、`fonts/Atma-SemiBold.ttf` 和 `fonts/OFL.txt` 是保留的正式输入，不依赖已删除的候选工具。
+`brand:generate` 依次运行 `uv run scripts/generate-brand.py`、Electron 渲染和 `uv run scripts/package-brand.py`：从路径主稿和固定字体生成便携/编辑 SVG、栅格 PNG、PDF、原生图标容器、清单与 ZIP，并同步运行副本。`source/mark.svg`、`fonts/Atma-SemiBold.ttf` 和 `fonts/OFL.txt` 是保留的正式输入，是生成素材的输入。
 
 路径调整应先编辑 `source/mark.svg`，再运行完整生成并核对导出。
 
 [品牌下载页](http://127.0.0.1:5186/brand.html) 与根地址均展示正式素材。执行 `pnpm brand:check` 检查下载页类型并构建静态产物，输出在忽略的 `docs/brand/brand-kit/dist/`。
 
 PDF 页面源为 [brand-guide.html](brand-kit/brand-guide.html)。PDF、PNG 使用 Electron Chromium 渲染；修改指南或品牌源后重新运行 `pnpm brand:generate`。清单用于验证现有输出，PDF 的重新生成不承诺二进制逐字节一致。
-
-## 2026-10-06 验证范围
-
-正式下载页在 1440px 与 390px 检查，24 个素材下载链接均返回 HTTP 200，字体成功载入，无记录到的控制台错误。品牌 PDF、标志族、单色镂空和小尺寸图标均有新渲染预览。
-
-应用截图来自实际 Electron 主应用及真实 preload/IPC，使用隔离配置；覆盖中英文、明暗主题、IINA 发现与播放浮窗开启。公开图片为 [中文欢迎](../assets/welcome.png)、[英文欢迎](../assets/welcome-en.png)、[中文设置](../assets/settings.png)、[英文设置](../assets/settings-en.png)。820 × 600 为 CSS 视口检查，不能代替原生窗口缩放验收。本轮没有验证服务器登录或真实媒体播放。
-
-macOS arm64 的未签名目录应用已用于检查 `asar` 内字体与许可；这不等于签名、公证安装包或三平台运行验收。更完整的历史证据和待验收范围见 [validation.md](../validation.md)。外部 elonzh-cn 网站本轮未修改或部署；所需素材与集成约束见 [site-surface.md](../site-surface.md)。版本维持 0.1.0，本轮未创建版本标签或发布。
 
 ZIP 内目录直接包含 `source/`、`fonts/`、`svg/` 等素材。本说明中的仓库链接以 `docs/brand/README.md` 为相对位置；脱离仓库阅读时按 ZIP 内同名路径查找文件。

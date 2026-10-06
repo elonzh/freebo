@@ -28,7 +28,9 @@
     "package": "pnpm build && electron-builder --publish never",
     "brand:generate": "uv run scripts/generate-brand.py && pnpm exec electron scripts/render-brand.cjs && uv run scripts/package-brand.py",
     "brand:preview": "vite --config docs/brand/brand-kit/vite.config.ts",
-    "brand:check": "tsc --project docs/brand/brand-kit/tsconfig.json && vite build --config docs/brand/brand-kit/vite.config.ts"
+    "brand:typecheck": "tsc --project docs/brand/brand-kit/tsconfig.json",
+    "brand:build": "vite build --config docs/brand/brand-kit/vite.config.ts",
+    "brand:check": "pnpm brand:typecheck && pnpm brand:build"
   },
   "dependencies": {
     "@tanstack/react-query": "5.104.1",
