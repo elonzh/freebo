@@ -115,6 +115,8 @@ sequenceDiagram
 
 开发和生产共同使用 `scripts/build-electron.mjs`，先清理编译目录，再生成固定的 `main.cjs`、`preload.cjs`、`emby-preload.cjs`，避免移动源文件后误加载旧桥接脚本。
 
+GitHub Actions 的流程定义见 [CI 配置](../.github/workflows/ci.yml)。外部 fork 的 Pull Request 运行三平台检查；推送 `v*` 标签时直接构建安装包，成功后生成校验和并创建草稿发行版。普通分支推送不触发工作流，仓库内的 Pull Request 不重复运行检查。构建使用 Node.js 24，各平台 runner 使用 `latest`。
+
 更名后用户数据目录为 `Freebo`。首次启动仅在新目录不存在时复制旧应用配置及浏览器会话，不覆盖现有目录，也不删除旧目录。配置新增的语言和 Provider 字段均有默认值。
 
 ## 验证边界

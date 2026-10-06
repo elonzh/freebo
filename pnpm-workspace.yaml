@@ -1,3 +1,5 @@
-onlyBuiltDependencies:
-  - electron
-  - esbuild
+allowBuilds:
+  electron: true
+  esbuild: true
+  # Windows 使用 NSIS 和 portable，不需要 Squirrel 安装器的脚本。
+  electron-winstaller: false
