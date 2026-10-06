@@ -14,6 +14,28 @@ export interface Server {
   url: string;
   providerId: string;
 }
+export interface ServerCredentials {
+  username: string;
+  password: string;
+}
+export interface ServerInput {
+  id?: string;
+  name: string;
+  url: string;
+  providerId: string;
+  // undefined keeps the saved credentials; null forgets them.
+  credentials?: ServerCredentials | null;
+}
+export interface ServerConnectionInput {
+  id?: string;
+  url: string;
+  providerId: string;
+  credentials?: ServerCredentials;
+}
+export interface ServerConnectionResult {
+  serverName: string;
+  authenticated: boolean;
+}
 export interface Player {
   id: string;
   name: string;
@@ -86,6 +108,7 @@ export interface AppState {
   version: string;
   webStatus: "closed" | "loading" | "ready" | "error";
   webError?: string;
+  credentialsAvailable: boolean;
   adapterStatus?: "waiting" | "sign-in" | "ready" | "error";
   locale: import("./i18n").Locale;
   providers: { id: string; name: string }[];
@@ -102,12 +125,9 @@ export type PlaybackControl =
   | { action: "jump"; index: number };
 export interface DesktopAPI {
   getState(): Promise<AppState>;
-  saveServer(server: {
-    id?: string;
-    name: string;
-    url: string;
-    providerId: string;
-  }): Promise<AppState>;
+  saveServer(server: ServerInput): Promise<AppState>;
+  getServerCredentials(this: void, id: string): Promise<ServerCredentials | null>;
+  testServerConnection(this: void, server: ServerConnectionInput): Promise<ServerConnectionResult>;
   removeServer(id: string): Promise<AppState>;
   openServer(id: string): Promise<AppState>;
   showPage(page: AppPage, section?: SettingsPage): Promise<void>;
@@ -132,7 +152,7 @@ export interface DesktopAPI {
   ): Promise<AppState>;
   control(control: PlaybackControl): Promise<void>;
   confirm(action: "remove" | "sign-out", id: string): Promise<boolean>;
-  navigate(action: "back" | "forward" | "reload" | "home"): Promise<void>;
+  navigate(action: "back" | "forward" | "reload" | "stop" | "home"): Promise<void>;
   resetSession(id: string): Promise<AppState>;
   openGuide(kind: PlayerKind): Promise<void>;
   exportDiagnostics(): Promise<string | null>;

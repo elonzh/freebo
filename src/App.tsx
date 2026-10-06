@@ -186,6 +186,7 @@ export function App() {
         ? state.browser.url
         : active.url
       : `freebo://${page}`;
+  const loadingPage = page === "library" && state.webStatus === "loading";
   return (
     <div
       className={`flex h-screen flex-col overflow-hidden platform-${state.platform} ${state.fullscreen ? "fullscreen" : ""}`}
@@ -196,7 +197,7 @@ export function App() {
             <Button
               variant="ghost"
               className={`browser-tab home-tab ${page === "home" || page === "setup" ? "active" : ""}`}
-              aria-current={page === "home" ? "page" : undefined}
+              aria-current={page === "home" || page === "setup" ? "page" : undefined}
               title={t("appHome")}
               onClick={() => go("home")}
             >
@@ -210,6 +211,8 @@ export function App() {
                 <div
                   className={`browser-tab server-tab ${page === "library" && active?.id === server.id ? "active" : ""}`}
                   key={server.id}
+                  title={server.name}
+                  onClick={() => open(server)}
                 >
                   <Button
                     variant="ghost"
@@ -218,9 +221,19 @@ export function App() {
                       page === "library" && active?.id === server.id ? "page" : undefined
                     }
                     title={server.name}
-                    onClick={() => open(server)}
+                    aria-busy={
+                      state.browser.serverId === server.id && state.webStatus === "loading"
+                    }
                   >
-                    <Globe2 size={15} />
+                    {state.browser.serverId === server.id && state.webStatus === "loading" ? (
+                      <LoaderCircle
+                        size={15}
+                        className="animate-spin"
+                        aria-label={t("loading", { name: server.name })}
+                      />
+                    ) : (
+                      <Globe2 size={15} />
+                    )}
                     <span>{server.name}</span>
                   </Button>
                   <Button
@@ -228,19 +241,24 @@ export function App() {
                     size="icon-xs"
                     className="tab-close"
                     aria-label={t("closeTab", { name: server.name })}
-                    onClick={() => closeTab(server.id)}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      closeTab(server.id);
+                    }}
                   >
                     <X size={13} />
                   </Button>
                 </div>
               ))}
             {settingsOpened && (
-              <div className={`browser-tab settings-tab ${page === "settings" ? "active" : ""}`}>
+              <div
+                className={`browser-tab settings-tab ${page === "settings" ? "active" : ""}`}
+                onClick={() => go("settings")}
+              >
                 <Button
                   variant="ghost"
                   className="tab-select text-xs"
                   aria-current={page === "settings" ? "page" : undefined}
-                  onClick={() => go("settings")}
                 >
                   <Settings2 size={15} />
                   <span>{t("settings")}</span>
@@ -250,7 +268,8 @@ export function App() {
                   size="icon-xs"
                   className="tab-close"
                   aria-label={t("closeTab", { name: t("settings") })}
-                  onClick={() => {
+                  onClick={(event) => {
+                    event.stopPropagation();
                     setSettingsOpened(false);
                     if (page === "settings") go("home");
                   }}
@@ -294,11 +313,15 @@ export function App() {
             <Button
               variant="ghost"
               size="icon"
-              aria-label={t("reload")}
+              aria-label={t(loadingPage ? "stopLoading" : "reload")}
               disabled={page !== "library"}
-              onClick={() => void run("reload", (desktop) => desktop.navigate("reload"))}
+              onClick={() =>
+                void run("navigation", (desktop) =>
+                  desktop.navigate(loadingPage ? "stop" : "reload"),
+                )
+              }
             >
-              <RefreshCw size={17} />
+              {loadingPage ? <X size={18} /> : <RefreshCw size={17} />}
             </Button>
             <Button
               variant="ghost"
@@ -400,12 +423,6 @@ export function App() {
         )}
         {page === "library" ? (
           <div className="grid min-h-0 flex-1 place-items-center bg-background">
-            {state.webStatus === "loading" && (
-              <div className="flex min-h-[60vh] items-center justify-center gap-3 text-sm text-muted-foreground">
-                <LoaderCircle className="animate-spin" />
-                <span>{t("loading", { name: active?.name ?? t("brand") })}</span>
-              </div>
-            )}
             {state.webStatus === "closed" && (
               <Button onClick={() => go("home")}>{t("chooseServer")}</Button>
             )}
@@ -417,6 +434,7 @@ export function App() {
             run={run}
             update={update}
             pending={pending}
+            testConnection={api.testServerConnection}
             finish={(serverId) =>
               void run("finish-setup", async (desktop) => {
                 const updated = await desktop.updateSettings({ setupCompleted: true });
@@ -616,6 +634,10 @@ export function App() {
                         key={editing.id ?? "new"}
                         t={t}
                         providers={state.providers}
+                        credentialsAvailable={state.credentialsAvailable}
+                        loadCredentials={api.getServerCredentials}
+                        testConnection={api.testServerConnection}
+                        locale={state.locale}
                         server={editing}
                         saving={pending === "save"}
                         onCancel={() => setEditing(null)}

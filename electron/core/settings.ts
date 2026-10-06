@@ -93,12 +93,15 @@ export class SettingsStore {
       });
     await this.writing;
   }
-  async upsertServer(input: {
-    id?: string;
-    name: string;
-    url: string;
-    providerId?: string;
-  }): Promise<Server> {
+  async upsertServer(
+    input: {
+      id?: string;
+      name: string;
+      url: string;
+      providerId?: string;
+    },
+    beforeSave?: (server: Server) => Promise<void>,
+  ): Promise<Server> {
     const server = serverSchema.parse({ ...input, id: input.id ?? randomUUID() });
     if (
       this.value.servers.some(
@@ -106,6 +109,7 @@ export class SettingsStore {
       )
     )
       throw new UserFacingError("serverDuplicate");
+    await beforeSave?.(server);
     const servers = this.value.servers.filter((s) => s.id !== server.id).concat(server);
     await this.save({ ...this.value, servers });
     return server;

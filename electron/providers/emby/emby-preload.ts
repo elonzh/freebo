@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { installEmbyAdapter } from "./emby-adapter";
+import { installCredentialAutofill } from "./credential-autofill";
 
 contextBridge.exposeInMainWorld("freeboPlayback", {
   request: (payload: unknown) => ipcRenderer.invoke("server:play", payload),
@@ -8,6 +9,7 @@ contextBridge.exposeInMainWorld("freeboPlayback", {
 window.addEventListener(
   "DOMContentLoaded",
   () => {
+    installCredentialAutofill(() => ipcRenderer.invoke("server:credentials"));
     try {
       contextBridge.executeInMainWorld({ func: installEmbyAdapter });
     } catch {

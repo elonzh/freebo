@@ -9,6 +9,7 @@ import {
   nativeTheme,
   Menu,
   screen,
+  safeStorage,
   type IpcMainInvokeEvent,
 } from "electron";
 import { join } from "node:path";
@@ -31,12 +32,27 @@ import {
 import { MediaProxy } from "./core/media-proxy";
 import type { AppState, AppPage, SettingsPage, Platform, Server } from "../src/shared/types";
 import { redact } from "./core/redact";
+import { CredentialStore, credentialsSchema, credentialOriginMatches } from "./core/credentials";
 
 app.setName("Freebo");
 app.setPath("userData", join(app.getPath("appData"), "Freebo"));
 if (process.env.FREEBO_DEV_URL && process.env.FREEBO_USER_DATA_DIR)
   app.setPath("userData", process.env.FREEBO_USER_DATA_DIR);
 const store = new SettingsStore(join(app.getPath("userData"), "settings.json"));
+const credentials = new CredentialStore(join(app.getPath("userData"), "credentials.json"), {
+  available: async () => {
+    if (!(await safeStorage.isAsyncEncryptionAvailable())) return false;
+    // Linux's basic fallback uses a hardcoded key rather than a system secret store.
+    return (
+      process.platform !== "linux" ||
+      (safeStorage.isEncryptionAvailable() &&
+        safeStorage.getSelectedStorageBackend() !== "basic_text")
+    );
+  },
+  encrypt: (value) => safeStorage.encryptStringAsync(value),
+  decrypt: async (value) => (await safeStorage.decryptStringAsync(value)).result,
+});
+let credentialsAvailable = false;
 const windowIcon = join(
   __dirname,
   process.env.FREEBO_DEV_URL ? "../public/icon.png" : "../dist/icon.png",
@@ -79,6 +95,7 @@ function state(): AppState {
     version: app.getVersion(),
     webStatus,
     webError,
+    credentialsAvailable,
     adapterStatus,
     locale: locale(),
     providers: providers.list(),
@@ -204,18 +221,19 @@ async function openServer(id: string, destination?: string) {
     if (url.startsWith("https://") && new URL(url).origin !== origin) void shell.openExternal(url);
     return { action: "deny" };
   });
-  view.webContents.on("will-navigate", (event, url) => {
+  const guardNavigation = (event: { preventDefault(): void }, url: string) => {
     if (new URL(url).origin !== origin) {
       event.preventDefault();
       webError = errorToken("externalNavigation");
       layout();
       publish();
     }
-  });
+  };
+  view.webContents.on("will-navigate", guardNavigation);
+  view.webContents.on("will-redirect", guardNavigation);
   view.webContents.on("dom-ready", () => {
     if (guest !== view) return;
     if (webStatus !== "error" && !view.webContents.getURL().startsWith("chrome-error:")) {
-      webStatus = "ready";
       layout();
       publish();
     }
@@ -223,6 +241,16 @@ async function openServer(id: string, destination?: string) {
       void view.webContents
         .executeJavaScript(provider.adapterScript)
         .catch((error) => log(String(error)));
+  });
+  view.webContents.on("did-start-loading", () => {
+    if (guest !== view) return;
+    webStatus = "loading";
+    publish();
+  });
+  view.webContents.on("did-stop-loading", () => {
+    if (guest !== view || webStatus === "error") return;
+    webStatus = "ready";
+    publish();
   });
   view.webContents.on("did-start-navigation", (event) => {
     if (guest !== view || !event.isMainFrame || event.isSameDocument) return;
@@ -239,7 +267,6 @@ async function openServer(id: string, destination?: string) {
       view.webContents.getURL().startsWith("chrome-error:")
     )
       return;
-    webStatus = "ready";
     webError = undefined;
     layout();
     publish();
@@ -380,15 +407,81 @@ function setupIPC() {
         name: z.string(),
         url: z.string(),
         providerId: z.string(),
+        credentials: credentialsSchema.nullable().optional(),
       })
       .parse(input);
     const provider = providers.get(server.providerId);
-    await store.upsertServer({ ...server, url: provider.normalizeUrl(server.url) });
+    const savedServer = await store.upsertServer(
+      { ...server, url: provider.normalizeUrl(server.url) },
+      async (saved) => {
+        const previous = store.value.servers.find((entry) => entry.id === saved.id);
+        if (server.credentials !== undefined) await credentials.set(saved, server.credentials);
+        else if (
+          previous &&
+          (previous.url !== saved.url || previous.providerId !== saved.providerId)
+        )
+          await credentials.set(saved, null);
+      },
+    );
+    if (
+      activeServer?.id === savedServer.id &&
+      (server.credentials !== undefined || activeServer.url !== savedServer.url)
+    )
+      closeGuest();
     publish();
     return state();
   });
+  handle("app:server-credentials", async (input) => {
+    const server = store.value.servers.find((server) => server.id === idSchema.parse(input));
+    if (!server) throw new UserFacingError("serverMissing");
+    return credentials.get(server);
+  });
+  handle("app:test-server-connection", async (input) => {
+    const request = z
+      .object({
+        id: z.uuid().optional(),
+        url: z.string(),
+        providerId: z.string(),
+        credentials: credentialsSchema.optional(),
+      })
+      .parse(input);
+    const provider = providers.get(request.providerId);
+    if (!provider.testConnection) throw new UserFacingError("providerMissing");
+    const url = provider.normalizeUrl(request.url);
+    const registered = store.value.servers.find(
+      (server) =>
+        server.id === request.id && server.url === url && server.providerId === provider.id,
+    );
+    const ses = session.fromPartition(
+      registered ? providers.partition(registered) : "freebo-connection-test",
+    );
+    ses.setUserAgent(ses.getUserAgent().replace(/Electron\/[\d.]+\s*/g, ""));
+    return provider.testConnection(
+      url,
+      request.credentials,
+      (input, init) => {
+        const headers = new Headers(init?.headers);
+        headers.set("User-Agent", ses.getUserAgent());
+        headers.set("Origin", new URL(url).origin);
+        headers.set(
+          "Referer",
+          provider.entryUrl({
+            id: registered?.id ?? "connection-test",
+            name: "",
+            url,
+            providerId: provider.id,
+          }),
+        );
+        return ses.fetch(input, { ...init, credentials: "include", headers });
+      },
+      app.getVersion(),
+    );
+  });
   handle("app:remove-server", async (input) => {
     const id = idSchema.parse(input);
+    const server = store.value.servers.find((entry) => entry.id === id);
+    if (!server) throw new UserFacingError("serverMissing");
+    await credentials.set(server, null);
     if (activeServer?.id === id) closeGuest();
     if (page === "library" && !guest) page = "home";
     const servers = store.value.servers.filter((s) => s.id !== id);
@@ -501,7 +594,7 @@ function setupIPC() {
     await playback.control(controlSchema.parse(input));
   });
   handle("app:navigate", (input) => {
-    const action = z.enum(["back", "forward", "reload", "home"]).parse(input);
+    const action = z.enum(["back", "forward", "reload", "stop", "home"]).parse(input);
     if (!guest || !activeServer) return;
     if (action === "home")
       void guest.webContents.loadURL(
@@ -514,6 +607,10 @@ function setupIPC() {
       layout();
       publish();
       guest.webContents.reload();
+    } else if (action === "stop") {
+      guest.webContents.stop();
+      if (webStatus !== "error") webStatus = "ready";
+      publish();
     } else if (action === "back" && guest.webContents.navigationHistory.canGoBack())
       guest.webContents.navigationHistory.goBack();
     else if (action === "forward" && guest.webContents.navigationHistory.canGoForward())
@@ -593,6 +690,25 @@ function setupIPC() {
         publish();
       }
     }
+  });
+  ipcMain.handle("server:credentials", async (event) => {
+    const view = guest;
+    const server = activeServer;
+    const frame = event.senderFrame;
+    if (
+      !view ||
+      !server ||
+      event.sender !== view.webContents ||
+      frame !== view.webContents.mainFrame ||
+      !frame ||
+      !credentialOriginMatches(server, frame.url)
+    )
+      throw new UserFacingError("invalidOrigin");
+    const frameUrl = frame.url;
+    const saved = await credentials.get(server);
+    // A pending keychain read must not deliver secrets to a newly navigated page.
+    if (guest !== view || frame.isDestroyed() || frame.url !== frameUrl) return null;
+    return saved;
   });
   ipcMain.handle("server:play", async (event, input) => {
     if (
@@ -765,6 +881,12 @@ void app.whenReady().then(async () => {
   } catch (error) {
     log(String(error));
     await dialog.showMessageBox({ type: "error", message: String(error) });
+  }
+  try {
+    await credentials.load();
+    credentialsAvailable = await credentials.available();
+  } catch {
+    log("System credential storage is unavailable");
   }
   await proxy.open();
   nativeTheme.themeSource = store.value.theme;

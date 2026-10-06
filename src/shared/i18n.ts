@@ -156,10 +156,52 @@ const messages = {
     "The server website has its own language settings.",
   ],
   signOut: ["退出登录", "Sign out"],
+  stopLoading: ["停止加载", "Stop loading"],
+  credentialsHint: [
+    "填写后保存，下次自动填入登录页。密码使用系统加密存储。",
+    "Save these fields to autofill the sign-in page. Passwords are encrypted using system storage.",
+  ],
+  testConnection: ["测试连接", "Test connection"],
+  testingConnection: ["正在测试…", "Testing…"],
+  connectionVerified: [
+    "已连接 {name}，账号密码验证成功。",
+    "Connected to {name}. Account verified.",
+  ],
+  serverReachable: [
+    "已连接 {name}。填写账号密码后可验证登录。",
+    "Connected to {name}. Enter an account to verify sign-in.",
+  ],
+  connectionTestFailed: [
+    "无法连接服务器，请检查地址和网络。",
+    "Cannot connect. Check the address and network.",
+  ],
+  connectionTimeout: [
+    "连接超时，请检查服务器地址和网络。",
+    "Connection timed out. Check the address and network.",
+  ],
+  credentialsRejected: [
+    "账号或密码不正确，或此账号没有登录权限。",
+    "The account or password is incorrect, or sign-in is not allowed.",
+  ],
+  unexpectedServer: [
+    "服务器未返回有效的 Emby 数据，请检查地址。",
+    "The server did not return valid Emby data. Check the address.",
+  ],
+  username: ["账号", "Account"],
+  password: ["密码", "Password"],
+  forgetCredentials: ["清除已保存的账号密码", "Forget saved account and password"],
+  credentialsUnavailable: [
+    "系统密码存储不可用，暂时无法记住账号密码。请在服务器网页登录。",
+    "System password storage is unavailable. Sign in on the server website for now.",
+  ],
+  credentialsUnreadable: [
+    "无法读取保存的账号密码。请清除后重新保存，或在服务器网页登录。",
+    "Saved credentials could not be read. Forget them and save again, or sign in on the server website.",
+  ],
   remove: ["移除 {name}", "Remove {name}"],
   signOutConfirm: [
-    "清除 {name} 的登录状态？下次打开时需要重新登录。",
-    "Clear the saved session for {name}? You will need to sign in again.",
+    "清除 {name} 的登录状态？下次打开时需要重新登录，已保存的账号密码仍会保留。",
+    "Clear the saved session for {name}? You will need to sign in again. Saved account and password will be kept.",
   ],
   removeConfirm: [
     "移除 {name}？服务器中的媒体不会被删除。",
@@ -196,8 +238,8 @@ const messages = {
   optional: ["可选", "Optional"],
   myServer: ["我的 Emby", "My Emby"],
   signInNote: [
-    "账号和密码在下一步的 Emby 网页中填写。",
-    "Enter your account and password on the Emby website in the next step.",
+    "在 Emby 网页中完成登录；已保存的账号密码会自动填入。",
+    "Complete sign-in on the Emby website. Saved credentials will be filled in automatically.",
   ],
   saving: ["正在保存…", "Saving…"],
   saveOpen: ["保存并打开", "Save and open"],

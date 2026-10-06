@@ -4,6 +4,8 @@ import type { DesktopAPI, AppState } from "../src/shared/types";
 const api: DesktopAPI = {
   getState: () => ipcRenderer.invoke("app:state"),
   saveServer: (server) => ipcRenderer.invoke("app:save-server", server),
+  getServerCredentials: (id) => ipcRenderer.invoke("app:server-credentials", id),
+  testServerConnection: (server) => ipcRenderer.invoke("app:test-server-connection", server),
   removeServer: (id) => ipcRenderer.invoke("app:remove-server", id),
   openServer: (id) => ipcRenderer.invoke("app:open-server", id),
   showPage: (page, section) => ipcRenderer.invoke("app:page", { page, section }),

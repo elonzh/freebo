@@ -27,6 +27,35 @@ Electron 使用隐藏标题栏配合各平台原生窗口控制。服务器网�
 
 Emby 接管由沙箱预加载在 DOMContentLoaded 时安装。先等待网页自己的登录连接，再加载播放模块；登录页与接管状态区分，初始化超时只自动重新加载一次，避免无限重试。
 
+网页加载状态由 `did-start-loading` / `did-stop-loading` 驱动，DOM 就绪后仍等待资源加载完成才结束标签图标动画。加载时工具栏刷新按钮变为停止，调用 `webContents.stop()`；失败页面保留错误与恢复操作。非激活标签使用完整圆角 hover 背景，内部标题按钮保持透明，激活标签与工具栏连接，关闭按钮保留独立的圆形操作反馈。
+
+## 账号密码
+
+添加或编辑服务器时直接显示账号密码表单，填写账号后保存即可记住，留空可仅保存服务器。`CredentialStore` 将账号和密码一起加密，存入用户数据目录的 `credentials.json`，不写入 `settings.json`、广播的 `AppState` 或诊断日志。文件采用原子替换和 `0600` 权限，写入串行化；加密或解密失败不会降级为明文。当前使用 Electron [safeStorage 异步接口](https://www.electronjs.org/docs/latest/api/safe-storage)，Linux 缺少系统密钥存储时禁用保存。
+
+凭据绑定服务器 ID、Provider 和完整注册地址。主进程只向当前网页主框架的隔离预加载世界返回凭据，并检查来源和反向代理子路径；等待系统密钥读取期间若页面发生导航，则丢弃结果。凭据读取接口不暴露给网页主世界。
+
+Emby 预加载在登录路由观察延迟出现的表单，兼容 `startup/manuallogin.html` 等部署路径和动态字段 ID，只填写可见的账号及现有密码字段，发送 `input` / `change` 事件，不自动提交。已输入的其他账号、密码及密码创建字段保持原样。退出登录只清除网页会话，保存的账号密码仍可自动填入；清空字段或点击清除后保存会忘记凭据，移除服务器同时移除凭据。修改服务器地址会清空表单中的旧凭据，需要明确重新填写后才会保存到新地址。
+
+测试连接通过自有页面 IPC 调用 Provider，主进程规范化地址，使用 Electron Session 请求 Emby 的公开信息接口；填写账号时再调用 [Users/AuthenticateByName](https://dev.emby.media/doc/restapi/User-Authentication.html)。密码只放在请求体中，不跟随重定向。测试成功后尝试注销测试令牌，仅向渲染端返回服务器名称与是否通过认证，不保存凭据或更改网页登录会话。测试失败不会将上游响应体或网络异常中的敏感内容写入诊断；表单修改后清除旧测试结果。
+
+```mermaid
+sequenceDiagram
+    participant UI as Freebo 服务器表单
+    participant Main as Electron 主进程
+    participant Vault as 系统加密与本地凭据文件
+    participant Preload as Emby 隔离预加载
+    participant Page as Emby 登录表单
+    UI->>Main: 保存服务器及可选凭据
+    Main->>Vault: 加密并原子写入
+    Preload->>Main: 请求当前服务器凭据
+    Main->>Main: 校验主框架、来源、路径及导航状态
+    Main->>Vault: 解密
+    Main-->>Preload: 账号密码
+    Preload->>Page: 填写空白字段并触发输入事件
+    Note over Page: 用户确认并提交登录
+```
+
 中文和英文文案由 `src/shared/i18n.ts` 管理。主进程返回带键和参数的错误，渲染端按当前语言翻译，因此切换语言也会更新已经显示的错误。服务器网页自身的语言由服务器控制。
 
 ## 界面组件与样式

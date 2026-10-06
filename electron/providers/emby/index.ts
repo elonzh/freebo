@@ -3,6 +3,7 @@ import { EmbyClient } from "./client";
 import { normalizeServerUrl } from "../../core/settings";
 import { UserFacingError } from "../../../src/shared/i18n";
 import type { MediaServerProvider } from "../types";
+import { testEmbyConnection } from "./connection-test";
 const id = z.string().min(1).max(200);
 const requestSchema = z.object({
   auth: z.object({
@@ -34,6 +35,7 @@ export const embyProvider: MediaServerProvider = {
   preload: "emby-preload.cjs",
   // The sandboxed preload installs the adapter without waiting for every page resource.
   adapterScript: "",
+  testConnection: testEmbyConnection,
   normalizeUrl(input) {
     const url = new URL(normalizeServerUrl(input));
     url.pathname = url.pathname.replace(/\/web(?:\/.*)?$/i, "").replace(/\/+$/, "");

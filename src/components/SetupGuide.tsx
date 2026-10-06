@@ -11,7 +11,7 @@ import {
   MonitorPlay,
   RefreshCw,
 } from "lucide-react";
-import type { AppState, Server } from "../shared/types";
+import type { AppState, ServerInput, DesktopAPI } from "../shared/types";
 import type { Translator, RunAction, SettingsPatch } from "../ui";
 import { PlayerSetup } from "./PlayerSetup";
 import { ServerForm } from "./ServerForm";
@@ -24,6 +24,7 @@ export function SetupGuide({
   update,
   pending,
   finish,
+  testConnection,
 }: {
   state: AppState;
   t: Translator;
@@ -31,6 +32,7 @@ export function SetupGuide({
   update: (patch: SettingsPatch) => void;
   pending: string;
   finish: (serverId?: string) => void;
+  testConnection: DesktopAPI["testServerConnection"];
 }) {
   const fieldId = useId();
   const [step, setStep] = useState<"welcome" | "player" | "server" | "done">("welcome");
@@ -48,7 +50,7 @@ export function SetupGuide({
   const server = state.settings.servers.find((server) => server.id === serverId);
   const steps = ["setupPlayer", "setupServer", "setupComplete"] as const;
   const stepIndex = step === "player" ? 0 : step === "server" ? 1 : 2;
-  const saveServer = (input: Partial<Server> & { name: string; url: string; providerId: string }) =>
+  const saveServer = (input: ServerInput) =>
     void run("setup-server", async (desktop) => {
       const updated = await desktop.saveServer(input);
       setServerId(updated.settings.servers.at(-1)?.id);
@@ -148,6 +150,9 @@ export function SetupGuide({
                   <ServerForm
                     t={t}
                     providers={state.providers}
+                    credentialsAvailable={state.credentialsAvailable}
+                    testConnection={testConnection}
+                    locale={state.locale}
                     server={{}}
                     saving={pending === "setup-server"}
                     onSave={saveServer}

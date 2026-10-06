@@ -4,6 +4,8 @@ import type {
   PlaybackItem,
   PlaybackSource,
   PreparedMedia,
+  ServerCredentials,
+  ServerConnectionResult,
 } from "../../src/shared/types";
 export type Fetcher = (input: string, init?: RequestInit) => Promise<Response>;
 /** A server adapter owns authentication, its wire types and progress reporting. */
@@ -29,6 +31,12 @@ export interface MediaServerProvider {
   readonly preload: string;
   readonly adapterScript: string;
   normalizeUrl(input: string): string;
+  testConnection?(
+    url: string,
+    credentials: ServerCredentials | undefined,
+    fetcher: Fetcher,
+    version: string,
+  ): Promise<ServerConnectionResult>;
   entryUrl(server: Server, home?: boolean): string;
   itemUrl?(server: Server, itemId: string): string;
   parsePlayback(
