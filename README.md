@@ -11,7 +11,7 @@
 
 Freebo 把服务器管理、播放器发现和播放衔接放在一个桌面应用里。打开应用，添加 Emby 地址，在原有网页中登录，即可将视频交给本地播放器。无需安装浏览器脚本、配置 Python 或单独启动服务。
 
-项目处于首版开发阶段。支持范围和实际验证结果见 [验证记录](docs/validation.md)。
+版本更新见 [发布说明](CHANGELOG.md)。支持范围和实际验证结果见 [验证记录](docs/validation.md)。
 
 ## 界面与品牌
 
@@ -25,7 +25,7 @@ Freebo 把服务器管理、播放器发现和播放衔接放在一个桌面应�
 
 - 使用 Emby 原有网页浏览媒体库、搜索和管理账户。
 - 多服务器管理，各服务器使用独立的持久化网页登录会话。
-- 首次配置引导并扫描 IINA、mpv、mpv.net、VLC，Windows 还支持 PotPlayer、MPC-HC、MPC-BE；之后按需手动扫描，提供默认播放器选择、手动定位和安装指引。
+- 首次配置引导并扫描 IINA、mpv、mpv.net、VLC，Windows 还支持 PotPlayer、MPC-HC、MPC-BE；之后按需手动扫描，提供默认播放器选择、手动定位和官网下载入口。
 - 电影、剧集、视频播放列表、连续播放、断点续播和观看进度回传。
 - 解析 Emby 视频版本、字幕和音轨选择。
 - 主页展示服务器列表，设置统一管理服务器与播放器。
@@ -40,8 +40,8 @@ Freebo 把服务器管理、播放器发现和播放衔接放在一个桌面应�
 ## 使用
 
 1. 安装应用并打开，跟随首次配置指引选择播放器、添加 Emby 地址。
-2. 若没有播放器，打开安装指引，安装后重新扫描或手动选择；也可以稍后配置。
-3. 打开服务器，在它自己的网页中输入账号和密码。
+2. 若没有播放器，点击播放器旁的地球图标前往官网下载，安装后重新扫描或手动选择；也可以稍后配置。
+3. 可以在服务器表单中保存账号密码并测试连接；打开服务器后，在原有网页确认登录。
 4. 点击 Emby 网页中的视频播放按钮，启动所选播放器。
 5. 点击地址栏旁的播放图标，打开控制与播放列表浮窗；点击标题右侧的服务器图标可跳转到对应详情页。
 
@@ -71,7 +71,7 @@ pnpm check
 pnpm package
 ```
 
-工具链：React、TypeScript、Electron、Vite、Vitest、Oxlint、Oxfmt。Electron 主进程负责会话、媒体传输和播放器通信，React 管理设置界面，独立的 `WebContentsView` 加载服务器网页。
+工具链：React、TypeScript、Electron、TanStack Router、TanStack Query、i18next／react-i18next、Vite、Vitest、Oxlint、Oxfmt。Electron 主进程负责会话、媒体传输和播放器通信，React 管理设置界面，独立的 `WebContentsView` 加载服务器网页。
 
 媒体服务器通过 Provider 接口接入，网页注入、认证、媒体解析和进度回传由各 Provider 负责。当前只注册 Emby，扩展架构不改变首版的支持范围。详见 [架构说明](docs/architecture.md)。
 
@@ -81,7 +81,7 @@ GitHub Actions 配置为在 macOS、Windows、Linux 上执行检查，分别生�
 
 当前工作流默认生成未签名安装包。正式签名和 macOS 公证需要维护者配置证书与对应凭据。
 
-品牌素材使用 `pnpm brand:generate` 生成，`pnpm brand:preview` 在本地提供品牌素材下载页。源文件、字体授权及复现说明见 [品牌规范](docs/brand/README.md)。本轮品牌调整维持版本 0.1.0。
+品牌素材使用 `pnpm brand:generate` 生成，`pnpm brand:preview` 在本地提供品牌素材下载页。源文件、字体授权及复现说明见 [品牌规范](docs/brand/README.md)。
 
 ## 许可证
 

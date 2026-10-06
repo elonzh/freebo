@@ -1,6 +1,6 @@
+import { useAppTranslation } from "../i18n";
 import { useRef, useState } from "react";
 import { LogOut, Trash2 } from "lucide-react";
-import type { Translator } from "../ui";
 import { Button, buttonVariants } from "./ui/button";
 import {
   AlertDialog,
@@ -14,16 +14,15 @@ import {
 } from "./ui/alert-dialog";
 
 export function ServerActions({
-  t,
   onRemove,
   onSignOut,
   disabled,
 }: {
-  t: Translator;
   onRemove: () => void;
   onSignOut: () => void;
   disabled: boolean;
 }) {
+  const { t } = useAppTranslation();
   const [action, setAction] = useState<"remove" | "sign-out" | null>(null);
   const opener = useRef<HTMLButtonElement | null>(null);
   const removing = action === "remove";

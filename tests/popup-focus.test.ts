@@ -1,10 +1,10 @@
+import { withTestProviders } from "./render-providers";
 // @vitest-environment jsdom
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { PlaybackPanel } from "../src/components/PlaybackPanel";
 import { ServerMenu } from "../src/components/ServerMenu";
-import { translate } from "../src/shared/i18n";
 import type { AppState } from "../src/shared/types";
 import type { RunAction } from "../src/ui";
 
@@ -41,12 +41,14 @@ it.each(["servers", "playback"] as const)(
     const render = async (open: boolean) => {
       await act(async () =>
         root.render(
-          createElement(Component, {
-            state: { ...state, serverPopupOpen: open, playbackPopupOpen: open },
-            t: (key, params) => translate("zh", key, params),
-            run,
-            error: "",
-          }),
+          withTestProviders(
+            createElement(Component, {
+              state: { ...state, serverPopupOpen: open, playbackPopupOpen: open },
+
+              run,
+              error: "",
+            }),
+          ),
         ),
       );
     };

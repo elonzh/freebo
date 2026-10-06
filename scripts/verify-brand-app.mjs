@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { mkdir, writeFile, copyFile } from "node:fs/promises";
+import { mkdir, writeFile, copyFile, readFile } from "node:fs/promises";
 import path from "node:path";
 import assert from "node:assert/strict";
 import electron from "electron";
@@ -103,7 +103,7 @@ try {
   const cdp = await connect(target);
   await ready(cdp);
   const initial = await cdp.evaluate("window.desktop.getState()");
-  assert.equal(initial.version, "0.1.0");
+  assert.equal(initial.version, JSON.parse(await readFile("package.json", "utf8")).version);
   assert.equal(initial.platform, process.platform);
   await cdp.evaluate(
     `(async () => { await window.desktop.updateSettings({ theme:"light", language:"zh", setupCompleted:false }); await window.desktop.showPage("setup"); })()`,

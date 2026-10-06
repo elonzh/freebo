@@ -1,9 +1,12 @@
+import { createRendererI18n } from "../src/i18n";
+import type { i18n } from "i18next";
+import { withTestProviders } from "./render-providers";
 // @vitest-environment jsdom
 import { createElement, act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { beforeEach, afterEach, expect, it, vi } from "vitest";
 import { ServerForm } from "../src/components/ServerForm";
-import { translate } from "../src/shared/i18n";
+import { translate, UserFacingError } from "../src/shared/i18n";
 import type { Server, ServerCredentials, DesktopAPI } from "../src/shared/types";
 
 const server: Server = {
@@ -41,24 +44,33 @@ async function render(
     serverName: "Test",
     authenticated: true,
   })),
+  language?: i18n,
 ) {
   const onSave = vi.fn();
   await act(async () =>
     root.render(
-      createElement(ServerForm, {
-        server,
-        saving: false,
-        onSave,
-        onCancel: vi.fn(),
-        providers: [{ id: "emby", name: "Emby" }],
-        credentialsAvailable: true,
-        loadCredentials,
-        testConnection,
-        locale: "zh",
-        t: (key, params) => translate("zh", key, params),
-      }),
+      withTestProviders(
+        createElement(ServerForm, {
+          server,
+          saving: false,
+          onSave,
+          onCancel: vi.fn(),
+          providers: [{ id: "emby", name: "Emby" }],
+          credentialsAvailable: true,
+          loadCredentials,
+          testConnection,
+        }),
+        language ?? "zh",
+      ),
     ),
   );
+  await act(async () => {
+    await vi.waitFor(() =>
+      expect(container.querySelector<HTMLButtonElement>('[name="test-connection"]')!.disabled).toBe(
+        false,
+      ),
+    );
+  });
   return onSave;
 }
 async function submit() {
@@ -161,4 +173,26 @@ it("does not erase saved credentials after a keychain read fails", async () => {
   await submit();
   expect(onSave).toHaveBeenLastCalledWith(expect.objectContaining({ credentials: undefined }));
   expect(container.textContent).not.toContain("清除已保存的账号密码");
+});
+
+it("re-localizes an existing connection error when the renderer language changes", async () => {
+  const language = createRendererI18n("zh");
+  await render(
+    async () => null,
+    vi.fn(async () => {
+      throw new UserFacingError("credentialsRejected");
+    }),
+    language,
+  );
+  await act(async () =>
+    container.querySelector<HTMLButtonElement>('[name="test-connection"]')!.click(),
+  );
+  expect(container.querySelector('[role="alert"]')?.textContent).toContain("账号或密码不正确");
+  await act(async () => {
+    await language.changeLanguage("en");
+  });
+  expect(container.querySelector('[role="alert"]')?.textContent).toContain(
+    "The account or password is incorrect",
+  );
+  expect(container.querySelector('[name="test-connection"]')?.textContent).toBe("Test connection");
 });

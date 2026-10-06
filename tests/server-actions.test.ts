@@ -1,9 +1,9 @@
+import { withTestProviders } from "./render-providers";
 // @vitest-environment jsdom
 import { createElement, act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { ServerManagementRow } from "../src/components/ServerManagementRow";
-import { translate } from "../src/shared/i18n";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -22,18 +22,20 @@ beforeEach(async () => {
   root = createRoot(container);
   await act(async () =>
     root.render(
-      createElement(
-        "ul",
-        null,
-        createElement(ServerManagementRow, {
-          server: { id: "s", name: "", url: "https://media.test", providerId: "emby" },
-          t: (key, params) => translate("zh", key, params),
-          onRemove,
-          onSignOut,
-          onEdit,
-          onOpen,
-          disabled: false,
-        }),
+      withTestProviders(
+        createElement(
+          "ul",
+          null,
+          createElement(ServerManagementRow, {
+            server: { id: "s", name: "", url: "https://media.test", providerId: "emby" },
+
+            onRemove,
+            onSignOut,
+            onEdit,
+            onOpen,
+            disabled: false,
+          }),
+        ),
       ),
     ),
   );

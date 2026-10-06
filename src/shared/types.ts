@@ -137,6 +137,7 @@ export interface Diagnostics {
   logs: { time: string; message: string }[];
 }
 export interface AppState {
+  revision: number;
   settings: Settings;
   playback: PlaybackState;
   platform: Platform;
@@ -161,28 +162,35 @@ export type PlaybackControl =
   | { action: "seek"; seconds: number }
   | { action: "jump"; index: number };
 export interface DesktopAPI {
-  getState(): Promise<AppState>;
-  saveServer(server: ServerInput): Promise<AppState>;
+  getState(this: void): Promise<AppState>;
+  saveServer(this: void, server: ServerInput): Promise<AppState>;
   getServerCredentials(this: void, id: string): Promise<ServerCredentials | null>;
   testServerConnection(this: void, server: ServerConnectionInput): Promise<ServerConnectionResult>;
-  removeServer(id: string): Promise<AppState>;
-  openServer(id: string): Promise<AppState>;
-  showPage(page: AppPage, section?: SettingsPage): Promise<void>;
-  togglePlaybackPopup(anchor: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  }): Promise<void>;
-  hidePlaybackPopup(): Promise<void>;
-  toggleServerPopup(anchor: { x: number; y: number; width: number; height: number }): Promise<void>;
-  hideServerPopup(): Promise<void>;
-  addServer(): Promise<void>;
-  openPlaybackItem(): Promise<void>;
-  showError(visible: boolean): Promise<void>;
-  discoverPlayers(): Promise<AppState>;
-  choosePlayer(kind: PlayerKind): Promise<AppState>;
+  removeServer(this: void, id: string): Promise<AppState>;
+  openServer(this: void, id: string): Promise<AppState>;
+  showPage(this: void, page: AppPage, section?: SettingsPage): Promise<void>;
+  togglePlaybackPopup(
+    this: void,
+    anchor: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    },
+  ): Promise<void>;
+  hidePlaybackPopup(this: void): Promise<void>;
+  toggleServerPopup(
+    this: void,
+    anchor: { x: number; y: number; width: number; height: number },
+  ): Promise<void>;
+  hideServerPopup(this: void): Promise<void>;
+  addServer(this: void): Promise<void>;
+  openPlaybackItem(this: void): Promise<void>;
+  showError(this: void, visible: boolean): Promise<void>;
+  discoverPlayers(this: void): Promise<AppState>;
+  choosePlayer(this: void, kind: PlayerKind): Promise<AppState>;
   updateSettings(
+    this: void,
     settings: Partial<
       Pick<
         Settings,
@@ -190,15 +198,15 @@ export interface DesktopAPI {
       >
     >,
   ): Promise<AppState>;
-  control(control: PlaybackControl): Promise<void>;
-  surfaceReady(surface: "servers" | "playback"): Promise<void>;
-  navigate(action: "back" | "forward" | "reload" | "stop" | "home"): Promise<void>;
-  resetSession(id: string): Promise<AppState>;
-  openGuide(kind: PlayerKind): Promise<void>;
-  exportDiagnostics(): Promise<string | null>;
-  getDiagnostics(): Promise<Diagnostics>;
-  copyDiagnostics(): Promise<void>;
-  openLink(target: "product" | "github" | "issue"): Promise<void>;
-  onState(callback: (state: AppState) => void): () => void;
-  onAddServer(callback: () => void): () => void;
+  control(this: void, control: PlaybackControl): Promise<void>;
+  surfaceReady(this: void, surface: "servers" | "playback"): Promise<void>;
+  navigate(this: void, action: "back" | "forward" | "reload" | "stop" | "home"): Promise<void>;
+  resetSession(this: void, id: string): Promise<AppState>;
+  openGuide(this: void, kind: PlayerKind): Promise<void>;
+  exportDiagnostics(this: void): Promise<string | null>;
+  getDiagnostics(this: void): Promise<Diagnostics>;
+  copyDiagnostics(this: void): Promise<void>;
+  openLink(this: void, target: "product" | "github" | "issue"): Promise<void>;
+  onState(this: void, callback: (state: AppState) => void): () => void;
+  onAddServer(this: void, callback: () => void): () => void;
 }

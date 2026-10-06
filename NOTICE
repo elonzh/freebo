@@ -24,3 +24,10 @@ Copyright 2010 The Atma Project Authors (https://github.com/BlackFoundryCom/Atma
 The original font and its WOFF2 format are distributed under the SIL Open Font
 License 1.1; see docs/licenses/Atma-OFL.txt and dist/fonts/Atma-OFL.txt.
 Brand vector artwork and reproducible exports are provided in assets/brand/freebo.
+
+TanStack Query and TanStack Router (https://tanstack.com), i18next
+(https://www.i18next.com), and react-i18next (https://react.i18next.com) are
+licensed under the MIT License. Their original copyright notices and licenses
+are included in docs/licenses/tanstack-react-query.txt,
+docs/licenses/tanstack-react-router.txt, docs/licenses/i18next.txt, and
+docs/licenses/react-i18next.txt.

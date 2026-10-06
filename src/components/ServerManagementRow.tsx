@@ -1,14 +1,13 @@
+import { useAppTranslation } from "../i18n";
 import { ExternalLink } from "lucide-react";
 import type { Server } from "../shared/types";
 import { serverLabel } from "../shared/servers";
-import type { Translator } from "../ui";
 import { ServerRow } from "./ServerRow";
 import { ServerActions } from "./ServerActions";
 import { Button } from "./ui/button";
 
 export function ServerManagementRow({
   server,
-  t,
   disabled,
   onEdit,
   onOpen,
@@ -16,13 +15,13 @@ export function ServerManagementRow({
   onSignOut,
 }: {
   server: Server;
-  t: Translator;
   disabled: boolean;
   onEdit: () => void;
   onOpen: () => void;
   onRemove: () => void;
   onSignOut: () => void;
 }) {
+  const { t } = useAppTranslation();
   return (
     <li>
       <ServerRow
@@ -41,7 +40,7 @@ export function ServerManagementRow({
         >
           <ExternalLink size={16} />
         </Button>
-        <ServerActions t={t} disabled={disabled} onRemove={onRemove} onSignOut={onSignOut} />
+        <ServerActions disabled={disabled} onRemove={onRemove} onSignOut={onSignOut} />
       </ServerRow>
     </li>
   );

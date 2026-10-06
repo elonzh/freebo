@@ -1,10 +1,10 @@
+import { withTestProviders } from "./render-providers";
 // @vitest-environment jsdom
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { PlayerSetup } from "../src/components/PlayerSetup";
 import { defaultSettings } from "../electron/core/settings";
-import { translate } from "../src/shared/i18n";
 import type { AppState, DesktopAPI, Platform, Player } from "../src/shared/types";
 import type { RunAction } from "../src/ui";
 
@@ -38,12 +38,17 @@ async function render(
 ) {
   await act(async () =>
     root.render(
-      createElement(PlayerSetup, {
-        state: { platform, settings: { ...defaultSettings, players, defaultPlayerId } } as AppState,
-        t: (key, params) => translate("zh", key, params),
-        run,
-        update,
-      }),
+      withTestProviders(
+        createElement(PlayerSetup, {
+          state: {
+            platform,
+            settings: { ...defaultSettings, players, defaultPlayerId },
+          } as AppState,
+
+          run,
+          update,
+        }),
+      ),
     ),
   );
 }

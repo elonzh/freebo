@@ -1,8 +1,12 @@
+import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useApp } from "../runtime/context";
+import { useAppTranslation } from "../i18n";
+import type { SetupStep } from "../routing";
 import { serverLabel } from "../shared/servers";
 import { OptionSelect } from "./OptionSelect";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -12,33 +16,28 @@ import {
   MonitorPlay,
   RefreshCw,
 } from "lucide-react";
-import type { AppState, ServerInput, DesktopAPI } from "../shared/types";
-import type { Translator, RunAction, SettingsPatch } from "../ui";
+import type { ServerInput } from "../shared/types";
 import { PlayerSetup } from "./PlayerSetup";
 import { ServerForm } from "./ServerForm";
 import { BrandLogo } from "./Brand";
 import { PlayerIcon, ServerIcon } from "./IntegrationIcon";
 
-export function SetupGuide({
-  state,
-  t,
-  run,
-  update,
-  pending,
-  finish,
-  testConnection,
-}: {
-  state: AppState;
-  t: Translator;
-  run: RunAction;
-  update: (patch: SettingsPatch) => void;
-  pending: string;
-  finish: (serverId?: string) => void;
-  testConnection: DesktopAPI["testServerConnection"];
-}) {
+export function SetupGuide() {
+  const { state, runtime, run, update, pending } = useApp();
+  const { t } = useAppTranslation();
+  const { step = "welcome", serverId } = useSearch({ strict: false });
+  const navigate = useNavigate();
+  const setStep = (step: SetupStep) => void navigate({ to: "/setup", search: { step, serverId } });
   const fieldId = useId();
-  const [step, setStep] = useState<"welcome" | "player" | "server" | "done">("welcome");
-  const [serverId, setServerId] = useState<string>();
+  const testConnection = runtime.api.testServerConnection;
+  const finish = (serverId?: string) =>
+    void run("finish-setup", async (api) => {
+      const updated = await api.updateSettings({ setupCompleted: true });
+      runtime.applyState(updated);
+      if (serverId) await navigate({ to: "/library/$serverId", params: { serverId } });
+      else await navigate({ to: "/" });
+      return updated;
+    });
   const scanStarted = useRef(false);
   useEffect(() => {
     if (step !== "player" || state.settings.playerScanCompleted || scanStarted.current) return;
@@ -54,8 +53,11 @@ export function SetupGuide({
   const saveServer = (input: ServerInput) =>
     void run("setup-server", async (desktop) => {
       const updated = await desktop.saveServer(input);
-      setServerId(updated.settings.servers.at(-1)?.id);
-      setStep("done");
+      runtime.applyState(updated);
+      await navigate({
+        to: "/setup",
+        search: { step: "done", serverId: updated.settings.servers.at(-1)?.id },
+      });
       return updated;
     });
   return (
@@ -129,7 +131,7 @@ export function SetupGuide({
                     {t("scanningPlayers")}
                   </div>
                 ) : (
-                  <PlayerSetup state={state} t={t} run={run} update={update} />
+                  <PlayerSetup state={state} run={run} update={update} />
                 )}
                 <div className="mt-7 flex flex-wrap items-center justify-end gap-3 [&>:first-child]:mr-auto">
                   <Button variant="outline" onClick={() => setStep("welcome")}>
@@ -147,11 +149,9 @@ export function SetupGuide({
               <>
                 <h1>{t("addServer")}</h1>
                 <ServerForm
-                  t={t}
                   providers={state.providers}
                   credentialsAvailable={state.credentialsAvailable}
                   testConnection={testConnection}
-                  locale={state.locale}
                   server={{}}
                   saving={pending === "setup-server"}
                   onSave={saveServer}

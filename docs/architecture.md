@@ -2,6 +2,29 @@
 
 Freebo 使用服务器原有网页提供浏览与登录，把视频播放交给本地播放器。当前只有 Emby Provider；注册表可扩展到其他服务器，界面不会列出尚未实现的支持项。
 
+## 渲染端路由与数据
+
+`src/router.tsx` 定义 TanStack Router 的类型化路由树，主页、服务器网页、设置各页、服务器新建与编辑、快速配置及两个浮窗分别对应路由。设置使用嵌套 `Outlet`；编辑目标由路由参数决定，快速配置步骤与本轮新增服务器 ID 由受校验的搜索参数决定。使用 [memory history](https://tanstack.com/router/latest/docs/guide/history-types)，避免修改生产 `file://` 入口及浮窗的 `surface` 参数。设置与快速配置按路由加载。
+
+路由进入前通过 IPC 同步原生网页视图的显隐及服务器身份。原生 IPC 无法中途取消，因此页面切换串行执行，较后的主页跳转不会被较早的服务器打开请求覆盖。主进程菜单、播放浮窗及服务器选择浮窗也可能发起跳转；`connectNativeNavigation` 将这些状态映射回路由，同时保留同一设置页的编辑目标与快速配置步骤。
+
+`src/runtime/desktop.ts` 为每个窗口建立 TanStack Query 客户端。主进程仍是持久设置、网页登录会话与播放会话的唯一拥有者；渲染端首次通过 `getState` 读取快照，后续 IPC 推送及 mutation 返回值直接更新缓存，不做周期轮询。快照带递增 `revision`，较早的读取或操作结果不能覆盖较新的推送。应用操作的进行中和错误状态由 mutation 管理，操作缓存只保留名称与标识，不保留可能捕获账号密码的表单回调；诊断由 query 管理并支持手动刷新。IPC 查询和操作均禁用自动重试、窗口聚焦重取及联网恢复重取，离线时也可管理本地设置。
+
+账号密码读取使用仅随表单存活的 query（`gcTime: 0`），不进入全局快照或持久化 Query 缓存；连接测试使用不重试的 mutation，表单内容变化后忽略旧测试结果。结果保留语义数据及原始错误键，切换语言时重新翻译。
+
+当前不另外引入全局状态管理库：共享异步数据由 Query 拥有，页面位置由 Router 拥有，标签集合、确认框、表单草稿及拖动预览留在其所属组件。React Context 仅提供窗口运行时与操作接口，不复制 Query 中的数据。
+
+```mermaid
+flowchart LR
+    Route["TanStack Router 页面与步骤"] --> Native["类型校验的 DesktopAPI / IPC"]
+    Native --> Main["Electron 主进程"]
+    Main -->|"revision 快照推送"| Query["每窗口 QueryClient"]
+    Query --> UI["React 页面与浮窗"]
+    UI -->|"mutation"| Native
+    Locale["共享 i18next 语言资源"] --> UI
+    Locale --> Menu["主进程原生菜单与错误"]
+```
+
 ## 服务器边界
 
 `electron/providers/types.ts` 定义两个接口：
@@ -84,11 +107,11 @@ sequenceDiagram
     Note over Page: 用户确认并提交登录
 ```
 
-中文和英文文案由 `src/shared/i18n.ts` 管理。主进程返回带键和参数的错误，渲染端按当前语言翻译，因此切换语言也会更新已经显示的错误。服务器网页自身的语言由服务器控制。
+中文和英文文案分别放在 `src/shared/locales/zh.ts` 和 `en.ts`，由 i18next 管理插值与回退语言；资源键及两种语言的占位符保持一致。主进程使用独立的同步实例，React 页面通过 [I18nextProvider](https://react.i18next.com/latest/i18nextprovider) 和 `useTranslation` 订阅当前窗口的语言，不再逐层传递翻译函数。`src/shared/i18n.ts` 仅保留实例配置、系统语言解析与可序列化的错误接口。主进程返回带键和参数的错误，渲染端按当前语言翻译，因此切换语言也会更新已经显示的错误。服务器网页自身的语言由服务器控制。
 
 ## 界面组件与样式
 
-通用控件使用 shadcn/ui，源码保存在 `src/components/ui/`；`components.json` 配置组件生成路径，Vite 接入 Tailwind CSS v4。按钮、输入框、标签、开关、单选组、进度条和折叠区共享组件实现。`OptionSelect` 组合 shadcn Select，统一主题、语言、Provider 和向导服务器选择，菜单通过 Portal 展示并继承根节点主题。
+通用控件使用 shadcn/ui，源码保存在 `src/components/ui/`；`components.json` 配置组件生成路径，Vite 接入 Tailwind CSS v4。按钮、输入框、标签、开关、单选组、进度条和折叠区共享组件实现。`OptionSelect` 组合 shadcn Select，统一主题、语言及 Provider 选择，菜单通过 Portal 展示并继承根节点主题。
 
 页面布局使用 Tailwind。`src/style.css` 仅保留主题变量、基础排版、Electron 标题栏及地址栏规则和减少动态效果设置。系统外观变化同步 `.dark` 类，保证页面控件与弹出菜单一致；组件状态样式由 shadcn 管理，避免页面 CSS 覆盖下拉选项或禁用状态。
 

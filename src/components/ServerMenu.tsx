@@ -1,7 +1,8 @@
+import { useAppTranslation } from "../i18n";
 import { serverLabel } from "../shared/servers";
 import { Plus, X } from "lucide-react";
 import type { AppState } from "../shared/types";
-import type { RunAction, Translator } from "../ui";
+import type { RunAction } from "../ui";
 import { cn } from "../lib/utils";
 import { Button } from "./ui/button";
 import { ServerIcon } from "./IntegrationIcon";
@@ -9,15 +10,14 @@ import { PopupSurface } from "./PopupSurface";
 
 export function ServerMenu({
   state,
-  t,
   run,
   error,
 }: {
   state: AppState;
-  t: Translator;
   run: RunAction;
   error: string;
 }) {
+  const { t } = useAppTranslation();
   return (
     <PopupSurface
       open={state.serverPopupOpen}

@@ -1,3 +1,5 @@
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useAppTranslation } from "../i18n";
 import { OptionSelect } from "./OptionSelect";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -5,9 +7,14 @@ import { Button } from "./ui/button";
 import { ServerIcon } from "./IntegrationIcon";
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { Eye, EyeOff, LoaderCircle } from "lucide-react";
-import type { Server, AppState, ServerInput, DesktopAPI } from "../shared/types";
+import type {
+  Server,
+  AppState,
+  ServerInput,
+  DesktopAPI,
+  ServerConnectionResult,
+} from "../shared/types";
 import { localizeError, type MessageKey } from "../shared/i18n";
-import type { Translator } from "../ui";
 
 export function ServerForm({
   server,
@@ -18,8 +25,6 @@ export function ServerForm({
   credentialsAvailable,
   loadCredentials,
   testConnection,
-  locale,
-  t,
   submitLabel = "save",
 }: {
   server: Partial<Server>;
@@ -30,63 +35,78 @@ export function ServerForm({
   credentialsAvailable: boolean;
   loadCredentials?: DesktopAPI["getServerCredentials"];
   testConnection: DesktopAPI["testServerConnection"];
-  locale: AppState["locale"];
-  t: Translator;
   submitLabel?: MessageKey;
 }) {
+  const { t, locale } = useAppTranslation();
   const fieldId = useId();
   const [name, setName] = useState(server.name ?? "");
   const [url, setUrl] = useState(server.url ?? "");
   const [providerId, setProviderId] = useState(server.providerId ?? providers[0]?.id ?? "emby");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [usernameDraft, setUsername] = useState<string>();
+  const [passwordDraft, setPassword] = useState<string>();
   const [showPassword, setShowPassword] = useState(false);
-  const [loadingCredentials, setLoadingCredentials] = useState(
-    Boolean(server.id && loadCredentials),
-  );
-  const [credentialsError, setCredentialsError] = useState("");
-  const [testing, setTesting] = useState(false);
-  const [connectionMessage, setConnectionMessage] = useState("");
-  const [connectionNotice, setConnectionNotice] = useState("");
-  const [connectionError, setConnectionError] = useState(false);
+  const [credentialsDismissed, setCredentialsDismissed] = useState(false);
+  const [feedback, setFeedback] = useState<
+    { result: ServerConnectionResult } | { error: unknown } | null
+  >(null);
   const inputVersion = useRef(0);
   const testRun = useRef(0);
-  const editedUrl = useRef(false);
+  const [editedUrl, setEditedUrl] = useState(false);
+  const credentialQuery = useQuery({
+    queryKey: ["credentials", server.id, server.url],
+    queryFn: () => loadCredentials!(server.id!),
+    enabled: Boolean(server.id && loadCredentials && credentialsAvailable && !editedUrl),
+    staleTime: Infinity,
+    gcTime: 0,
+    retry: false,
+    retryOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    networkMode: "always",
+  });
+  const loadingCredentials = credentialQuery.isFetching;
+  const credentialsError = credentialsDismissed ? null : credentialQuery.error;
+  const username = usernameDraft ?? (!editedUrl ? credentialQuery.data?.username : undefined) ?? "";
+  const password = passwordDraft ?? (!editedUrl ? credentialQuery.data?.password : undefined) ?? "";
   useEffect(
     () => () => {
       testRun.current++;
     },
     [],
   );
+  const connectionTest = useMutation({
+    mutationKey: ["connection-test"],
+    mutationFn: () =>
+      testConnection({
+        id: server.id,
+        url: url.trim(),
+        providerId,
+        credentials: username.trim() ? { username: username.trim(), password } : undefined,
+      }),
+    retry: false,
+    gcTime: 0,
+    networkMode: "always",
+  });
+  const testing = connectionTest.isPending;
+  const connectionError = Boolean(feedback && "error" in feedback);
+  const connectionMessage = !feedback
+    ? ""
+    : "error" in feedback
+      ? localizeError(locale, feedback.error)
+      : t(feedback.result.authenticated ? "connectionVerified" : "serverReachable");
+  const connectionNotice =
+    feedback && "result" in feedback && feedback.result.logoutFailed
+      ? t("connectionVerifiedLogoutFailed")
+      : "";
   const invalidateTest = () => {
     inputVersion.current++;
-    setConnectionMessage("");
-    setConnectionNotice("");
+    setFeedback(null);
   };
-  useEffect(() => {
-    if (!server.id || !loadCredentials) return;
-    let current = true;
-    void loadCredentials(server.id)
-      .then((saved) => {
-        if (!current || editedUrl.current) return;
-        setUsername(saved?.username ?? "");
-        setPassword(saved?.password ?? "");
-      })
-      .catch((error) => {
-        if (current) setCredentialsError(String(error));
-      })
-      .finally(() => {
-        if (current) setLoadingCredentials(false);
-      });
-    return () => {
-      current = false;
-    };
-  }, [server.id, loadCredentials]);
   const resetAccountFields = () => {
     setUsername("");
     setPassword("");
     setShowPassword(false);
-    setCredentialsError("");
+    setCredentialsDismissed(true);
   };
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -101,26 +121,12 @@ export function ServerForm({
   const checkConnection = async () => {
     const run = ++testRun.current;
     const version = inputVersion.current;
-    setTesting(true);
-    setConnectionMessage("");
-    setConnectionNotice("");
+    setFeedback(null);
     try {
-      const result = await testConnection({
-        id: server.id,
-        url: url.trim(),
-        providerId,
-        credentials: username.trim() ? { username: username.trim(), password } : undefined,
-      });
-      if (testRun.current !== run || inputVersion.current !== version) return;
-      setConnectionError(false);
-      setConnectionMessage(t(result.authenticated ? "connectionVerified" : "serverReachable"));
-      setConnectionNotice(result.logoutFailed ? t("connectionVerifiedLogoutFailed") : "");
+      const result = await connectionTest.mutateAsync();
+      if (testRun.current === run && inputVersion.current === version) setFeedback({ result });
     } catch (error) {
-      if (testRun.current !== run || inputVersion.current !== version) return;
-      setConnectionError(true);
-      setConnectionMessage(localizeError(locale, String(error)));
-    } finally {
-      if (testRun.current === run) setTesting(false);
+      if (testRun.current === run && inputVersion.current === version) setFeedback({ error });
     }
   };
   return (
@@ -179,7 +185,7 @@ export function ServerForm({
             setUrl(event.target.value);
             invalidateTest();
             if (server.id) {
-              editedUrl.current = true;
+              setEditedUrl(true);
               resetAccountFields();
             }
           }}
@@ -205,7 +211,7 @@ export function ServerForm({
               disabled={saving || loadingCredentials || !credentialsAvailable}
               onChange={(event) => {
                 setUsername(event.target.value);
-                setCredentialsError("");
+                setCredentialsDismissed(true);
                 invalidateTest();
               }}
             />
@@ -223,7 +229,7 @@ export function ServerForm({
                 disabled={saving || loadingCredentials || !credentialsAvailable}
                 onChange={(event) => {
                   setPassword(event.target.value);
-                  setCredentialsError("");
+                  setCredentialsDismissed(true);
                   invalidateTest();
                 }}
               />

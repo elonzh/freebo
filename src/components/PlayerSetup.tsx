@@ -1,3 +1,4 @@
+import { useAppTranslation } from "../i18n";
 import { useId, type ReactNode } from "react";
 import { cn } from "../lib/utils";
 import { Label } from "./ui/label";
@@ -6,7 +7,7 @@ import { Button } from "./ui/button";
 import { Globe2, FolderOpen } from "lucide-react";
 import type { AppState, PlayerKind, Platform } from "../shared/types";
 import type { MessageKey } from "../shared/i18n";
-import type { Translator, RunAction, SettingsPatch } from "../ui";
+import type { RunAction, SettingsPatch } from "../ui";
 import { PlayerIcon } from "./IntegrationIcon";
 
 const playerOptions: {
@@ -26,17 +27,16 @@ const playerOptions: {
 
 export function PlayerSetup({
   state,
-  t,
   run,
   update,
   children,
 }: {
   state: AppState;
-  t: Translator;
   run: RunAction;
   update: (patch: SettingsPatch) => void;
   children?: ReactNode;
 }) {
+  const { t } = useAppTranslation();
   const fieldId = useId();
   return (
     <>

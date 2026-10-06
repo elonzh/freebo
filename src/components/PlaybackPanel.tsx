@@ -1,3 +1,4 @@
+import { useAppTranslation } from "../i18n";
 import { serverLabel } from "../shared/servers";
 import { Slider } from "./ui/slider";
 import { cn } from "../lib/utils";
@@ -16,21 +17,20 @@ import {
 } from "lucide-react";
 import type { AppState } from "../shared/types";
 import { localizeError } from "../shared/i18n";
-import { formatTime, type Translator, type RunAction } from "../ui";
+import { formatTime, type RunAction } from "../ui";
 import { ServerIcon } from "./IntegrationIcon";
 import { PopupSurface } from "./PopupSurface";
 
 export function PlaybackPanel({
   state,
-  t,
   run,
   error,
 }: {
   state: AppState;
-  t: Translator;
   run: RunAction;
   error: string;
 }) {
+  const { t } = useAppTranslation();
   const [seekPosition, setSeekPosition] = useState<number | null>(null);
   const playback = state.playback;
   const server = state.settings.servers.find(

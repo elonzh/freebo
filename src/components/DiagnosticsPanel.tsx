@@ -1,10 +1,14 @@
+import { useQuery } from "@tanstack/react-query";
+import { useRuntime } from "../runtime/context";
+import { diagnosticsKey } from "../runtime/desktop";
+import { useAppTranslation } from "../i18n";
 import { useEffect, useState, type ReactNode } from "react";
 import { Check, Copy, Download, ExternalLink, RefreshCw } from "lucide-react";
 import { Button } from "./ui/button";
 import { PlayerIcon } from "./IntegrationIcon";
 import { localizeError, type MessageKey } from "../shared/i18n";
 import type { AppState, Diagnostics } from "../shared/types";
-import { formatTime, type Translator, type RunAction } from "../ui";
+import { formatTime, type RunAction } from "../ui";
 
 function Details({ rows }: { rows: [string, ReactNode][] }) {
   return (
@@ -21,42 +25,26 @@ function Details({ rows }: { rows: [string, ReactNode][] }) {
     </dl>
   );
 }
-export function DiagnosticsPanel({
-  state,
-  t,
-  run,
-}: {
-  state: AppState;
-  t: Translator;
-  run: RunAction;
-}) {
-  const [data, setData] = useState<Diagnostics>();
-  const [error, setError] = useState("");
+export function DiagnosticsPanel({ state, run }: { state: AppState; run: RunAction }) {
+  const { t } = useAppTranslation();
+  const runtime = useRuntime();
+  const query = useQuery({
+    queryKey: [
+      ...diagnosticsKey,
+      state.locale,
+      state.webStatus,
+      state.adapterStatus,
+      state.playback.sync?.status,
+      state.playback.sync?.time,
+    ],
+    queryFn: () => runtime.api.getDiagnostics(),
+    staleTime: 0,
+    gcTime: 30_000,
+  });
+  const data = query.data;
+  const error = query.error ? localizeError(state.locale, query.error) : "";
+  const refreshing = query.isFetching;
   const [copied, setCopied] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  useEffect(() => {
-    let active = true;
-    void window.desktop
-      ?.getDiagnostics()
-      .then((value) => {
-        if (active) {
-          setData(value);
-          setError("");
-        }
-      })
-      .catch((reason: unknown) => {
-        if (active) setError(localizeError(state.locale, reason));
-      });
-    return () => {
-      active = false;
-    };
-  }, [
-    state.locale,
-    state.webStatus,
-    state.adapterStatus,
-    state.playback.sync?.status,
-    state.playback.sync?.time,
-  ]);
   useEffect(() => {
     if (!copied) return;
     const timer = setTimeout(() => setCopied(false), 3_000);
@@ -104,21 +92,7 @@ export function DiagnosticsPanel({
             <Download size={15} />
             {t("exportLog")}
           </Button>
-          <Button
-            variant="ghost"
-            disabled={refreshing}
-            onClick={() =>
-              void run("refresh-diagnostics", async (desktop) => {
-                setRefreshing(true);
-                try {
-                  setData(await desktop.getDiagnostics());
-                  setError("");
-                } finally {
-                  setRefreshing(false);
-                }
-              })
-            }
-          >
+          <Button variant="ghost" disabled={refreshing} onClick={() => void query.refetch()}>
             <RefreshCw
               size={15}
               className={refreshing ? "animate-spin motion-reduce:animate-none" : ""}

@@ -142,9 +142,11 @@ function getDiagnostics() {
     diagnostics,
   );
 }
+let stateRevision = 0;
 function state(): AppState {
   const contents = guest && !guest.webContents.isDestroyed() ? guest.webContents : undefined;
   return {
+    revision: ++stateRevision,
     settings: store.value,
     playback: playback.state,
     platform: process.platform as Platform,
