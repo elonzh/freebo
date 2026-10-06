@@ -28,6 +28,9 @@ const api: DesktopAPI = {
   getDiagnostics: () => ipcRenderer.invoke("app:get-diagnostics"),
   copyDiagnostics: () => ipcRenderer.invoke("app:copy-diagnostics"),
   openLink: (target) => ipcRenderer.invoke("app:open-link", target),
+  checkForUpdates: () => ipcRenderer.invoke("app:check-updates"),
+  installUpdate: () => ipcRenderer.invoke("app:install-update"),
+  openReleases: () => ipcRenderer.invoke("app:open-releases"),
   onState: (callback) => {
     const listener = (_event: unknown, state: AppState) => callback(state);
     ipcRenderer.on("app:state", listener);

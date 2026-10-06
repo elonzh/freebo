@@ -28,6 +28,7 @@
     "package": "pnpm build && electron-builder --publish never",
     "brand:generate": "uv run scripts/generate-brand.py && pnpm exec electron scripts/render-brand.cjs && uv run scripts/package-brand.py",
     "brand:preview": "vite --config docs/brand/brand-kit/vite.config.ts",
+    "tray:generate": "electron scripts/render-tray.cjs",
     "brand:typecheck": "tsc --project docs/brand/brand-kit/tsconfig.json",
     "brand:build": "vite build --config docs/brand/brand-kit/vite.config.ts",
     "brand:check": "pnpm brand:typecheck && pnpm brand:build"
@@ -37,6 +38,7 @@
     "@tanstack/react-router": "1.170.41",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
+    "electron-updater": "^6.8.9",
     "i18next": "26.4.2",
     "lucide-react": "^0.577.0",
     "radix-ui": "1.7.0",
@@ -90,7 +92,6 @@
         "dmg",
         "zip"
       ],
-      "identity": null,
       "icon": "resources/icon.icns"
     },
     "win": {
@@ -117,7 +118,21 @@
     "icon": "resources/icon.png",
     "portable": {
       "artifactName": "${productName}-${version}-${os}-${arch}-portable.${ext}"
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "elonzh",
+        "repo": "freebo",
+        "releaseType": "release"
+      }
+    ],
+    "extraResources": [
+      {
+        "from": "resources/tray",
+        "to": "tray"
+      }
+    ]
   },
   "productName": "Freebo"
 }

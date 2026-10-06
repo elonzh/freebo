@@ -136,12 +136,27 @@ export interface Diagnostics {
   players: { name: string; kind: PlayerKind; default: boolean }[];
   logs: { time: string; message: string }[];
 }
+export interface UpdateState {
+  status:
+    | "disabled"
+    | "idle"
+    | "checking"
+    | "up-to-date"
+    | "downloading"
+    | "downloaded"
+    | "installing"
+    | "error";
+  reason?: "development" | "unsigned-mac" | "unsupported-package";
+  version?: string;
+  percent?: number;
+}
 export interface AppState {
   revision: number;
   settings: Settings;
   playback: PlaybackState;
   platform: Platform;
   version: string;
+  updates: UpdateState;
   webStatus: "closed" | "loading" | "ready" | "error";
   webError?: string;
   credentialsAvailable: boolean;
@@ -207,6 +222,9 @@ export interface DesktopAPI {
   getDiagnostics(this: void): Promise<Diagnostics>;
   copyDiagnostics(this: void): Promise<void>;
   openLink(this: void, target: "product" | "github" | "issue"): Promise<void>;
+  checkForUpdates(this: void): Promise<void>;
+  installUpdate(this: void): Promise<void>;
+  openReleases(this: void): Promise<void>;
   onState(this: void, callback: (state: AppState) => void): () => void;
   onAddServer(this: void, callback: () => void): () => void;
 }

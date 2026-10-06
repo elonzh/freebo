@@ -31,6 +31,8 @@
 
 组合外留白至少为犬头高度的四分之一。横向标志宽度至少 120px，独立犬头至少 24px；16px 使用专用应用图标。空间适合竖向时使用已生成的 stacked 版本。保持比例，不添加模糊、阴影、描边、新颜色或中文文字。
 
+系统托盘使用独立的 [小尺寸矢量源](../../resources/tray/mark.svg)，按主稿保留一立一垂的耳朵、向右伸出的口鼻、长下颌与面部白斑，省略细碎毛边。不要将脸型改成正面圆脸，也不要将完整犬头直接缩小到托盘尺寸。托盘符号仅用于系统状态区，不替代品牌主稿；macOS 模板以外轮廓和面部白斑为不透明区，鼻子、嘴和深色毛发为透明区，避免深色菜单栏将毛发显示成大片白色。Windows/Linux 使用松绿与青柠色版本。`pnpm tray:generate` 用 Electron 导出 20px 与 40px（Retina）PNG，运行时读取 `resources/tray/`，打包时随资源复制。
+
 ## 交付素材
 
 [完整 ZIP](../../assets/brand/freebo/Freebo-brand-kit.zip) 包含矢量主稿、字体与许可、导出素材和本说明。[单页 PDF 指南](../../assets/brand/freebo/Freebo-brand-guide.pdf) 用于快速查阅。[manifest.json](../../assets/brand/freebo/manifest.json) 记录 58 份素材的大小和 SHA-256；清单不包含它自身与 ZIP。

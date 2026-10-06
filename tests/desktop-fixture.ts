@@ -19,6 +19,7 @@ export function createDesktopFixture() {
     },
     platform: "darwin",
     version: "1.0.0",
+    updates: { status: "disabled", reason: "development" },
     locale: "zh",
     webStatus: "closed",
     credentialsAvailable: true,
@@ -123,6 +124,9 @@ export function createDesktopFixture() {
     }),
     copyDiagnostics: vi.fn(async () => {}),
     openLink: vi.fn(async () => {}),
+    checkForUpdates: vi.fn(async () => {}),
+    installUpdate: vi.fn(async () => {}),
+    openReleases: vi.fn(async () => {}),
   };
   return { api, push, state: () => state, listenerCount: () => listeners.size + addListeners.size };
 }

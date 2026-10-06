@@ -26,6 +26,7 @@ Your library already organizes your videos, and your computer already has a play
 - A floating panel for pause, seeking and queue navigation.
 - Installed player discovery and manual path selection.
 - English and Chinese, light and dark appearance, and remembered window size and position.
+- Keep playing in the background when the main window closes; reopen or quit from the tray.
 
 | System  | Players                                      |
 | ------- | -------------------------------------------- |
@@ -42,6 +43,8 @@ Music and live TV continue to play on the Emby website.
 3. Press play in your library. Use the playback button beside the address bar to open the floating controls.
 
 Servers and players can be changed in Settings. Server names are optional; saved credentials fill the sign-in form. Choose a path manually for portable players. Server addresses support ports and reverse proxy subpaths.
+
+Supported installed builds check for updates and download them automatically. Restart to install from Settings → About; other builds link to the download page. See [architecture](docs/architecture.md#构建与升级) for supported packages.
 
 ## Run from source
 

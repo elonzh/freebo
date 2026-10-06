@@ -11,12 +11,15 @@ import {
   screen,
   safeStorage,
   clipboard,
+  Tray,
+  nativeImage,
+  Notification,
   type IpcMainInvokeEvent,
 } from "electron";
 import { join } from "node:path";
 import { release } from "node:os";
 import { writeFile, access, mkdir } from "node:fs/promises";
-import { constants } from "node:fs";
+import { constants, existsSync, readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import {
   browserUserAgent,
@@ -52,11 +55,15 @@ import { redact } from "./core/redact";
 import { CredentialStore, credentialsSchema, credentialOriginMatches } from "./core/credentials";
 import { loadFavicon } from "./core/favicon";
 import { diagnosticSnapshot, productLink } from "./core/diagnostics";
+import { AppLifecycle } from "./core/app-lifecycle";
+import { UpdateManager, hasMacUpdateSignature, updateDisabledReason } from "./core/updates";
+import { autoUpdater } from "electron-updater";
 
 app.setName("Freebo");
 app.setPath("userData", join(app.getPath("appData"), "Freebo"));
-if (process.env.FREEBO_DEV_URL && process.env.FREEBO_USER_DATA_DIR)
+if (!app.isPackaged && process.env.FREEBO_USER_DATA_DIR)
   app.setPath("userData", process.env.FREEBO_USER_DATA_DIR);
+let primaryInstance = false;
 const store = new SettingsStore(join(app.getPath("userData"), "settings.json"));
 const windowStateStore = new WindowStateStore(join(app.getPath("userData"), "window-state.json"));
 const credentials = new CredentialStore(join(app.getPath("userData"), "credentials.json"), {
@@ -98,6 +105,22 @@ let serverPopupAnchor: PopupAnchor | undefined;
 let serverPopupLoading: Promise<void> | undefined;
 let playbackPopupLoading: Promise<void> | undefined;
 let mainWindowClosing = false;
+let tray: Tray | undefined;
+let updates: UpdateManager | undefined;
+let updateTimer: ReturnType<typeof setInterval> | undefined;
+const lifecycle = new AppLifecycle(async () => {
+  clearInterval(updateTimer);
+  try {
+    await playback.flush();
+  } catch (error) {
+    log(`Playback shutdown failed: ${String(error)}`);
+  }
+  try {
+    await proxy.close();
+  } catch (error) {
+    log(`Media proxy shutdown failed: ${String(error)}`);
+  }
+});
 const popupReadiness = new Map<number, { promise: Promise<void>; resolve(): void }>();
 function waitForPopupRenderer(panel: BrowserWindow): Promise<void> {
   const id = panel.webContents.id;
@@ -151,6 +174,7 @@ function state(): AppState {
     playback: playback.state,
     platform: process.platform as Platform,
     version: app.getVersion(),
+    updates: updates?.state ?? { status: "disabled", reason: "development" },
     webStatus,
     webError,
     credentialsAvailable,
@@ -810,6 +834,7 @@ function setupIPC() {
     nativeTheme.themeSource = store.value.theme;
     updateChrome();
     buildMenu();
+    buildTrayMenu();
     publish();
     return state();
   });
@@ -1063,6 +1088,133 @@ function buildMenu() {
   );
 }
 
+function showMainWindow() {
+  if (lifecycle.isQuitting || !isLiveWindow(window)) return;
+  if (window.isMinimized()) window.restore();
+  window.show();
+  window.focus();
+  publish();
+}
+function showUpdates() {
+  showMainWindow();
+  if (lifecycle.isQuitting) return;
+  hidePlaybackPopup();
+  hideServerPopup();
+  shown = false;
+  page = "settings";
+  settingsPage = "about";
+  layout();
+  publish();
+}
+function buildTrayMenu() {
+  if (!tray || tray.isDestroyed()) return;
+  tray.setToolTip(t("brand"));
+  tray.setContextMenu(
+    Menu.buildFromTemplate([
+      { label: t("showFreebo"), click: showMainWindow },
+      {
+        label: t(updates?.state.status === "downloaded" ? "updateReadyMenu" : "softwareUpdates"),
+        click: showUpdates,
+      },
+      { type: "separator" },
+      { label: t("quit"), click: () => app.quit() },
+    ]),
+  );
+}
+function createTray() {
+  try {
+    const directory = join(
+      app.isPackaged ? process.resourcesPath : join(__dirname, "../resources"),
+      "tray",
+    );
+    const image = nativeImage.createFromPath(
+      join(directory, process.platform === "darwin" ? "trayTemplate.png" : "trayColor.png"),
+    );
+    if (image.isEmpty()) throw new Error("Tray icon is missing");
+    if (process.platform === "darwin") image.setTemplateImage(true);
+    tray = new Tray(image);
+    tray.on("click", showMainWindow);
+    tray.on("double-click", showMainWindow);
+    buildTrayMenu();
+  } catch (error) {
+    // A machine without a usable tray must retain a way to exit the app.
+    log(`Could not create tray: ${String(error)}`);
+  }
+}
+async function setupUpdates() {
+  const packageType = join(process.resourcesPath, "package-type");
+  const reason = updateDisabledReason({
+    packaged: app.isPackaged,
+    platform: process.platform as Platform,
+    portable: Boolean(process.env.PORTABLE_EXECUTABLE_FILE),
+    appImage: Boolean(process.env.APPIMAGE),
+    deb: existsSync(packageType) && readFileSync(packageType, "utf8").trim() === "deb",
+    macSigned:
+      process.platform !== "darwin" ||
+      (app.isPackaged && (await hasMacUpdateSignature(process.execPath))),
+  });
+  updates = new UpdateManager(reason ? undefined : autoUpdater, reason, log);
+  updates.on("install-failed", () => {
+    void lifecycle
+      .prepareToQuit()
+      .then(async () => {
+        if (!isLiveWindow(window)) {
+          app.quit();
+          return;
+        }
+        await proxy.open();
+        lifecycle.resumeAfterFailedUpdate();
+      })
+      .catch((error) => {
+        log(`Could not recover after update installation failed: ${String(error)}`);
+        app.quit();
+      });
+  });
+  let previousStatus = updates.state.status;
+  updates.on("change", () => {
+    publish();
+    buildTrayMenu();
+    if (
+      updates?.state.status === "downloaded" &&
+      previousStatus !== "downloaded" &&
+      Notification.isSupported()
+    ) {
+      const notification = new Notification({
+        title: t("brand"),
+        body: t("updateDownloaded", { version: updates.state.version ?? "" }),
+        icon: windowIcon,
+      });
+      notification.on("click", showUpdates);
+      notification.show();
+    }
+    previousStatus = updates!.state.status;
+  });
+  ipcMain.handle("app:check-updates", (event) => {
+    own(event);
+    if (!lifecycle.isQuitting) return updates?.check();
+  });
+  ipcMain.handle("app:install-update", (event) => {
+    own(event);
+    if (!lifecycle.isQuitting) return updates?.install(() => lifecycle.prepareToQuit());
+  });
+  ipcMain.handle("app:open-releases", (event) => {
+    own(event);
+    return shell.openExternal("https://github.com/elonzh/freebo/releases/latest");
+  });
+  buildTrayMenu();
+  publish();
+  if (!reason) {
+    void updates.check();
+    updateTimer = setInterval(
+      () => {
+        if (!lifecycle.isQuitting) void updates?.check();
+      },
+      6 * 60 * 60 * 1000,
+    );
+    updateTimer.unref();
+  }
+}
+
 app.on("web-contents-created", (_event, contents) => {
   contents.on("will-attach-webview", (event) => event.preventDefault());
 });
@@ -1072,6 +1224,12 @@ void app.whenReady().then(async () => {
       join(app.getPath("appData"), "Emby Free Play"),
       join(app.getPath("appData"), "emby-free-play"),
     ]).catch((error) => log(String(error)));
+  }
+  // Electron's instance lock can create userData. Preserve first-launch migration.
+  primaryInstance = app.requestSingleInstanceLock();
+  if (!primaryInstance) {
+    app.quit();
+    return;
   }
   try {
     await store.load();
@@ -1138,6 +1296,7 @@ void app.whenReady().then(async () => {
   window.on("close", saveWindowState);
   if (process.platform === "darwin") app.dock?.setIcon(windowIcon);
   buildMenu();
+  createTray();
   setupIPC();
   playback.on("state", () => {
     if (playback.state.status === "idle") proxy.clear();
@@ -1160,7 +1319,15 @@ void app.whenReady().then(async () => {
   });
   window.on("minimize", hidePlaybackPopup);
   window.on("minimize", hideServerPopup);
-  window.on("close", () => {
+  window.on("close", (event) => {
+    if (
+      !lifecycle.close(event, Boolean(tray && !tray.isDestroyed()), () => {
+        hidePlaybackPopup();
+        hideServerPopup();
+        window.hide();
+      })
+    )
+      return;
     mainWindowClosing = true;
     clearTimeout(popupBlurTimer);
     clearTimeout(serverPopupBlurTimer);
@@ -1183,18 +1350,16 @@ void app.whenReady().then(async () => {
   window.webContents.on("will-navigate", (event) => event.preventDefault());
   if (process.env.FREEBO_DEV_URL) await window.loadURL(process.env.FREEBO_DEV_URL);
   else await window.loadFile(join(__dirname, "../dist/index.html"));
+  await setupUpdates();
 });
-let quitting = false;
 app.on("before-quit", (event) => {
-  if (quitting) return;
-  event.preventDefault();
-  quitting = true;
-  void playback.flush().finally(async () => {
-    await proxy.close();
-    app.quit();
-  });
+  if (primaryInstance) lifecycle.beforeQuit(event, () => app.quit());
 });
-app.on("window-all-closed", () => app.quit());
-app.on("activate", () => {
-  if (window && !window.isDestroyed()) window.show();
+app.on("will-quit", () => {
+  tray?.destroy();
 });
+app.on("window-all-closed", () => {
+  if (lifecycle.isQuitting || !tray || tray.isDestroyed()) app.quit();
+});
+app.on("activate", showMainWindow);
+app.on("second-instance", showMainWindow);

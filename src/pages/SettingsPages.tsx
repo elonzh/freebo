@@ -20,6 +20,7 @@ import { ServerForm } from "../components/ServerForm";
 import { ServerManagementRow } from "../components/ServerManagementRow";
 import { BrandLogo, BrandName } from "../components/Brand";
 import { DiagnosticsPanel } from "../components/DiagnosticsPanel";
+import { UpdateSettings } from "../components/UpdateSettings";
 import { useApp } from "../runtime/context";
 import { useAppTranslation } from "../i18n";
 import { settingsPaths } from "../routing";
@@ -251,6 +252,7 @@ export function AboutPage() {
           </Button>
         </div>
       </div>
+      <UpdateSettings state={state} run={run} />
     </>
   );
 }
