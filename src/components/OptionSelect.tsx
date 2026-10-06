@@ -1,5 +1,6 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { cn } from "../lib/utils";
+import type { ReactNode } from "react";
 
 export function OptionSelect<T extends string>({
   value,
@@ -13,7 +14,7 @@ export function OptionSelect<T extends string>({
 }: {
   value: T;
   onValueChange: (value: T) => void;
-  options: readonly { value: T; label: string }[];
+  options: readonly { value: T; label: string; icon?: ReactNode }[];
   label: string;
   id?: string;
   name?: string;
@@ -36,6 +37,7 @@ export function OptionSelect<T extends string>({
       <SelectContent position="popper" align="end">
         {options.map((option) => (
           <SelectItem key={option.value} value={option.value}>
+            {option.icon}
             {option.label}
           </SelectItem>
         ))}

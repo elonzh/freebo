@@ -13,6 +13,9 @@ const auth: AuthContext = {
   token: "test-token",
   userId: "user1",
   deviceId: "desktop1",
+  clientName: "Emby Web",
+  clientVersion: "4.9.5.0",
+  deviceName: "Chrome",
 };
 const episode = (id: string): MediaItem => ({
   Id: id,
@@ -25,6 +28,17 @@ const response = (body: unknown) =>
   new Response(JSON.stringify(body), { headers: { "Content-Type": "application/json" } });
 
 describe("Emby video playback", () => {
+  it("preserves the web client's identity and stops requests after a permission rejection", async () => {
+    const fetcher = vi.fn<Fetcher>(async () => new Response(null, { status: 403 }));
+    const client = new EmbyClient(auth, fetcher);
+    await expect(client.item("a")).rejects.toThrow("connectionForbidden");
+    const request = new URL(fetcher.mock.calls[0][0]);
+    expect(request.searchParams.get("X-Emby-Client")).toBe(auth.clientName);
+    expect(request.searchParams.get("X-Emby-Client-Version")).toBe(auth.clientVersion);
+    expect(request.searchParams.get("X-Emby-Device-Name")).toBe(auth.deviceName);
+    await expect(client.item("a")).rejects.toThrow("connectionForbidden");
+    expect(fetcher).toHaveBeenCalledOnce();
+  });
   it("retains a reverse-proxy prefix, chosen source, resume, audio ordinals and external subtitle auth", async () => {
     const fetcher = vi.fn(async () =>
       response({

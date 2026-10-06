@@ -28,7 +28,7 @@ const serverSchema = z.object({
     .string()
     .regex(/^[a-z][a-z0-9-]*$/)
     .default("emby"),
-  name: z.string().trim().min(1).max(100),
+  name: z.string().trim().max(100),
   url: z.string().transform(normalizeServerUrl),
 });
 const playerSchema = z.object({

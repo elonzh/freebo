@@ -12,9 +12,9 @@ const requestSchema = z.object({
     token: z.string().min(1).max(4096),
     deviceId: id,
     serverId: id.optional(),
-    clientName: z.string().max(200).optional(),
-    clientVersion: z.string().max(200).optional(),
-    deviceName: z.string().max(200).optional(),
+    clientName: id,
+    clientVersion: id,
+    deviceName: id,
   }),
   intent: z.object({
     itemIds: z.array(id).min(1).max(10_000),

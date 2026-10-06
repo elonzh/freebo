@@ -52,7 +52,15 @@ describe("provider boundary and localization", () => {
       providerId: "emby",
     };
     const request = {
-      auth: { baseUrl: "https://example.test/media/emby", userId: "u", token: "t", deviceId: "d" },
+      auth: {
+        baseUrl: "https://example.test/media/emby",
+        userId: "u",
+        token: "t",
+        deviceId: "d",
+        clientName: "Emby Web",
+        clientVersion: "4.9.5.0",
+        deviceName: "Chrome",
+      },
       intent: { itemIds: ["a"] },
     };
     expect(embyProvider.parsePlayback(request, server).intent.itemIds).toEqual(["a"]);
@@ -71,7 +79,15 @@ describe("provider boundary and localization", () => {
   });
   it("treats blank video-version choices as unspecified while retaining ID validation", () => {
     const server = { id: "test", name: "Emby", url: "https://example.test", providerId: "emby" };
-    const auth = { baseUrl: "https://example.test/emby", userId: "u", token: "t", deviceId: "d" };
+    const auth = {
+      baseUrl: "https://example.test/emby",
+      userId: "u",
+      token: "t",
+      deviceId: "d",
+      clientName: "Emby Web",
+      clientVersion: "4.9.5.0",
+      deviceName: "Chrome",
+    };
     for (const mediaSourceId of [undefined, null, ""]) {
       const result = embyProvider.parsePlayback(
         { auth, intent: { itemIds: ["video"], mediaSourceId } },

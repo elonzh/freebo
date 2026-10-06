@@ -1,6 +1,6 @@
 import { cn } from "./lib/utils";
 import { Button } from "./components/ui/button";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import {
   AlertCircle,
   ArrowLeft,
@@ -17,13 +17,12 @@ import {
   Plus,
   RefreshCw,
   Settings2,
-  SlidersHorizontal,
-  Trash2,
   X,
   ExternalLink,
 } from "lucide-react";
 import type { AppPage, AppState, Server } from "./shared/types";
 import { translate, localizeError, resolveLocale } from "./shared/i18n";
+import { serverLabel } from "./shared/servers";
 import type { Translator, RunAction, SettingsPatch } from "./ui";
 import { PlayerSetup } from "./components/PlayerSetup";
 import { ServerForm } from "./components/ServerForm";
@@ -34,14 +33,15 @@ import { Input } from "./components/ui/input";
 import { Switch } from "./components/ui/switch";
 import { BrandLogo, BrandName } from "./components/Brand";
 import { SiteIcon } from "./components/SiteIcon";
-import { PlayerIcon, ServerIcon } from "./components/IntegrationIcon";
+import { PlayerIcon } from "./components/IntegrationIcon";
 import { ServerMenu } from "./components/ServerMenu";
+import { ServerManagementRow } from "./components/ServerManagementRow";
+import { ServerRow } from "./components/ServerRow";
 import { DiagnosticsPanel } from "./components/DiagnosticsPanel";
 
 const settingPages = [
   { id: "servers", icon: Globe2 },
   { id: "players", icon: MonitorPlay },
-  { id: "playback", icon: SlidersHorizontal },
   { id: "appearance", icon: Languages },
   { id: "diagnostics", icon: Bug },
   { id: "about", icon: Info },
@@ -59,6 +59,14 @@ export function App() {
   const api = window.desktop;
   const locale = state?.locale ?? resolveLocale("system", navigator.language);
   const theme = state?.settings.theme ?? "system";
+  const initialized = Boolean(state);
+  useLayoutEffect(() => {
+    if (!initialized || !api || !popupSurface) return;
+    const frame = requestAnimationFrame(() => {
+      void api.surfaceReady(surface as "servers" | "playback").catch(() => {});
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [initialized, api]);
   const applyState = useCallback((next: AppState) => {
     setState(next);
     if (popupSurface) return;
@@ -151,6 +159,10 @@ export function App() {
     go("settings", "servers");
     setEditing(add ? {} : null);
   };
+  const editServer = (server: Server) => {
+    go("settings", "servers");
+    setEditing(server);
+  };
   const update = (patch: SettingsPatch) =>
     void run("settings", (desktop) => desktop.updateSettings(patch));
   if (!api)
@@ -224,7 +236,7 @@ export function App() {
                 <div
                   className={`browser-tab server-tab ${page === "library" && active?.id === server.id ? "active" : ""}`}
                   key={server.id}
-                  title={server.name}
+                  title={serverLabel(server)}
                   onClick={() => open(server)}
                 >
                   <Button
@@ -233,7 +245,7 @@ export function App() {
                     aria-current={
                       page === "library" && active?.id === server.id ? "page" : undefined
                     }
-                    title={server.name}
+                    title={serverLabel(server)}
                     aria-busy={
                       state.browser.serverId === server.id && state.webStatus === "loading"
                     }
@@ -242,7 +254,7 @@ export function App() {
                       <LoaderCircle
                         size={15}
                         className="animate-spin"
-                        aria-label={t("loading", { name: server.name })}
+                        aria-label={t("loading", { name: serverLabel(server) })}
                       />
                     ) : (
                       <SiteIcon
@@ -250,13 +262,13 @@ export function App() {
                         providerId={server.providerId}
                       />
                     )}
-                    <span>{server.name}</span>
+                    <span>{serverLabel(server)}</span>
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon-xs"
                     className="tab-close"
-                    aria-label={t("closeTab", { name: server.name })}
+                    aria-label={t("closeTab", { name: serverLabel(server) })}
                     onClick={(event) => {
                       event.stopPropagation();
                       closeTab(server.id);
@@ -493,35 +505,22 @@ export function App() {
                 <h2>{t("servers")}</h2>
                 <div className="my-[30px]">
                   {state.settings.servers.map((server) => (
-                    <article
-                      className="flex items-center gap-[18px] border-b py-[18px]"
-                      key={server.id}
-                    >
-                      <ServerIcon providerId={server.providerId} className="mx-2 size-7" />
-                      <Button
-                        variant="ghost"
-                        className="h-auto min-w-0 flex-1 flex-col items-start gap-2 rounded-md p-2 text-left whitespace-normal [&_strong]:flex [&_strong]:items-center [&_strong]:gap-3 [&_strong]:text-sm [&_small]:text-[11px] [&_small]:font-normal [&_small]:text-muted-foreground [&>span]:text-xs [&>span]:text-muted-foreground [&>span]:wrap-anywhere"
-                        onClick={() => open(server)}
+                    <article key={server.id}>
+                      <ServerRow
+                        server={server}
+                        label={`${t("open")} · ${serverLabel(server)}`}
+                        onSelect={() => open(server)}
                       >
-                        <strong>
-                          {server.name}
-                          <small>
-                            {
-                              state.providers.find((provider) => provider.id === server.providerId)
-                                ?.name
-                            }
-                          </small>
-                        </strong>
-                        <span>{server.url}</span>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        disabled={pending === "open"}
-                        onClick={() => open(server)}
-                      >
-                        {t("open")}
-                        <ArrowRight size={15} />
-                      </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label={`${t("editServer")} · ${serverLabel(server)}`}
+                          title={t("editServer")}
+                          onClick={() => editServer(server)}
+                        >
+                          <Pencil size={16} />
+                        </Button>
+                      </ServerRow>
                     </article>
                   ))}
                 </div>
@@ -545,7 +544,7 @@ export function App() {
                 {currentPlayer ? (
                   <>
                     <PlayerIcon kind={currentPlayer.kind} className="size-5" />
-                    {t("playerFound", { name: currentPlayer.name })}
+                    {currentPlayer.name}
                   </>
                 ) : (
                   <>
@@ -558,14 +557,14 @@ export function App() {
           </div>
         ) : (
           <div className="grid min-h-full grid-cols-[216px_minmax(0,1fr)] max-[1000px]:grid-cols-[190px_minmax(0,1fr)] max-[650px]:grid-cols-[150px_minmax(0,1fr)]">
-            <aside className="sticky top-0 flex h-[calc(100vh-88px)] flex-col border-r px-3 py-6 max-[650px]:px-2 max-[650px]:py-5 [&>h1]:mx-4 [&>h1]:mb-6 [&>h1]:text-xl [&>nav]:flex [&>nav]:flex-col [&>nav]:gap-[3px]">
+            <aside className="sticky top-0 flex h-[calc(100vh-88px)] flex-col px-3 py-6 max-[650px]:px-2 max-[650px]:py-5 [&>h1]:mx-4 [&>h1]:mb-6 [&>h1]:text-xl [&>nav]:flex [&>nav]:flex-col [&>nav]:gap-[3px]">
               <h1>{t("settings")}</h1>
-              <nav aria-label={t("settings")}>
+              <nav className="-ml-3 max-[650px]:-ml-2" aria-label={t("settings")}>
                 {settingPages.map(({ id, icon: Icon }) => (
                   <Button
                     variant="ghost"
                     className={cn(
-                      "h-auto justify-start gap-3 rounded-l-none rounded-r-[22px] px-4 py-3 text-[13px] text-muted-foreground",
+                      "h-auto justify-start gap-3 rounded-l-none rounded-r-[22px] py-3 text-[13px] text-muted-foreground has-[>svg]:pl-6 max-[650px]:has-[>svg]:pl-5",
                       settingsPage === id && "bg-accent text-primary",
                     )}
                     key={id}
@@ -587,7 +586,17 @@ export function App() {
             <div className="mx-auto w-full max-w-[880px] px-10 pt-7 pb-10 max-[1000px]:p-7 max-[650px]:p-5">
               <section className="mb-6 scroll-mt-[30px]">
                 <div className="flex items-center justify-between gap-5 [&_p]:mt-[7px] [&>span]:text-xs [&>span]:text-muted-foreground">
-                  <h2>{t(settingsPage === "servers" ? "serverManagement" : settingsPage)}</h2>
+                  <h2>
+                    {t(
+                      settingsPage === "servers"
+                        ? editing
+                          ? editing.id
+                            ? "editServer"
+                            : "addServer"
+                          : "serverManagement"
+                        : settingsPage,
+                    )}
+                  </h2>
                   {settingsPage === "players" && (
                     <Button
                       variant="outline"
@@ -606,10 +615,7 @@ export function App() {
                   )}
                 </div>
                 {settingsPage === "players" && (
-                  <PlayerSetup state={state} t={t} run={run} update={update} />
-                )}
-                {settingsPage === "playback" && (
-                  <>
+                  <PlayerSetup state={state} t={t} run={run} update={update}>
                     <SettingRow title={t("autoNext")} description={t("autoNextDescription")}>
                       <Switch
                         aria-label={t("autoNext")}
@@ -624,7 +630,7 @@ export function App() {
                         onCheckedChange={(checked) => update({ fullscreen: checked })}
                       />
                     </SettingRow>
-                  </>
+                  </PlayerSetup>
                 )}
                 {settingsPage === "appearance" && (
                   <>
@@ -678,53 +684,28 @@ export function App() {
                       />
                     ) : (
                       <>
-                        {state.settings.servers.map((server) => (
-                          <SettingRow
-                            key={server.id}
-                            title={server.name}
-                            description={server.url}
-                            icon={<ServerIcon providerId={server.providerId} />}
-                          >
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              aria-label={`${t("editServer")} · ${server.name}`}
-                              onClick={() => setEditing(server)}
-                            >
-                              <Pencil size={16} />
-                            </Button>
-                            <Button variant="outline" onClick={() => open(server)}>
-                              {t("open")}
-                            </Button>
-                            <Button
-                              variant="outline"
-                              onClick={() =>
-                                void run("reset", async (desktop) => {
-                                  if (await desktop.confirm("sign-out", server.id))
-                                    return desktop.resetSession(server.id);
-                                })
+                        <ul>
+                          {state.settings.servers.map((server) => (
+                            <ServerManagementRow
+                              key={server.id}
+                              server={server}
+                              t={t}
+                              disabled={pending === "remove" || pending === "reset"}
+                              onEdit={() => setEditing(server)}
+                              onOpen={() => open(server)}
+                              onSignOut={() =>
+                                void run("reset", (desktop) => desktop.resetSession(server.id))
                               }
-                            >
-                              {t("signOut")}
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-destructive"
-                              aria-label={t("remove", { name: server.name })}
-                              onClick={() =>
+                              onRemove={() =>
                                 void run("remove", async (desktop) => {
-                                  if (await desktop.confirm("remove", server.id)) {
-                                    setTabs((current) => current.filter((id) => id !== server.id));
-                                    return desktop.removeServer(server.id);
-                                  }
+                                  const updated = await desktop.removeServer(server.id);
+                                  setTabs((current) => current.filter((id) => id !== server.id));
+                                  return updated;
                                 })
                               }
-                            >
-                              <Trash2 size={16} />
-                            </Button>
-                          </SettingRow>
-                        ))}
+                            />
+                          ))}
+                        </ul>
                         {!state.settings.servers.length && (
                           <p className="mt-2.5">{t("noServers")}</p>
                         )}
@@ -738,10 +719,7 @@ export function App() {
                 {settingsPage === "about" && (
                   <div className="mt-6 flex flex-col items-start gap-5 [&_p]:mt-1.5">
                     <BrandLogo width={230} />
-                    <div>
-                      <p>v{state.version} · Apache-2.0</p>
-                      <p>{t("supportedServer")}</p>
-                    </div>
+                    <p>v{state.version} · Apache-2.0</p>
                     <div className="flex flex-wrap gap-2">
                       <Button
                         variant="outline"
@@ -786,7 +764,7 @@ function SettingRow({
       <div className="flex items-center gap-3">
         {icon}
         <div className="min-w-0">
-          <h3>{title}</h3>
+          <h3 className="wrap-anywhere">{title}</h3>
           {description && <p>{description}</p>}
         </div>
       </div>

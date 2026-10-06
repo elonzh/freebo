@@ -6,8 +6,19 @@ import { normalizeServerUrl, SettingsStore } from "../electron/core/settings";
 import { candidatePlayers, manualPlayer } from "../electron/core/players";
 import { embyProvider } from "../electron/providers/emby";
 import { redact } from "../electron/core/redact";
+import { serverLabel } from "../src/shared/servers";
 
 describe("server and player setup", () => {
+  it("persists an empty optional name and uses the normalized address as its display label", async () => {
+    const file = join(await mkdtemp(join(tmpdir(), "freebo-settings-")), "settings.json");
+    const store = new SettingsStore(file);
+    const server = await store.upsertServer({ name: "   ", url: "https://home.test/" });
+    expect(server.name).toBe("");
+    expect(serverLabel(server)).toBe("https://home.test");
+    const reloaded = await new SettingsStore(file).load();
+    expect(reloaded.servers[0].name).toBe("");
+    expect(serverLabel({ ...server, name: "Home" })).toBe("Home");
+  });
   it("normalizes web links and reverse-proxy roots without credentials", () => {
     expect(
       embyProvider.normalizeUrl(" https://example.test:443/media/web/index.html#!/home "),

@@ -1,3 +1,4 @@
+import { serverLabel } from "../shared/servers";
 import { OptionSelect } from "./OptionSelect";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
@@ -16,6 +17,7 @@ import type { Translator, RunAction, SettingsPatch } from "../ui";
 import { PlayerSetup } from "./PlayerSetup";
 import { ServerForm } from "./ServerForm";
 import { BrandLogo } from "./Brand";
+import { PlayerIcon, ServerIcon } from "./IntegrationIcon";
 
 export function SetupGuide({
   state,
@@ -36,8 +38,7 @@ export function SetupGuide({
 }) {
   const fieldId = useId();
   const [step, setStep] = useState<"welcome" | "player" | "server" | "done">("welcome");
-  const [serverId, setServerId] = useState<string | undefined>(state.settings.servers[0]?.id);
-  const [adding, setAdding] = useState(state.settings.servers.length === 0);
+  const [serverId, setServerId] = useState<string>();
   const scanStarted = useRef(false);
   useEffect(() => {
     if (step !== "player" || state.settings.playerScanCompleted || scanStarted.current) return;
@@ -58,7 +59,7 @@ export function SetupGuide({
       return updated;
     });
   return (
-    <div className="mx-auto flex min-h-full max-w-[760px] flex-col px-9 py-8 max-[650px]:px-5 max-[650px]:py-6">
+    <div className="mx-auto flex min-h-full max-w-[760px] flex-col px-9 py-6 max-[650px]:px-5">
       {step === "welcome" ? (
         <section className="flex flex-1 flex-col items-center justify-center gap-[18px] py-8 text-center [&>h1]:mt-1 [&>p]:max-w-[48ch]">
           <BrandLogo width={280} />
@@ -89,7 +90,7 @@ export function SetupGuide({
       ) : (
         <>
           <ol
-            className="mb-8 flex justify-between gap-6 border-b pb-6 text-xs text-muted-foreground max-[650px]:gap-3 [&>li]:flex [&>li]:items-center [&>li]:gap-[9px] [&>li>span]:grid [&>li>span]:size-6 [&>li>span]:place-items-center [&>li>span]:rounded-full [&>li>span]:bg-(--address) [&>li>span]:tabular-nums"
+            className="mb-6 flex justify-between gap-6 border-b pb-4 text-xs text-muted-foreground max-[650px]:gap-3 [&>li]:flex [&>li>span]:grid [&>li]:items-center [&>li]:gap-[9px] [&>li>span]:size-6 [&>li>span]:place-items-center [&>li>span]:rounded-full [&>li>span]:bg-(--address) [&>li>span]:tabular-nums"
             aria-label={t("setup")}
           >
             {steps.map((label, index) => (
@@ -144,80 +145,57 @@ export function SetupGuide({
             )}
             {step === "server" && (
               <>
-                <h1>{t("setupServer")}</h1>
-                {adding ? (
-                  <ServerForm
-                    t={t}
-                    providers={state.providers}
-                    credentialsAvailable={state.credentialsAvailable}
-                    testConnection={testConnection}
-                    locale={state.locale}
-                    server={{}}
-                    saving={pending === "setup-server"}
-                    onSave={saveServer}
-                    submitLabel="nextStep"
-                    onCancel={() => {
-                      if (state.settings.servers.length) setAdding(false);
-                      else setStep("player");
-                    }}
-                  />
-                ) : (
-                  <div className="my-7 [&>button]:mt-4">
-                    <div className="grid gap-2.5">
-                      <Label htmlFor={`${fieldId}-server`}>{t("useExistingServer")}</Label>
-                      <OptionSelect
-                        id={`${fieldId}-server`}
-                        label={t("useExistingServer")}
-                        value={serverId ?? ""}
-                        onValueChange={setServerId}
-                        options={state.settings.servers.map((server) => ({
-                          value: server.id,
-                          label: server.name,
-                        }))}
-                        className="w-full"
-                      />
-                    </div>
-                    <Button variant="link" onClick={() => setAdding(true)}>
-                      {t("addServer")}
-                    </Button>
-                  </div>
-                )}
-                <div className="mt-7 flex flex-wrap items-center justify-end gap-3 [&>:first-child]:mr-auto">
+                <h1>{t("addServer")}</h1>
+                <ServerForm
+                  t={t}
+                  providers={state.providers}
+                  credentialsAvailable={state.credentialsAvailable}
+                  testConnection={testConnection}
+                  locale={state.locale}
+                  server={{}}
+                  saving={pending === "setup-server"}
+                  onSave={saveServer}
+                  submitLabel="nextStep"
+                  onCancel={() => setStep("player")}
+                />
+                <div className="flex flex-wrap items-center justify-end gap-3 [&>:first-child]:mr-auto">
                   <Button variant="outline" onClick={() => setStep("player")}>
                     <ArrowLeft size={15} />
                     {t("previousStep")}
                   </Button>
-                  {!adding && (
-                    <Button disabled={!serverId} onClick={() => setStep("done")}>
-                      {t("nextStep")}
-                      <ArrowRight size={15} />
-                    </Button>
-                  )}
-                  {adding && (
-                    <Button variant="link" onClick={() => setStep("done")}>
-                      {t("setupLater")}
-                    </Button>
-                  )}
+                  <Button variant="link" onClick={() => setStep("done")}>
+                    {t("setupLater")}
+                  </Button>
                 </div>
               </>
             )}
             {step === "done" && (
               <>
                 <h1>{t("setupComplete")}</h1>
-                <dl className="my-6 [&>div]:flex [&>div]:justify-between [&>div]:gap-6 [&>div]:border-b [&>div]:py-[18px] [&_dt]:flex [&_dt]:items-center [&_dt]:gap-2.5 [&_dt]:text-muted-foreground [&_dd]:font-medium">
+                <dl className="my-6 [&>div]:flex [&>div]:justify-between [&>div]:gap-6 [&>div]:border-b [&>div]:py-[18px] [&_dt]:flex [&_dt]:items-center [&_dt]:gap-2.5 [&_dt]:text-muted-foreground [&_dd]:flex [&_dd]:min-w-0 [&_dd]:items-center [&_dd]:gap-2.5 [&_dd]:font-medium">
                   <div>
                     <dt>
                       <MonitorPlay size={17} />
                       {t("defaultPlayer")}
                     </dt>
-                    <dd>{player?.name ?? t("playerNotConfigured")}</dd>
+                    <dd>
+                      {player && <PlayerIcon kind={player.kind} className="size-6" />}
+                      <span className="wrap-anywhere">
+                        {player?.name ?? t("playerNotConfigured")}
+                      </span>
+                    </dd>
                   </div>
                   <div>
                     <dt>
                       <Globe2 size={17} />
                       {t("servers")}
                     </dt>
-                    <dd>{server?.name ?? t("serverNotConfigured")}</dd>
+                    <dd>
+                      {server && <ServerIcon providerId={server.providerId} className="size-6" />}
+                      <span className="wrap-anywhere">
+                        {server ? serverLabel(server) : t("serverNotConfigured")}
+                      </span>
+                    </dd>
                   </div>
                 </dl>
                 <div className="mt-7 flex flex-wrap items-center justify-end gap-3 [&>:first-child]:mr-auto">

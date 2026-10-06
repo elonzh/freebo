@@ -53,7 +53,7 @@ export interface AuthContext {
   token: string;
   deviceId: string;
   serverId?: string;
-  clientName?: string;
-  clientVersion?: string;
-  deviceName?: string;
+  clientName: string;
+  clientVersion: string;
+  deviceName: string;
 }

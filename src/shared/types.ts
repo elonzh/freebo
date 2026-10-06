@@ -1,13 +1,7 @@
 export type PlayerKind = "iina" | "mpv" | "mpvnet" | "vlc" | "potplayer" | "mpc-hc" | "mpc-be";
 export type Platform = "darwin" | "win32" | "linux";
 export type AppPage = "home" | "library" | "settings" | "setup";
-export type SettingsPage =
-  | "players"
-  | "playback"
-  | "appearance"
-  | "servers"
-  | "diagnostics"
-  | "about";
+export type SettingsPage = "players" | "appearance" | "servers" | "diagnostics" | "about";
 export interface Server {
   id: string;
   name: string;
@@ -23,8 +17,8 @@ export interface ServerInput {
   name: string;
   url: string;
   providerId: string;
-  // undefined keeps the saved credentials; null forgets them.
-  credentials?: ServerCredentials | null;
+  // Omission keeps saved credentials when the server address is unchanged.
+  credentials?: ServerCredentials;
 }
 export interface ServerConnectionInput {
   id?: string;
@@ -35,6 +29,7 @@ export interface ServerConnectionInput {
 export interface ServerConnectionResult {
   serverName: string;
   authenticated: boolean;
+  logoutFailed?: boolean;
 }
 export interface Player {
   id: string;
@@ -196,7 +191,7 @@ export interface DesktopAPI {
     >,
   ): Promise<AppState>;
   control(control: PlaybackControl): Promise<void>;
-  confirm(action: "remove" | "sign-out", id: string): Promise<boolean>;
+  surfaceReady(surface: "servers" | "playback"): Promise<void>;
   navigate(action: "back" | "forward" | "reload" | "stop" | "home"): Promise<void>;
   resetSession(id: string): Promise<AppState>;
   openGuide(kind: PlayerKind): Promise<void>;

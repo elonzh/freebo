@@ -1,16 +1,20 @@
-import { useId, useState } from "react";
+import { useId, type ReactNode } from "react";
 import { cn } from "../lib/utils";
 import { Label } from "./ui/label";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "./ui/collapsible";
 import { Button } from "./ui/button";
-import { MonitorPlay, ChevronDown, ExternalLink, FolderOpen } from "lucide-react";
-import type { AppState, PlayerKind } from "../shared/types";
+import { Globe2, FolderOpen } from "lucide-react";
+import type { AppState, PlayerKind, Platform } from "../shared/types";
 import type { MessageKey } from "../shared/i18n";
 import type { Translator, RunAction, SettingsPatch } from "../ui";
 import { PlayerIcon } from "./IntegrationIcon";
 
-const guides: { kind: PlayerKind; name: string; platforms: string[]; description: MessageKey }[] = [
+const playerOptions: {
+  kind: PlayerKind;
+  name: string;
+  platforms: Platform[];
+  description: MessageKey;
+}[] = [
   { kind: "iina", name: "IINA", platforms: ["darwin"], description: "iinaGuide" },
   { kind: "mpvnet", name: "mpv.net", platforms: ["win32"], description: "mpvnetGuide" },
   { kind: "potplayer", name: "PotPlayer", platforms: ["win32"], description: "potplayerGuide" },
@@ -25,102 +29,106 @@ export function PlayerSetup({
   t,
   run,
   update,
+  children,
 }: {
   state: AppState;
   t: Translator;
   run: RunAction;
   update: (patch: SettingsPatch) => void;
+  children?: ReactNode;
 }) {
   const fieldId = useId();
-  const [guideOpen, setGuideOpen] = useState<boolean>();
-  const currentPlayer = state.settings.players.find(
-    (player) => player.id === state.settings.defaultPlayerId,
-  );
   return (
     <>
-      {state.settings.players.length ? (
-        <RadioGroup
-          className="mt-5 mb-4 gap-[5px]"
-          aria-label={t("defaultPlayer")}
-          value={currentPlayer?.id ?? ""}
-          onValueChange={(defaultPlayerId) => update({ defaultPlayerId })}
-        >
-          {state.settings.players.map((player) => (
-            <Label
-              htmlFor={`${fieldId}-${player.id}`}
-              className={cn(
-                "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-3.5",
-                currentPlayer?.id === player.id && "bg-accent",
-              )}
-              key={player.id}
-            >
-              <RadioGroupItem id={`${fieldId}-${player.id}`} value={player.id} />
-              <PlayerIcon kind={player.kind} />
-              <span className="min-w-0 flex-1 [&_strong]:block [&_strong]:text-sm [&_small]:mt-1.5 [&_small]:block [&_small]:text-[11px] [&_small]:font-normal [&_small]:text-muted-foreground [&_small]:wrap-anywhere">
-                <strong>{player.name}</strong>
-                <small>{player.executable}</small>
-              </span>
-              {currentPlayer?.id === player.id && (
-                <span className="flex-none! text-[11px] font-normal text-primary">
-                  {t("default")}
-                </span>
-              )}
-            </Label>
-          ))}
-        </RadioGroup>
-      ) : (
-        <div className="flex items-center gap-[17px] py-[18px] [&_svg]:text-muted-foreground [&_strong]:text-sm [&_p]:mt-[5px]">
-          <MonitorPlay size={27} />
-          <div>
-            <strong>{t("noPlayers")}</strong>
-            <p>{t("noPlayersDescription")}</p>
-          </div>
-        </div>
-      )}
-      <Collapsible
-        className="mt-[18px] border-y py-4"
-        open={guideOpen ?? !state.settings.players.length}
-        onOpenChange={setGuideOpen}
+      <RadioGroup
+        className="mt-5 mb-4 gap-0"
+        aria-label={t("defaultPlayer")}
+        value={state.settings.defaultPlayerId ?? ""}
+        onValueChange={(defaultPlayerId) => update({ defaultPlayerId })}
       >
-        <CollapsibleTrigger asChild>
-          <Button variant="ghost" className="group w-full justify-between px-0">
-            {t("installGuide")}
-            <ChevronDown className="size-4 transition-transform group-data-[state=open]:rotate-180" />
-          </Button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="divide-y">
-          {guides
-            .filter((guide) => guide.platforms.includes(state.platform))
-            .map((guide) => (
-              <article
-                className="flex items-center gap-2.5 py-[18px] last:pb-0 max-[650px]:flex-wrap [&>div]:flex-1 max-[650px]:[&>div]:basis-full [&_p]:mt-[5px] [&_p]:text-xs"
-                key={guide.kind}
-              >
-                <PlayerIcon kind={guide.kind} />
-                <div>
-                  <h3>{guide.name}</h3>
-                  <p>{t(guide.description)}</p>
+        {playerOptions
+          .filter((option) => option.platforms.includes(state.platform))
+          .flatMap((option) => {
+            const installed = state.settings.players.filter(
+              (player) => player.kind === option.kind && player.executable.trim(),
+            );
+            const choices = installed.length ? installed : [undefined];
+            return choices.map((player, index) => {
+              const rowId = `${fieldId}-${option.kind}-${index}`;
+              const selected = Boolean(player && player.id === state.settings.defaultPlayerId);
+              const details = (
+                <>
+                  {player ? (
+                    <RadioGroupItem id={rowId} value={player.id} />
+                  ) : (
+                    <span aria-hidden="true" className="size-4 shrink-0" />
+                  )}
+                  <PlayerIcon kind={option.kind} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-medium">{player?.name ?? option.name}</span>
+                    <span className="mt-1.5 block text-xs font-normal text-muted-foreground wrap-anywhere">
+                      {player?.executable ?? t(option.description)}
+                    </span>
+                  </span>
+                  {selected && (
+                    <span className="shrink-0 text-[11px] font-normal text-primary">
+                      {t("default")}
+                    </span>
+                  )}
+                </>
+              );
+              return (
+                <div
+                  className="flex items-center gap-2 border-b py-1"
+                  key={player?.id ?? option.kind}
+                >
+                  {player ? (
+                    <Label
+                      htmlFor={rowId}
+                      className={cn(
+                        "min-w-0 flex-1 cursor-pointer gap-3 rounded-lg px-3 py-3.5",
+                        selected && "bg-accent",
+                      )}
+                    >
+                      {details}
+                    </Label>
+                  ) : (
+                    <div className="flex min-w-0 flex-1 items-center gap-3 px-3 py-3.5">
+                      {details}
+                    </div>
+                  )}
+                  <div className="flex shrink-0 items-center gap-1">
+                    {!player && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`${t("download")} · ${option.name}`}
+                        title={t("download")}
+                        onClick={() =>
+                          void run("guide", (desktop) => desktop.openGuide(option.kind))
+                        }
+                      >
+                        <Globe2 size={17} />
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={t("manualPlayer", { name: option.name })}
+                      title={t("manualHint")}
+                      onClick={() =>
+                        void run("choose", (desktop) => desktop.choosePlayer(option.kind))
+                      }
+                    >
+                      <FolderOpen size={17} />
+                    </Button>
+                  </div>
                 </div>
-                <Button
-                  variant="outline"
-                  onClick={() => void run("guide", (desktop) => desktop.openGuide(guide.kind))}
-                >
-                  {t("download")}
-                  <ExternalLink size={14} />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={t("manualPlayer", { name: guide.name })}
-                  title={t("manualHint")}
-                  onClick={() => void run("choose", (desktop) => desktop.choosePlayer(guide.kind))}
-                >
-                  <FolderOpen size={17} />
-                </Button>
-              </article>
-            ))}
-        </CollapsibleContent>
-      </Collapsible>
+              );
+            });
+          })}
+      </RadioGroup>
+      {children}
     </>
   );
 }

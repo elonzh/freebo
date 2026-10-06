@@ -9,10 +9,12 @@ import type {
   PlaybackRecord,
 } from "../../../src/shared/types";
 import type { Fetcher, PlaybackClient } from "../types";
+import { ServerAccessError } from "../types";
 export type { Fetcher } from "../types";
 
 export class EmbyClient implements PlaybackClient {
   private pausedSessions = new Map<string, boolean>();
+  private accessError?: ServerAccessError;
   get identity(): string {
     return `emby:${this.auth.baseUrl}:${this.auth.userId}`;
   }
@@ -41,13 +43,14 @@ export class EmbyClient implements PlaybackClient {
     params: Record<string, string | number | boolean | undefined> = {},
     body?: unknown,
   ): Promise<T> {
+    if (this.accessError) throw this.accessError;
     const response = await this.fetcher(
       this.url(path, {
         ...params,
-        "X-Emby-Client": this.auth.clientName ?? "Freebo",
-        "X-Emby-Device-Name": this.auth.deviceName ?? "Desktop",
+        "X-Emby-Client": this.auth.clientName,
+        "X-Emby-Device-Name": this.auth.deviceName,
         "X-Emby-Device-Id": this.auth.deviceId,
-        "X-Emby-Client-Version": this.auth.clientVersion ?? "0.1.0",
+        "X-Emby-Client-Version": this.auth.clientVersion,
         "X-Emby-Token": this.auth.token,
       }),
       {
@@ -60,8 +63,20 @@ export class EmbyClient implements PlaybackClient {
         ...(body === undefined ? {} : { body: JSON.stringify(body) }),
         signal: AbortSignal.timeout(25_000),
         cache: "no-store",
+        redirect: "error",
       },
     );
+    if ([401, 403, 429].includes(response.status)) {
+      this.accessError = new ServerAccessError(
+        response.status === 401
+          ? "authExpired"
+          : response.status === 403
+            ? "connectionForbidden"
+            : "serverRateLimited",
+        response.status,
+      );
+      throw this.accessError;
+    }
     if (!response.ok)
       throw new Error(
         response.status === 401
@@ -177,7 +192,7 @@ export class EmbyClient implements PlaybackClient {
       {
         UserId: this.auth.userId,
         DeviceProfile: {
-          Name: "Freebo",
+          Name: this.auth.clientName,
           MaxStreamingBitrate: 1_000_000_000,
           DirectPlayProfiles: [{ Type: "Video" }],
           TranscodingProfiles: [],

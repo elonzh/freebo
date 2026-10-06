@@ -161,6 +161,8 @@
   overflow-x: auto;
   scrollbar-width: none;
   gap: 2px;
+  padding-inline: 9px;
+  margin-left: -9px;
   -webkit-app-region: no-drag;
 }
 .browser-tab {
@@ -192,6 +194,20 @@
 .browser-tab.active {
   background: var(--toolbar);
   color: var(--foreground);
+  z-index: 1;
+}
+.browser-tab.active::after {
+  content: "";
+  position: absolute;
+  inset: auto -9px 0;
+  height: 9px;
+  background:
+    radial-gradient(circle at top left, transparent 8.5px, var(--toolbar) 9px) left / 9px 9px
+      no-repeat,
+    radial-gradient(circle at top right, transparent 8.5px, var(--toolbar) 9px) right / 9px 9px
+      no-repeat;
+  pointer-events: none;
+  z-index: -1;
 }
 .browser-tab:hover {
   background: transparent;

@@ -17,8 +17,22 @@ import { join } from "node:path";
 import { release } from "node:os";
 import { writeFile, access, mkdir } from "node:fs/promises";
 import { constants } from "node:fs";
+import { createHash } from "node:crypto";
+import {
+  browserUserAgent,
+  browserDeviceName,
+  browserFetcher,
+  guardServerAccess,
+} from "./core/browser-http";
+import { isLiveWindow, sendWindowState } from "./core/window-lifecycle";
 import { z } from "zod";
 import { SettingsStore } from "./core/settings";
+import {
+  WindowStateStore,
+  defaultWindowSize,
+  minimumWindowSize,
+  fitWindowBounds,
+} from "./core/window-state";
 import { discoverPlayers, manualPlayer, playerGuides } from "./core/players";
 import { PlaybackManager } from "./core/playback-manager";
 import { ProviderRegistry } from "./providers/registry";
@@ -44,6 +58,7 @@ app.setPath("userData", join(app.getPath("appData"), "Freebo"));
 if (process.env.FREEBO_DEV_URL && process.env.FREEBO_USER_DATA_DIR)
   app.setPath("userData", process.env.FREEBO_USER_DATA_DIR);
 const store = new SettingsStore(join(app.getPath("userData"), "settings.json"));
+const windowStateStore = new WindowStateStore(join(app.getPath("userData"), "window-state.json"));
 const credentials = new CredentialStore(join(app.getPath("userData"), "credentials.json"), {
   available: async () => {
     if (!(await safeStorage.isAsyncEncryptionAvailable())) return false;
@@ -81,6 +96,22 @@ let serverPopup: BrowserWindow | undefined;
 type PopupAnchor = { x: number; y: number; width: number; height: number };
 let serverPopupAnchor: PopupAnchor | undefined;
 let serverPopupLoading: Promise<void> | undefined;
+let playbackPopupLoading: Promise<void> | undefined;
+let mainWindowClosing = false;
+const popupReadiness = new Map<number, { promise: Promise<void>; resolve(): void }>();
+function waitForPopupRenderer(panel: BrowserWindow): Promise<void> {
+  const id = panel.webContents.id;
+  let resolve!: () => void;
+  const promise = new Promise<void>((done) => {
+    resolve = done;
+  });
+  popupReadiness.set(id, { promise, resolve });
+  panel.once("closed", () => {
+    popupReadiness.get(id)?.resolve();
+    popupReadiness.delete(id);
+  });
+  return promise;
+}
 let serverPopupBlurTimer: ReturnType<typeof setTimeout> | undefined;
 let playbackServer: Server | undefined;
 let playbackClient: PlaybackClient | undefined;
@@ -132,8 +163,8 @@ function state(): AppState {
     providers: providers.list(),
     page,
     settingsPage,
-    playbackPopupOpen: playbackPopup?.isVisible() ?? false,
-    serverPopupOpen: serverPopup?.isVisible() ?? false,
+    playbackPopupOpen: isLiveWindow(playbackPopup) && playbackPopup.isVisible(),
+    serverPopupOpen: isLiveWindow(serverPopup) && serverPopup.isVisible(),
     playbackSource:
       playbackServer && playback.state.queue[playback.state.index]
         ? { serverId: playbackServer.id, itemId: playback.state.queue[playback.state.index].id }
@@ -148,9 +179,9 @@ function state(): AppState {
   };
 }
 function publish() {
+  if (mainWindowClosing || !isLiveWindow(window)) return;
   const snapshot = state();
-  for (const target of [window, playbackPopup, serverPopup])
-    if (target && !target.isDestroyed()) target.webContents.send("app:state", snapshot);
+  for (const target of [window, playbackPopup, serverPopup]) sendWindowState(target, snapshot);
 }
 function layout() {
   if (!guest || !window || window.isDestroyed()) return;
@@ -165,7 +196,7 @@ function layout() {
 }
 function own(event: IpcMainInvokeEvent) {
   const contents = [window, playbackPopup, serverPopup].find(
-    (target) => target && !target.isDestroyed() && event.sender === target.webContents,
+    (target) => isLiveWindow(target) && event.sender === target.webContents,
   )?.webContents;
   if (!contents || event.senderFrame !== contents.mainFrame)
     throw new UserFacingError("invalidOrigin");
@@ -195,9 +226,10 @@ async function performScan() {
 }
 function closeGuest() {
   if (!guest) return;
-  window.contentView.removeChildView(guest);
-  guest.webContents.close();
+  const view = guest;
   guest = undefined;
+  if (window && !window.isDestroyed()) window.contentView.removeChildView(view);
+  if (!view.webContents.isDestroyed()) view.webContents.close();
   activeServer = undefined;
   adapterStatus = undefined;
   bootstrapRetries = 0;
@@ -230,7 +262,7 @@ async function openServer(id: string, destination?: string) {
   webStatus = "loading";
   const ses = session.fromPartition(providers.partition(server));
   // Emby treats Electron as its own desktop client and requests a missing native plugin.
-  ses.setUserAgent(ses.getUserAgent().replace(/Electron\/[\d.]+\s*/g, ""));
+  ses.setUserAgent(browserUserAgent(ses.getUserAgent()));
   ses.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
   guest = new WebContentsView({
     webPreferences: {
@@ -243,6 +275,7 @@ async function openServer(id: string, destination?: string) {
     },
   });
   const view = guest;
+  const faviconFetcher = guardServerAccess(browserFetcher(ses, provider.entryUrl(server)));
   let faviconRevision = 0;
   let faviconKey: string | undefined;
   view.webContents.on("page-favicon-updated", (_event, favicons) => {
@@ -251,13 +284,7 @@ async function openServer(id: string, destination?: string) {
     if (key === faviconKey) return;
     faviconKey = key;
     const revision = ++faviconRevision;
-    void loadFavicon(favicons, (url, init) =>
-      ses.fetch(url, {
-        ...init,
-        credentials: "include",
-        headers: { "User-Agent": ses.getUserAgent(), Referer: `${server.url}/web/index.html` },
-      }),
-    ).then((icon) => {
+    void loadFavicon(favicons, faviconFetcher).then((icon) => {
       if (guest !== view || revision !== faviconRevision || view.webContents.isDestroyed()) return;
       if (icon) serverFavicons.set(server.id, { url: server.url, icon });
       else if (!favicons.length) serverFavicons.delete(server.id);
@@ -354,11 +381,11 @@ async function openServer(id: string, destination?: string) {
 
 function hidePlaybackPopup() {
   clearTimeout(popupBlurTimer);
-  playbackPopup?.hide();
+  if (isLiveWindow(playbackPopup)) playbackPopup.hide();
   publish();
 }
 function positionPlaybackPopup() {
-  if (!playbackPopup || !popupAnchor || !window || window.isDestroyed()) return;
+  if (!isLiveWindow(playbackPopup) || !popupAnchor || !isLiveWindow(window)) return;
   const bounds = window.getContentBounds();
   const area = screen.getDisplayMatching(window.getBounds()).workArea;
   const width = Math.min(420, area.width - 24);
@@ -388,6 +415,7 @@ async function togglePlaybackPopup(anchor: {
   width: number;
   height: number;
 }) {
+  if (mainWindowClosing || !isLiveWindow(window)) return;
   hideServerPopup();
   clearTimeout(popupBlurTimer);
   if (playbackPopup?.isVisible()) {
@@ -425,16 +453,21 @@ async function togglePlaybackPopup(anchor: {
       playbackPopup = undefined;
       publish();
     });
+    const ready = waitForPopupRenderer(panel);
     if (process.env.FREEBO_DEV_URL) {
       const url = new URL(process.env.FREEBO_DEV_URL);
       url.searchParams.set("surface", "playback");
-      await panel.loadURL(url.toString());
+      playbackPopupLoading = Promise.all([panel.loadURL(url.toString()), ready]).then(() => {});
     } else
-      await panel.loadFile(join(__dirname, "../dist/index.html"), {
-        query: { surface: "playback" },
-      });
+      playbackPopupLoading = Promise.all([
+        panel.loadFile(join(__dirname, "../dist/index.html"), {
+          query: { surface: "playback" },
+        }),
+        ready,
+      ]).then(() => {});
   }
-  if (window.isDestroyed() || playbackPopup.isDestroyed()) return;
+  await playbackPopupLoading;
+  if (mainWindowClosing || !isLiveWindow(window) || !isLiveWindow(playbackPopup)) return;
   positionPlaybackPopup();
   playbackPopup.show();
   publish();
@@ -443,11 +476,11 @@ async function togglePlaybackPopup(anchor: {
 function hideServerPopup() {
   clearTimeout(serverPopupBlurTimer);
   serverPopupAnchor = undefined;
-  serverPopup?.hide();
+  if (isLiveWindow(serverPopup)) serverPopup.hide();
   publish();
 }
 function positionServerPopup() {
-  if (!serverPopup || !serverPopupAnchor || !window || window.isDestroyed()) return;
+  if (!isLiveWindow(serverPopup) || !serverPopupAnchor || !isLiveWindow(window)) return;
   const bounds = window.getContentBounds();
   const area = screen.getDisplayMatching(window.getBounds()).workArea;
   const width = Math.min(360, area.width - 24);
@@ -474,6 +507,7 @@ function positionServerPopup() {
   });
 }
 async function toggleServerPopup(anchor: PopupAnchor) {
+  if (mainWindowClosing || !isLiveWindow(window)) return;
   clearTimeout(serverPopupBlurTimer);
   if (serverPopupAnchor) {
     hideServerPopup();
@@ -508,7 +542,7 @@ async function toggleServerPopup(anchor: PopupAnchor) {
       if (input.type === "keyDown" && input.key === "Escape") {
         event.preventDefault();
         hideServerPopup();
-        window.focus();
+        if (isLiveWindow(window)) window.focus();
       }
     });
     panel.on("blur", () => {
@@ -519,17 +553,26 @@ async function toggleServerPopup(anchor: PopupAnchor) {
       serverPopupAnchor = undefined;
       publish();
     });
+    const ready = waitForPopupRenderer(panel);
     if (process.env.FREEBO_DEV_URL) {
       const url = new URL(process.env.FREEBO_DEV_URL);
       url.searchParams.set("surface", "servers");
-      serverPopupLoading = panel.loadURL(url.toString());
+      serverPopupLoading = Promise.all([panel.loadURL(url.toString()), ready]).then(() => {});
     } else
-      serverPopupLoading = panel.loadFile(join(__dirname, "../dist/index.html"), {
-        query: { surface: "servers" },
-      });
+      serverPopupLoading = Promise.all([
+        panel.loadFile(join(__dirname, "../dist/index.html"), {
+          query: { surface: "servers" },
+        }),
+        ready,
+      ]).then(() => {});
   }
   await serverPopupLoading;
-  if (window.isDestroyed() || !serverPopup || serverPopup.isDestroyed() || !serverPopupAnchor)
+  if (
+    mainWindowClosing ||
+    !isLiveWindow(window) ||
+    !isLiveWindow(serverPopup) ||
+    !serverPopupAnchor
+  )
     return;
   positionServerPopup();
   serverPopup.show();
@@ -549,6 +592,14 @@ function setupIPC() {
       }
     });
   handle("app:state", () => state());
+  ipcMain.handle("app:surface-ready", (event, input) => {
+    own(event);
+    const surface = z.enum(["servers", "playback"]).parse(input);
+    const panel = surface === "servers" ? serverPopup : playbackPopup;
+    if (!isLiveWindow(panel) || panel.webContents !== event.sender)
+      throw new UserFacingError("invalidOrigin");
+    popupReadiness.get(event.sender.id)?.resolve();
+  });
   handle("app:error-visible", (input) => {
     errorVisible = z.boolean().parse(input);
     layout();
@@ -560,7 +611,7 @@ function setupIPC() {
         name: z.string(),
         url: z.string(),
         providerId: z.string(),
-        credentials: credentialsSchema.nullable().optional(),
+        credentials: credentialsSchema.optional(),
       })
       .parse(input);
     const provider = providers.get(server.providerId);
@@ -608,26 +659,20 @@ function setupIPC() {
     const ses = session.fromPartition(
       registered ? providers.partition(registered) : "freebo-connection-test",
     );
-    ses.setUserAgent(ses.getUserAgent().replace(/Electron\/[\d.]+\s*/g, ""));
+    ses.setUserAgent(browserUserAgent(ses.getUserAgent()));
     return provider.testConnection(
       url,
       request.credentials,
-      (input, init) => {
-        const headers = new Headers(init?.headers);
-        headers.set("User-Agent", ses.getUserAgent());
-        headers.set("Origin", new URL(url).origin);
-        headers.set(
-          "Referer",
-          provider.entryUrl({
-            id: registered?.id ?? "connection-test",
-            name: "",
-            url,
-            providerId: provider.id,
-          }),
-        );
-        return ses.fetch(input, { ...init, credentials: "include", headers });
+      browserFetcher(
+        ses,
+        provider.entryUrl({ id: "connection-test", name: "", url, providerId: provider.id }),
+      ),
+      {
+        deviceId: createHash("sha256")
+          .update(`${app.getPath("userData")}\0${url}`)
+          .digest("hex"),
+        deviceName: browserDeviceName(ses.getUserAgent()),
       },
-      app.getVersion(),
     );
   });
   handle("app:remove-server", async (input) => {
@@ -656,9 +701,7 @@ function setupIPC() {
     const request = z
       .object({
         page: z.enum(["home", "library", "settings", "setup"]),
-        section: z
-          .enum(["players", "playback", "appearance", "servers", "diagnostics", "about"])
-          .optional(),
+        section: z.enum(["players", "appearance", "servers", "diagnostics", "about"]).optional(),
       })
       .parse(input);
     page = request.page;
@@ -803,21 +846,6 @@ function setupIPC() {
     publish();
     return state();
   });
-  handle("app:confirm", async (input) => {
-    const { action, id } = z
-      .object({ action: z.enum(["remove", "sign-out"]), id: idSchema })
-      .parse(input);
-    const server = store.value.servers.find((s) => s.id === id);
-    if (!server) throw new UserFacingError("serverMissing");
-    const result = await dialog.showMessageBox(window, {
-      type: "question",
-      message: t(action === "remove" ? "removeConfirm" : "signOutConfirm", { name: server.name }),
-      buttons: [t("cancel"), t(action === "remove" ? "remove" : "signOut", { name: server.name })],
-      defaultId: 0,
-      cancelId: 0,
-    });
-    return result.response === 1;
-  });
   handle("app:guide", async (input) => {
     await shell.openExternal(playerGuides[kindSchema.parse(input)].url);
   });
@@ -889,7 +917,6 @@ function setupIPC() {
     const provider = providers.get(activeServer.providerId);
     const request = provider.parsePlayback(input, activeServer);
     const { intent } = request;
-    const registered = new URL(activeServer.url);
     const player = store.value.players.find((p) => p.id === store.value.defaultPlayerId);
     if (!player) {
       shown = false;
@@ -907,16 +934,9 @@ function setupIPC() {
     const server = activeServer;
     playbackServer = server;
     const browserSession = guest.webContents.session;
+    const fetch = guardServerAccess(browserFetcher(browserSession, guest.webContents.getURL()));
     const fetcher = async (url: string, init?: RequestInit) => {
-      const headers = new Headers(init?.headers);
-      headers.set("User-Agent", browserSession.getUserAgent());
-      headers.set("Origin", registered.origin);
-      headers.set("Referer", provider.entryUrl(server));
-      const response = await browserSession.fetch(url, {
-        ...init,
-        credentials: "include",
-        headers,
-      });
+      const response = await fetch(url, init);
       if (!response.ok) {
         const message = `Emby API ${init?.method ?? "GET"} ${new URL(url).pathname}: ${response.status}, ${response.headers.get("content-type")}, ${response.headers.get("cf-mitigated") ?? ""}`;
         log(message);
@@ -1066,11 +1086,14 @@ void app.whenReady().then(async () => {
   await proxy.open();
   nativeTheme.themeSource = store.value.theme;
   page = store.value.setupCompleted ? "home" : "setup";
+  const savedWindow = windowStateStore.load();
+  const bounds = savedWindow
+    ? fitWindowBounds(savedWindow.bounds, screen.getDisplayMatching(savedWindow.bounds).workArea)
+    : defaultWindowSize;
   window = new BrowserWindow({
-    width: 1280,
-    height: 850,
-    minWidth: 820,
-    minHeight: 600,
+    ...bounds,
+    minWidth: minimumWindowSize.width,
+    minHeight: minimumWindowSize.height,
     title: t("brand"),
     icon: windowIcon,
     titleBarStyle: "hidden",
@@ -1091,6 +1114,26 @@ void app.whenReady().then(async () => {
       nodeIntegration: false,
     },
   });
+  if (savedWindow?.maximized) window.maximize();
+  let windowStateTimer: ReturnType<typeof setTimeout> | undefined;
+  const saveWindowState = () => {
+    clearTimeout(windowStateTimer);
+    if (window.isDestroyed()) return;
+    try {
+      windowStateStore.save({ bounds: window.getNormalBounds(), maximized: window.isMaximized() });
+    } catch {
+      log("Could not save window geometry");
+    }
+  };
+  const scheduleWindowState = () => {
+    clearTimeout(windowStateTimer);
+    windowStateTimer = setTimeout(saveWindowState, 400);
+  };
+  window.on("resize", scheduleWindowState);
+  window.on("move", scheduleWindowState);
+  window.on("maximize", scheduleWindowState);
+  window.on("unmaximize", scheduleWindowState);
+  window.on("close", saveWindowState);
   if (process.platform === "darwin") app.dock?.setIcon(windowIcon);
   buildMenu();
   setupIPC();
@@ -1115,9 +1158,15 @@ void app.whenReady().then(async () => {
   });
   window.on("minimize", hidePlaybackPopup);
   window.on("minimize", hideServerPopup);
-  window.on("closed", () => {
-    playbackPopup?.destroy();
-    serverPopup?.destroy();
+  window.on("close", () => {
+    mainWindowClosing = true;
+    clearTimeout(popupBlurTimer);
+    clearTimeout(serverPopupBlurTimer);
+    popupAnchor = undefined;
+    serverPopupAnchor = undefined;
+    closeGuest();
+    if (isLiveWindow(playbackPopup)) playbackPopup.destroy();
+    if (isLiveWindow(serverPopup)) serverPopup.destroy();
   });
   window.on("enter-full-screen", () => {
     layout();

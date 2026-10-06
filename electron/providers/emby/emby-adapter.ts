@@ -92,6 +92,16 @@ export function installEmbyAdapter(): void {
           connection.getApiClient(options.serverId ?? first?.ServerId) ??
           connection.currentApiClient();
         if (!api) return original(options, ...rest);
+        const clientIdentity = {
+          clientName: api.appName?.(),
+          clientVersion: api.appVersion?.(),
+          deviceName: api.deviceName?.(),
+        };
+        // Keep the web player's own behavior if it cannot supply its real identity.
+        if (
+          Object.values(clientIdentity).some((value) => typeof value !== "string" || !value.trim())
+        )
+          return original(options, ...rest);
         let ids =
           options.ids ??
           items.map((item: any) => (item.Type === "Chapter" ? item.ItemId : item.Id));
@@ -118,9 +128,7 @@ export function installEmbyAdapter(): void {
             token: api.accessToken(),
             deviceId: api.deviceId(),
             serverId: api.serverId?.() ?? options.serverId ?? first?.ServerId,
-            clientName: api.appName?.(),
-            clientVersion: api.appVersion?.(),
-            deviceName: api.deviceName?.(),
+            ...clientIdentity,
           },
           intent: {
             itemIds: ids,

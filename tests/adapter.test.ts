@@ -18,6 +18,9 @@ describe("real Emby playback option shapes", () => {
       getCurrentUserId: () => "u",
       accessToken: () => "test",
       deviceId: () => "d",
+      appName: () => "Emby Web",
+      appVersion: () => "4.9.5.0",
+      deviceName: () => "Chrome",
       serverId: () => "remote-server",
       ensureWebSocket: vi.fn(),
     };
@@ -50,6 +53,11 @@ describe("real Emby playback option shapes", () => {
       }),
     );
     expect(api.ensureWebSocket).toHaveBeenCalledTimes(1);
+    api.appVersion = () => "";
+    await manager.play({ items: [{ Id: "v", Type: "Movie" }] });
+    expect(original).toHaveBeenCalledTimes(1);
+    expect(request).toHaveBeenCalledTimes(1);
+    api.appVersion = () => "4.9.5.0";
     await manager.play({
       items: [{ Id: "v", Type: "Movie", MediaSourceId: "item-version" }],
       mediaSourceId: "",
@@ -60,6 +68,6 @@ describe("real Emby playback option shapes", () => {
       }),
     );
     await manager.play({ items: [{ Id: "music", Type: "Audio" }] });
-    expect(original).toHaveBeenCalledTimes(1);
+    expect(original).toHaveBeenCalledTimes(2);
   });
 });

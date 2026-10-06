@@ -8,6 +8,7 @@ import type {
   PreparedMedia,
 } from "../../src/shared/types";
 import type { PlaybackClient } from "../providers/types";
+import { ServerAccessError } from "../providers/types";
 import { UserFacingError, errorToken } from "../../src/shared/i18n";
 import { PlayerSession, title, type PlayerSnapshot, type PlaybackSession } from "./player-session";
 import { WindowsPlayerSession } from "./windows-player-session";
@@ -194,6 +195,7 @@ export class PlaybackManager extends EventEmitter {
             return;
           } catch (error) {
             failure = redact(error instanceof Error ? error.message : error);
+            if (error instanceof ServerAccessError) break;
             if (attempt < 2)
               await new Promise((resolve) => setTimeout(resolve, 1_000 * (attempt + 1)));
           }

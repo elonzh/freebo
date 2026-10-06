@@ -8,6 +8,16 @@ import type {
   ServerCredentials,
   ServerConnectionResult,
 } from "../../src/shared/types";
+import { UserFacingError, type MessageKey } from "../../src/shared/i18n";
+export class ServerAccessError extends UserFacingError {
+  constructor(key: MessageKey, code: number) {
+    super(key, { code });
+  }
+}
+export interface BrowserClientIdentity {
+  deviceId: string;
+  deviceName: string;
+}
 export type Fetcher = (input: string, init?: RequestInit) => Promise<Response>;
 /** A server adapter owns authentication, its wire types and progress reporting. */
 export interface PlaybackClient {
@@ -37,7 +47,7 @@ export interface MediaServerProvider {
     url: string,
     credentials: ServerCredentials | undefined,
     fetcher: Fetcher,
-    version: string,
+    identity: BrowserClientIdentity,
   ): Promise<ServerConnectionResult>;
   entryUrl(server: Server, home?: boolean): string;
   parsePlayback(

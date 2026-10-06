@@ -1,9 +1,11 @@
+import { serverLabel } from "../shared/servers";
 import { Plus, X } from "lucide-react";
 import type { AppState } from "../shared/types";
 import type { RunAction, Translator } from "../ui";
 import { cn } from "../lib/utils";
 import { Button } from "./ui/button";
 import { ServerIcon } from "./IntegrationIcon";
+import { PopupSurface } from "./PopupSurface";
 
 export function ServerMenu({
   state,
@@ -17,8 +19,12 @@ export function ServerMenu({
   error: string;
 }) {
   return (
-    <main className="flex h-screen flex-col bg-popover text-popover-foreground">
-      <header className="flex items-center justify-between px-4 py-2">
+    <PopupSurface
+      open={state.serverPopupOpen}
+      onClose={() => void run("close", (desktop) => desktop.hideServerPopup())}
+      className="bg-popover text-popover-foreground"
+    >
+      <header className="flex shrink-0 items-center justify-between px-4 py-2">
         <h2 className="text-sm">{t("chooseServer")}</h2>
         <Button
           variant="ghost"
@@ -30,10 +36,9 @@ export function ServerMenu({
         </Button>
       </header>
       <nav className="min-h-0 flex-1 overflow-y-auto px-2 pb-2" aria-label={t("servers")}>
-        {state.settings.servers.map((server, index) => (
+        {state.settings.servers.map((server) => (
           <Button
             variant="ghost"
-            autoFocus={index === 0}
             key={server.id}
             className={cn(
               "h-auto w-full justify-start gap-3 px-3 py-3 text-left",
@@ -43,10 +48,12 @@ export function ServerMenu({
           >
             <ServerIcon providerId={server.providerId} className="size-6" />
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm">{server.name}</span>
-              <span className="mt-1 block truncate text-xs font-normal text-muted-foreground">
-                {server.url}
-              </span>
+              <span className="block truncate text-sm">{serverLabel(server)}</span>
+              {server.name && (
+                <span className="mt-1 block truncate text-xs font-normal text-muted-foreground">
+                  {server.url}
+                </span>
+              )}
             </span>
           </Button>
         ))}
@@ -57,10 +64,9 @@ export function ServerMenu({
           {error}
         </p>
       )}
-      <footer className="border-t p-2">
+      <footer className="shrink-0 border-t p-2">
         <Button
           variant="ghost"
-          autoFocus={!state.settings.servers.length}
           className="w-full justify-start gap-3"
           onClick={() => void run("add", (desktop) => desktop.addServer())}
         >
@@ -68,6 +74,6 @@ export function ServerMenu({
           {t("addServer")}
         </Button>
       </footer>
-    </main>
+    </PopupSurface>
   );
 }

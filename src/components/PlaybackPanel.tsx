@@ -1,7 +1,8 @@
+import { serverLabel } from "../shared/servers";
 import { Slider } from "./ui/slider";
 import { cn } from "../lib/utils";
 import { Button } from "./ui/button";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   AlertCircle,
   ListVideo,
@@ -17,6 +18,7 @@ import type { AppState } from "../shared/types";
 import { localizeError } from "../shared/i18n";
 import { formatTime, type Translator, type RunAction } from "../ui";
 import { ServerIcon } from "./IntegrationIcon";
+import { PopupSurface } from "./PopupSurface";
 
 export function PlaybackPanel({
   state,
@@ -36,16 +38,13 @@ export function PlaybackPanel({
   );
   const playable = playback.status === "playing" || playback.status === "paused";
   const problem = error || playback.error || playback.syncError;
-  useEffect(() => {
-    const close = (event: KeyboardEvent) => {
-      if (event.key === "Escape") void window.desktop?.hidePlaybackPopup();
-    };
-    document.addEventListener("keydown", close);
-    return () => document.removeEventListener("keydown", close);
-  }, []);
   return (
-    <main className="flex h-screen flex-col overflow-hidden bg-card">
-      <header className="flex items-center justify-between gap-3 border-b py-3 pr-4 pl-5 [&>h1]:flex [&>h1]:items-center [&>h1]:gap-2.5 [&>h1]:text-[15px]">
+    <PopupSurface
+      open={state.playbackPopupOpen}
+      onClose={() => void run("close-popup", (desktop) => desktop.hidePlaybackPopup())}
+      className="bg-card"
+    >
+      <header className="flex shrink-0 items-center justify-between gap-3 border-b py-3 pr-4 pl-5 [&>h1]:flex [&>h1]:items-center [&>h1]:gap-2.5 [&>h1]:text-[15px]">
         <h1>
           <ListVideo size={18} />
           {t("playbackInfo")}
@@ -89,7 +88,7 @@ export function PlaybackPanel({
                   size="icon"
                   className="-mt-1.5 shrink-0"
                   aria-label={t("openPlayingItem")}
-                  title={`${t("openPlayingItem")} · ${server.name}`}
+                  title={`${t("openPlayingItem")} · ${serverLabel(server)}`}
                   onClick={() => void run("playing-item", (desktop) => desktop.openPlaybackItem())}
                 >
                   <ServerIcon providerId={server.providerId} className="size-6" />
@@ -210,7 +209,7 @@ export function PlaybackPanel({
           <p>{t("noPlaybackDescription")}</p>
         </section>
       )}
-    </main>
+    </PopupSurface>
   );
 }
 function MonitorPlaceholder() {

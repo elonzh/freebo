@@ -79,20 +79,24 @@ it("restores the saved account and masked password and preserves them on a norma
   await submit();
   expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ credentials }));
 });
-it("always shows both fields without a switch and forgets credentials only when requested", async () => {
+it("preserves saved credentials when both fields are emptied and has no clear-account action", async () => {
   const onSave = await render();
   expect(container.querySelector('[role="switch"]')).toBeNull();
+  expect(container.textContent).not.toContain("清除已保存的账号密码");
   await act(async () => {
-    [...container.querySelectorAll("button")]
-      .find((button) => button.textContent === translate("zh", "forgetCredentials"))!
-      .click();
+    for (const input of container.querySelectorAll<HTMLInputElement>(
+      'input[autocomplete="username"], input[autocomplete="current-password"]',
+    )) {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(input, "");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    }
   });
   expect(container.querySelector<HTMLInputElement>('input[type="password"]')?.value).toBe("");
   expect(container.querySelector<HTMLInputElement>('input[autocomplete="username"]')?.value).toBe(
     "",
   );
   await submit();
-  expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ credentials: null }));
+  expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ credentials: undefined }));
 });
 it("tests the current account without saving it and displays the result", async () => {
   const testConnection = vi.fn(async () => ({ serverName: "Test", authenticated: true }));
@@ -107,7 +111,32 @@ it("tests the current account without saving it and displays the result", async 
     credentials,
   });
   expect(onSave).not.toHaveBeenCalled();
-  expect(container.querySelector('[role="status"]')?.textContent).toContain("账号密码验证成功");
+  expect(container.querySelector('[role="status"]')?.textContent).toBe("连接成功");
+});
+it("submits a blank optional server name without inserting a default", async () => {
+  const onSave = await render();
+  const name = container.querySelector<HTMLInputElement>('input[maxlength="100"]')!;
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(name, "   ");
+    name.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  await submit();
+  expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ name: "", credentials }));
+});
+it("shows successful authentication as success even when test logout is rejected", async () => {
+  await render(
+    undefined,
+    vi.fn(async () => ({ serverName: "Test", authenticated: true, logoutFailed: true })),
+  );
+  await act(async () =>
+    container.querySelector<HTMLButtonElement>('[name="test-connection"]')!.click(),
+  );
+  const status = container.querySelector('[role="status"]')!;
+  expect(status.textContent).toBe("连接成功");
+  expect(status.classList.contains("text-destructive")).toBe(false);
+  expect(status.classList.contains("text-primary")).toBe(true);
+  expect(container.querySelector('[role="alert"]')).toBeNull();
+  expect(container.textContent).toContain("测试会话未注销。");
 });
 it("can test server reachability with empty credential fields and shows a localized error", async () => {
   const testConnection = vi.fn(async () => {
@@ -120,20 +149,16 @@ it("can test server reachability with empty credential fields and shows a locali
   );
   expect(testConnection).toHaveBeenCalledWith(expect.objectContaining({ credentials: undefined }));
   expect(container.querySelector('[role="alert"]')?.textContent).toContain("账号或密码不正确");
+  expect(container.querySelector('[role="alert"]')?.classList.contains("text-destructive")).toBe(
+    true,
+  );
 });
-it("does not erase saved credentials after a keychain read fails unless the user requests it", async () => {
+it("does not erase saved credentials after a keychain read fails", async () => {
   const onSave = await render(async () => {
     throw new Error("Keychain unavailable");
   });
   expect(container.querySelector('[role="alert"]')?.textContent).toContain("Keychain unavailable");
   await submit();
   expect(onSave).toHaveBeenLastCalledWith(expect.objectContaining({ credentials: undefined }));
-  const forget = [...container.querySelectorAll("button")].find(
-    (button) => button.textContent === translate("zh", "forgetCredentials"),
-  )!;
-  await act(async () => {
-    forget.click();
-  });
-  await submit();
-  expect(onSave).toHaveBeenLastCalledWith(expect.objectContaining({ credentials: null }));
+  expect(container.textContent).not.toContain("清除已保存的账号密码");
 });

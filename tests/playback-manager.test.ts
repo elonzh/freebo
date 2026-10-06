@@ -2,6 +2,7 @@ import { EventEmitter } from "node:events";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { PlaybackManager } from "../electron/core/playback-manager";
 import type { PlaybackClient } from "../electron/providers/types";
+import { ServerAccessError } from "../electron/providers/types";
 import { PlayerSession } from "../electron/core/player-session";
 import type { PreparedMedia, Settings, Player } from "../src/shared/types";
 const player: Player = {
@@ -160,6 +161,14 @@ describe("playback lifecycle", () => {
       ["stop", 101, false],
     ]);
     expect(manager.state.sync).toMatchObject({ status: "success", event: "stop" });
+  });
+  it("does not retry progress reporting when the server rejects access", async () => {
+    const { manager, session, client, report } = setup();
+    report.mockRejectedValue(new ServerAccessError("connectionForbidden", 403));
+    await manager.play(client, { itemIds: ["a"] }, player, settings);
+    session.emit("snapshot", { index: 0, position: 42, duration: 200, paused: false });
+    await vi.waitFor(() => expect(manager.state.sync?.status).toBe("error"));
+    expect(report).toHaveBeenCalledOnce();
   });
   it("retains a redacted failure after retries for diagnostics", async () => {
     vi.useFakeTimers();
