@@ -50,7 +50,7 @@ afterEach(async () => {
 });
 
 describe("saved server credentials", () => {
-  it("encrypts both fields outside settings, restores after restart, and restricts file permissions", async () => {
+  it("encrypts both fields outside settings, restores after restart, and restricts POSIX file permissions", async () => {
     const { path, crypto, store, directory } = await setup();
     const settings = new SettingsStore(join(directory, "settings.json"));
     const input = { ...server, credentials: login };
@@ -61,7 +61,8 @@ describe("saved server credentials", () => {
       expect(content).not.toContain(login.password);
       expect(content).not.toContain(login.username);
     }
-    expect((await stat(path)).mode & 0o777).toBe(0o600);
+    // Windows does not implement POSIX owner/group permissions.
+    if (process.platform !== "win32") expect((await stat(path)).mode & 0o777).toBe(0o600);
     const restored = new CredentialStore(path, crypto);
     await restored.load();
     expect(await restored.get(server)).toEqual(login);
