@@ -1,12 +1,25 @@
 # Freebo
 
-[中文](README.md) · 福瑞播
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/brand/freebo/svg/logo-on-dark.svg" />
+  <img src="assets/brand/freebo/svg/logo.svg" width="280" alt="Freebo" />
+</picture>
+
+[中文](README.md)
 
 Browse your Emby library on its website and watch videos in a local player.
 
 Freebo combines server management, player discovery and playback in a desktop app. Add your Emby address, sign in on the embedded website, and play a video. There is no browser extension, Python environment or separate service to start.
 
 This is an early development version. See the [validation record](docs/validation.md) for tested behavior and remaining work.
+
+## Interface and brand
+
+![Freebo first-use setup](docs/assets/welcome-en.png)
+
+[Player settings](docs/assets/settings-en.png) · [Brand assets and source](docs/brand/README.md) · [Brand kit ZIP](assets/brand/freebo/Freebo-brand-kit.zip) · [PDF guide](assets/brand/freebo/Freebo-brand-guide.pdf)
+
+These clean captures come from the actual macOS Electron app using an isolated profile. They show the chosen guide dog and Atma 600 identity; they do not establish real playback or cross-platform acceptance. The external project website was not updated in this branding pass.
 
 ## Features
 
@@ -45,6 +58,8 @@ pnpm check
 pnpm package
 ```
 
+Run `prek install` to enable pre-commit checks for formatting, lint, types, tests and both builds.
+
 Run `pnpm start` for the local production version. It builds the renderer, main process and preloads together before launching Electron to avoid mixed build versions.
 
 The stack uses React, TypeScript, Electron, Vite, Vitest, Oxlint and Oxfmt. The main process handles browser sessions, media transport and player communication. React renders the app shell, while a separate `WebContentsView` loads the server website.
@@ -52,6 +67,8 @@ The stack uses React, TypeScript, Electron, Vite, Vitest, Oxlint and Oxfmt. The 
 Media server providers own website injection, authentication, media resolution and progress reporting. Only Emby is currently registered. See [architecture](docs/architecture.md).
 
 GitHub Actions is configured to check macOS, Windows and Linux and build macOS arm64/x64, Windows x64 and Linux x64 packages. Version tags create a draft release with checksums. Packages are unsigned by default; signing and macOS notarization require maintainer credentials.
+
+Brand assets are generated with `pnpm brand:generate`; `pnpm brand:preview` serves the local brand asset download page. See the [brand specification](docs/brand/README.md) for sources, licensing and regeneration. The branding pass keeps version 0.1.0.
 
 ## License
 

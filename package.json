@@ -24,8 +24,11 @@
     "format:check": "oxfmt --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
-    "package": "pnpm build && electron-builder --publish never"
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm brand:check",
+    "package": "pnpm build && electron-builder --publish never",
+    "brand:generate": "uv run scripts/generate-brand.py && pnpm exec electron scripts/render-brand.cjs && uv run scripts/package-brand.py",
+    "brand:preview": "vite --config docs/brand/brand-kit/vite.config.ts",
+    "brand:check": "tsc --project docs/brand/brand-kit/tsconfig.json && vite build --config docs/brand/brand-kit/vite.config.ts"
   },
   "dependencies": {
     "class-variance-authority": "0.7.1",
@@ -70,7 +73,8 @@
       "LICENSE",
       "NOTICE",
       "docs/licenses/shadcn-ui.txt",
-      "package.json"
+      "package.json",
+      "docs/licenses/Atma-OFL.txt"
     ],
     "asar": true,
     "mac": {
@@ -79,13 +83,15 @@
         "dmg",
         "zip"
       ],
-      "identity": null
+      "identity": null,
+      "icon": "resources/icon.icns"
     },
     "win": {
       "target": [
         "nsis",
         "portable"
-      ]
+      ],
+      "icon": "resources/icon.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -98,7 +104,8 @@
         "AppImage",
         "deb"
       ],
-      "maintainer": "elonzh"
+      "maintainer": "elonzh",
+      "icon": "resources/icon.png"
     },
     "icon": "resources/icon.png",
     "portable": {

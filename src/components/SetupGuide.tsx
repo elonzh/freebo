@@ -15,6 +15,7 @@ import type { AppState, Server } from "../shared/types";
 import type { Translator, RunAction, SettingsPatch } from "../ui";
 import { PlayerSetup } from "./PlayerSetup";
 import { ServerForm } from "./ServerForm";
+import { BrandLogo } from "./Brand";
 
 export function SetupGuide({
   state,
@@ -58,7 +59,7 @@ export function SetupGuide({
     <div className="mx-auto flex min-h-full max-w-[760px] flex-col px-9 py-8 max-[650px]:px-5 max-[650px]:py-6">
       {step === "welcome" ? (
         <section className="flex flex-1 flex-col items-center justify-center gap-[18px] py-8 text-center [&>h1]:mt-1 [&>p]:max-w-[48ch]">
-          <img src="./icon.svg" alt="" width={56} height={56} />
+          <BrandLogo width={280} />
           <h1>{t("setupWelcome")}</h1>
           <p>{t("setupDescription")}</p>
           <div className="my-2 flex items-center gap-3 text-muted-foreground">

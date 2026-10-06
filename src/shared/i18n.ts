@@ -1,7 +1,7 @@
 export type Locale = "zh" | "en";
 export type Language = "system" | Locale;
 const messages = {
-  brand: ["福瑞播", "Freebo"],
+  brand: ["Freebo", "Freebo"],
   appHome: ["主页", "Home"],
   homeDescription: ["选择服务器，打开你的媒体库。", "Choose a server to open your library."],
   homeEmptyTitle: ["还没有添加服务器", "No servers yet"],
@@ -27,7 +27,7 @@ const messages = {
   closePlayback: ["关闭播放浮窗", "Close playback panel"],
   playbackError: ["播放出错", "Playback error"],
   setup: ["快速配置", "Quick setup"],
-  setupWelcome: ["欢迎使用福瑞播", "Welcome to Freebo"],
+  setupWelcome: ["欢迎使用 Freebo", "Welcome to Freebo"],
   setupDescription: [
     "选择播放器，添加服务器，就可以开始观看。",
     "Choose a player and add a server to start watching.",
@@ -129,7 +129,7 @@ const messages = {
   manualPlayer: ["手动选择 {name}", "Select {name} manually"],
   manualHint: ["已经安装？选择应用或可执行文件", "Already installed? Select the app or executable"],
   guideNote: [
-    "应用目录之外或便携版的播放器，请通过文件夹按钮选择。VLC 的播放控制由福瑞播自动配置。",
+    "应用目录之外或便携版的播放器，请通过文件夹按钮选择。VLC 的播放控制由 Freebo 自动配置。",
     "Use the folder button for portable players or custom locations. Freebo configures VLC playback controls automatically.",
   ],
   autoNext: ["连续播放", "Continuous playback"],

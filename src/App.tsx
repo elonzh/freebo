@@ -32,6 +32,7 @@ import { PlaybackPanel } from "./components/PlaybackPanel";
 import { OptionSelect } from "./components/OptionSelect";
 import { Input } from "./components/ui/input";
 import { Switch } from "./components/ui/switch";
+import { BrandLogo, BrandName } from "./components/Brand";
 
 const settingPages = [
   { id: "players", icon: MonitorPlay },
@@ -144,8 +145,7 @@ export function App() {
   if (!api)
     return (
       <main className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-sm text-muted-foreground [&>h1]:text-foreground">
-        <img src="./icon.svg" alt="" width={48} height={48} />
-        <h1>{t("brand")}</h1>
+        <BrandLogo />
         <p>{t("preview")}</p>
       </main>
     );
@@ -201,7 +201,7 @@ export function App() {
               onClick={() => go("home")}
             >
               <img src="./icon.svg" alt="" width={18} height={18} />
-              <span>{t("brand")}</span>
+              <BrandName />
             </Button>
             {tabs
               .map((id) => state.settings.servers.find((server) => server.id === id))
@@ -477,8 +477,8 @@ export function App() {
                 </div>
               </section>
             ) : (
-              <section className="flex flex-1 flex-col items-center justify-center pt-10 pb-15 text-center [&>img]:mb-5 [&>h2]:text-[19px] [&>p]:mt-2 [&>p]:mb-[22px]">
-                <img src="./icon.svg" width={56} height={56} alt="" />
+              <section className="flex flex-1 flex-col items-center justify-center pt-10 pb-15 text-center [&>h2]:text-[19px] [&>p]:mt-2 [&>p]:mb-[22px]">
+                <BrandLogo width={260} className="mb-6" />
                 <h2>{t("homeEmptyTitle")}</h2>
                 <p>{t("homeEmptyDescription")}</p>
                 <Button onClick={() => manageServers(true)}>
@@ -524,12 +524,14 @@ export function App() {
                     onClick={() => go("settings", id)}
                   >
                     <Icon size={17} />
-                    {t(id)}
+                    <span className="min-w-0 text-left leading-normal whitespace-normal">
+                      {t(id)}
+                    </span>
                   </Button>
                 ))}
               </nav>
               <span className="mx-4 mt-auto pt-6 text-[11px] leading-[1.8] text-muted-foreground">
-                {t("brand")}
+                <BrandName className="text-sm" />
                 <br />v{state.version}
               </span>
             </aside>
@@ -689,10 +691,9 @@ export function App() {
                   </SettingRow>
                 )}
                 {settingsPage === "about" && (
-                  <div className="mt-6 flex items-center gap-5 [&_p]:mt-1.5">
-                    <img src="./icon.svg" width={48} height={48} alt="" />
+                  <div className="mt-6 flex flex-col items-start gap-5 [&_p]:mt-1.5">
+                    <BrandLogo width={230} />
                     <div>
-                      <h3>Freebo · 福瑞播</h3>
                       <p>v{state.version} · Apache-2.0</p>
                       <p>{t("supportedServer")}</p>
                     </div>

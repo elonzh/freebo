@@ -1,567 +1,647 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-05T17:49:16Z",
-  "title": "Design System: Freebo / 福瑞播",
+  "generatedAt": "2026-10-06T07:34:55.788274+00:00",
+  "title": "Design System: Freebo",
   "extensions": {
     "colorMeta": {
-      "bg": {
-        "role": "neutral",
-        "displayName": "Workspace Paper",
+      "pine": {
+        "role": "primary",
+        "displayName": "Deep Pine",
         "tonalRamp": [
-          "oklch(15.00% 0.00171 247.84)",
-          "oklch(26.43% 0.00171 247.84)",
-          "oklch(37.86% 0.00171 247.84)",
-          "oklch(49.29% 0.00171 247.84)",
-          "oklch(60.71% 0.00171 247.84)",
-          "oklch(72.14% 0.00171 247.84)",
-          "oklch(83.57% 0.00171 247.84)",
-          "oklch(95.00% 0.00171 247.84)"
+          "oklch(15% 0.0427 178.67)",
+          "oklch(26% 0.0427 178.67)",
+          "oklch(38% 0.0427 178.67)",
+          "oklch(49% 0.0427 178.67)",
+          "oklch(61% 0.0427 178.67)",
+          "oklch(72% 0.0427 178.67)",
+          "oklch(84% 0.0427 178.67)",
+          "oklch(95% 0.0427 178.67)"
+        ]
+      },
+      "lime": {
+        "role": "primary",
+        "displayName": "Lime",
+        "tonalRamp": [
+          "oklch(15% 0.1815 123.16)",
+          "oklch(26% 0.1815 123.16)",
+          "oklch(38% 0.1815 123.16)",
+          "oklch(49% 0.1815 123.16)",
+          "oklch(61% 0.1815 123.16)",
+          "oklch(72% 0.1815 123.16)",
+          "oklch(84% 0.1815 123.16)",
+          "oklch(95% 0.1815 123.16)"
+        ]
+      },
+      "background": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "tonalRamp": [
+          "oklch(15% 0.0041 121.56)",
+          "oklch(26% 0.0041 121.56)",
+          "oklch(38% 0.0041 121.56)",
+          "oklch(49% 0.0041 121.56)",
+          "oklch(61% 0.0041 121.56)",
+          "oklch(72% 0.0041 121.56)",
+          "oklch(84% 0.0041 121.56)",
+          "oklch(95% 0.0041 121.56)"
         ]
       },
       "tab-strip": {
         "role": "neutral",
-        "displayName": "Tab Gray",
+        "displayName": "Tab Strip",
         "tonalRamp": [
-          "oklch(15.00% 0.00753 260.73)",
-          "oklch(26.43% 0.00753 260.73)",
-          "oklch(37.86% 0.00753 260.73)",
-          "oklch(49.29% 0.00753 260.73)",
-          "oklch(60.71% 0.00753 260.73)",
-          "oklch(72.14% 0.00753 260.73)",
-          "oklch(83.57% 0.00753 260.73)",
-          "oklch(95.00% 0.00753 260.73)"
+          "oklch(15% 0.0193 133.08)",
+          "oklch(26% 0.0193 133.08)",
+          "oklch(38% 0.0193 133.08)",
+          "oklch(49% 0.0193 133.08)",
+          "oklch(61% 0.0193 133.08)",
+          "oklch(72% 0.0193 133.08)",
+          "oklch(84% 0.0193 133.08)",
+          "oklch(95% 0.0193 133.08)"
         ]
       },
       "address": {
         "role": "neutral",
-        "displayName": "Address Gray",
+        "displayName": "Address",
         "tonalRamp": [
-          "oklch(15.00% 0.00253 228.78)",
-          "oklch(26.43% 0.00253 228.78)",
-          "oklch(37.86% 0.00253 228.78)",
-          "oklch(49.29% 0.00253 228.78)",
-          "oklch(60.71% 0.00253 228.78)",
-          "oklch(72.14% 0.00253 228.78)",
-          "oklch(83.57% 0.00253 228.78)",
-          "oklch(95.00% 0.00253 228.78)"
+          "oklch(15% 0.0142 128.63)",
+          "oklch(26% 0.0142 128.63)",
+          "oklch(38% 0.0142 128.63)",
+          "oklch(49% 0.0142 128.63)",
+          "oklch(61% 0.0142 128.63)",
+          "oklch(72% 0.0142 128.63)",
+          "oklch(84% 0.0142 128.63)",
+          "oklch(95% 0.0142 128.63)"
         ]
       },
-      "surface": {
+      "card": {
         "role": "neutral",
-        "displayName": "Utility Surface",
+        "displayName": "Card",
         "tonalRamp": [
-          "oklch(15.00% 0.00000 0.00)",
-          "oklch(26.43% 0.00000 0.00)",
-          "oklch(37.86% 0.00000 0.00)",
-          "oklch(49.29% 0.00000 0.00)",
-          "oklch(60.71% 0.00000 0.00)",
-          "oklch(72.14% 0.00000 0.00)",
-          "oklch(83.57% 0.00000 0.00)",
-          "oklch(95.00% 0.00000 0.00)"
+          "oklch(15% 0.0000 89.88)",
+          "oklch(26% 0.0000 89.88)",
+          "oklch(38% 0.0000 89.88)",
+          "oklch(49% 0.0000 89.88)",
+          "oklch(61% 0.0000 89.88)",
+          "oklch(72% 0.0000 89.88)",
+          "oklch(84% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
         ]
       },
       "toolbar": {
         "role": "neutral",
-        "displayName": "Toolbar Surface",
+        "displayName": "Toolbar",
         "tonalRamp": [
-          "oklch(15.00% 0.00000 0.00)",
-          "oklch(26.43% 0.00000 0.00)",
-          "oklch(37.86% 0.00000 0.00)",
-          "oklch(49.29% 0.00000 0.00)",
-          "oklch(60.71% 0.00000 0.00)",
-          "oklch(72.14% 0.00000 0.00)",
-          "oklch(83.57% 0.00000 0.00)",
-          "oklch(95.00% 0.00000 0.00)"
+          "oklch(15% 0.0000 89.88)",
+          "oklch(26% 0.0000 89.88)",
+          "oklch(38% 0.0000 89.88)",
+          "oklch(49% 0.0000 89.88)",
+          "oklch(61% 0.0000 89.88)",
+          "oklch(72% 0.0000 89.88)",
+          "oklch(84% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
         ]
       },
-      "ink": {
+      "foreground": {
         "role": "neutral",
-        "displayName": "Reading Ink",
+        "displayName": "Foreground",
         "tonalRamp": [
-          "oklch(15.00% 0.00585 271.18)",
-          "oklch(26.43% 0.00585 271.18)",
-          "oklch(37.86% 0.00585 271.18)",
-          "oklch(49.29% 0.00585 271.18)",
-          "oklch(60.71% 0.00585 271.18)",
-          "oklch(72.14% 0.00585 271.18)",
-          "oklch(83.57% 0.00585 271.18)",
-          "oklch(95.00% 0.00585 271.18)"
+          "oklch(15% 0.0427 178.67)",
+          "oklch(26% 0.0427 178.67)",
+          "oklch(38% 0.0427 178.67)",
+          "oklch(49% 0.0427 178.67)",
+          "oklch(61% 0.0427 178.67)",
+          "oklch(72% 0.0427 178.67)",
+          "oklch(84% 0.0427 178.67)",
+          "oklch(95% 0.0427 178.67)"
         ]
       },
       "muted": {
         "role": "neutral",
-        "displayName": "Supporting Gray",
+        "displayName": "Muted",
         "tonalRamp": [
-          "oklch(15.00% 0.00939 253.91)",
-          "oklch(26.43% 0.00939 253.91)",
-          "oklch(37.86% 0.00939 253.91)",
-          "oklch(49.29% 0.00939 253.91)",
-          "oklch(60.71% 0.00939 253.91)",
-          "oklch(72.14% 0.00939 253.91)",
-          "oklch(83.57% 0.00939 253.91)",
-          "oklch(95.00% 0.00939 253.91)"
+          "oklch(15% 0.0176 131.88)",
+          "oklch(26% 0.0176 131.88)",
+          "oklch(38% 0.0176 131.88)",
+          "oklch(49% 0.0176 131.88)",
+          "oklch(61% 0.0176 131.88)",
+          "oklch(72% 0.0176 131.88)",
+          "oklch(84% 0.0176 131.88)",
+          "oklch(95% 0.0176 131.88)"
         ]
       },
-      "line": {
+      "muted-foreground": {
         "role": "neutral",
-        "displayName": "Divider Gray",
+        "displayName": "Muted Foreground",
         "tonalRamp": [
-          "oklch(15.00% 0.01047 261.79)",
-          "oklch(26.43% 0.01047 261.79)",
-          "oklch(37.86% 0.01047 261.79)",
-          "oklch(49.29% 0.01047 261.79)",
-          "oklch(60.71% 0.01047 261.79)",
-          "oklch(72.14% 0.01047 261.79)",
-          "oklch(83.57% 0.01047 261.79)",
-          "oklch(95.00% 0.01047 261.79)"
+          "oklch(15% 0.0316 159.94)",
+          "oklch(26% 0.0316 159.94)",
+          "oklch(38% 0.0316 159.94)",
+          "oklch(49% 0.0316 159.94)",
+          "oklch(61% 0.0316 159.94)",
+          "oklch(72% 0.0316 159.94)",
+          "oklch(84% 0.0316 159.94)",
+          "oklch(95% 0.0316 159.94)"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Border",
+        "tonalRamp": [
+          "oklch(15% 0.0211 134.10)",
+          "oklch(26% 0.0211 134.10)",
+          "oklch(38% 0.0211 134.10)",
+          "oklch(49% 0.0211 134.10)",
+          "oklch(61% 0.0211 134.10)",
+          "oklch(72% 0.0211 134.10)",
+          "oklch(84% 0.0211 134.10)",
+          "oklch(95% 0.0211 134.10)"
+        ]
+      },
+      "input": {
+        "role": "neutral",
+        "displayName": "Input",
+        "tonalRamp": [
+          "oklch(15% 0.0409 134.66)",
+          "oklch(26% 0.0409 134.66)",
+          "oklch(38% 0.0409 134.66)",
+          "oklch(49% 0.0409 134.66)",
+          "oklch(61% 0.0409 134.66)",
+          "oklch(72% 0.0409 134.66)",
+          "oklch(84% 0.0409 134.66)",
+          "oklch(95% 0.0409 134.66)"
+        ]
+      },
+      "primary": {
+        "role": "primary",
+        "displayName": "Light-theme action",
+        "tonalRamp": [
+          "oklch(15% 0.0427 178.67)",
+          "oklch(26% 0.0427 178.67)",
+          "oklch(38% 0.0427 178.67)",
+          "oklch(49% 0.0427 178.67)",
+          "oklch(61% 0.0427 178.67)",
+          "oklch(72% 0.0427 178.67)",
+          "oklch(84% 0.0427 178.67)",
+          "oklch(95% 0.0427 178.67)"
+        ]
+      },
+      "primary-foreground": {
+        "role": "primary",
+        "displayName": "Primary Foreground",
+        "tonalRamp": [
+          "oklch(15% 0.0041 121.56)",
+          "oklch(26% 0.0041 121.56)",
+          "oklch(38% 0.0041 121.56)",
+          "oklch(49% 0.0041 121.56)",
+          "oklch(61% 0.0041 121.56)",
+          "oklch(72% 0.0041 121.56)",
+          "oklch(84% 0.0041 121.56)",
+          "oklch(95% 0.0041 121.56)"
         ]
       },
       "accent": {
         "role": "primary",
-        "displayName": "Utility Blue",
+        "displayName": "Soft Green Selection",
         "tonalRamp": [
-          "oklch(15.00% 0.17311 259.04)",
-          "oklch(26.43% 0.17311 259.04)",
-          "oklch(37.86% 0.17311 259.04)",
-          "oklch(49.29% 0.17311 259.04)",
-          "oklch(60.71% 0.17311 259.04)",
-          "oklch(72.14% 0.17311 259.04)",
-          "oklch(83.57% 0.17311 259.04)",
-          "oklch(95.00% 0.17311 259.04)"
+          "oklch(15% 0.0432 120.00)",
+          "oklch(26% 0.0432 120.00)",
+          "oklch(38% 0.0432 120.00)",
+          "oklch(49% 0.0432 120.00)",
+          "oklch(61% 0.0432 120.00)",
+          "oklch(72% 0.0432 120.00)",
+          "oklch(84% 0.0432 120.00)",
+          "oklch(95% 0.0432 120.00)"
         ]
       },
-      "accent-soft": {
-        "role": "primary",
-        "displayName": "Soft Blue Selection",
-        "tonalRamp": [
-          "oklch(15.00% 0.01768 253.34)",
-          "oklch(26.43% 0.01768 253.34)",
-          "oklch(37.86% 0.01768 253.34)",
-          "oklch(49.29% 0.01768 253.34)",
-          "oklch(60.71% 0.01768 253.34)",
-          "oklch(72.14% 0.01768 253.34)",
-          "oklch(83.57% 0.01768 253.34)",
-          "oklch(95.00% 0.01768 253.34)"
-        ]
-      },
-      "danger": {
-        "role": "secondary",
+      "destructive": {
+        "role": "neutral",
         "displayName": "Recovery Red",
         "tonalRamp": [
-          "oklch(15.00% 0.15492 24.25)",
-          "oklch(26.43% 0.15492 24.25)",
-          "oklch(37.86% 0.15492 24.25)",
-          "oklch(49.29% 0.15492 24.25)",
-          "oklch(60.71% 0.15492 24.25)",
-          "oklch(72.14% 0.15492 24.25)",
-          "oklch(83.57% 0.15492 24.25)",
-          "oklch(95.00% 0.15492 24.25)"
+          "oklch(15% 0.1552 24.52)",
+          "oklch(26% 0.1552 24.52)",
+          "oklch(38% 0.1552 24.52)",
+          "oklch(49% 0.1552 24.52)",
+          "oklch(61% 0.1552 24.52)",
+          "oklch(72% 0.1552 24.52)",
+          "oklch(84% 0.1552 24.52)",
+          "oklch(95% 0.1552 24.52)"
         ]
       },
-      "hover": {
+      "secondary": {
         "role": "neutral",
-        "displayName": "Hover Gray",
+        "displayName": "Secondary",
         "tonalRamp": [
-          "oklch(15.00% 0.00920 258.34)",
-          "oklch(26.43% 0.00920 258.34)",
-          "oklch(37.86% 0.00920 258.34)",
-          "oklch(49.29% 0.00920 258.34)",
-          "oklch(60.71% 0.00920 258.34)",
-          "oklch(72.14% 0.00920 258.34)",
-          "oklch(83.57% 0.00920 258.34)",
-          "oklch(95.00% 0.00920 258.34)"
+          "oklch(15% 0.0159 130.42)",
+          "oklch(26% 0.0159 130.42)",
+          "oklch(38% 0.0159 130.42)",
+          "oklch(49% 0.0159 130.42)",
+          "oklch(61% 0.0159 130.42)",
+          "oklch(72% 0.0159 130.42)",
+          "oklch(84% 0.0159 130.42)",
+          "oklch(95% 0.0159 130.42)"
         ]
       },
-      "dark-bg": {
+      "dark-background": {
         "role": "neutral",
-        "displayName": "Dark Workspace Paper",
+        "displayName": "Night Green",
         "tonalRamp": [
-          "oklch(15.00% 0.00564 271.22)",
-          "oklch(26.43% 0.00564 271.22)",
-          "oklch(37.86% 0.00564 271.22)",
-          "oklch(49.29% 0.00564 271.22)",
-          "oklch(60.71% 0.00564 271.22)",
-          "oklch(72.14% 0.00564 271.22)",
-          "oklch(83.57% 0.00564 271.22)",
-          "oklch(95.00% 0.00564 271.22)"
+          "oklch(15% 0.0185 172.13)",
+          "oklch(26% 0.0185 172.13)",
+          "oklch(38% 0.0185 172.13)",
+          "oklch(49% 0.0185 172.13)",
+          "oklch(61% 0.0185 172.13)",
+          "oklch(72% 0.0185 172.13)",
+          "oklch(84% 0.0185 172.13)",
+          "oklch(95% 0.0185 172.13)"
         ]
       },
       "dark-tab-strip": {
         "role": "neutral",
-        "displayName": "Dark Tab Gray",
+        "displayName": "Dark Tab Strip",
         "tonalRamp": [
-          "oklch(15.00% 0.00585 271.18)",
-          "oklch(26.43% 0.00585 271.18)",
-          "oklch(37.86% 0.00585 271.18)",
-          "oklch(49.29% 0.00585 271.18)",
-          "oklch(60.71% 0.00585 271.18)",
-          "oklch(72.14% 0.00585 271.18)",
-          "oklch(83.57% 0.00585 271.18)",
-          "oklch(95.00% 0.00585 271.18)"
+          "oklch(15% 0.0166 168.13)",
+          "oklch(26% 0.0166 168.13)",
+          "oklch(38% 0.0166 168.13)",
+          "oklch(49% 0.0166 168.13)",
+          "oklch(61% 0.0166 168.13)",
+          "oklch(72% 0.0166 168.13)",
+          "oklch(84% 0.0166 168.13)",
+          "oklch(95% 0.0166 168.13)"
         ]
       },
       "dark-address": {
         "role": "neutral",
-        "displayName": "Dark Address Gray",
+        "displayName": "Dark Address",
         "tonalRamp": [
-          "oklch(15.00% 0.00585 271.18)",
-          "oklch(26.43% 0.00585 271.18)",
-          "oklch(37.86% 0.00585 271.18)",
-          "oklch(49.29% 0.00585 271.18)",
-          "oklch(60.71% 0.00585 271.18)",
-          "oklch(72.14% 0.00585 271.18)",
-          "oklch(83.57% 0.00585 271.18)",
-          "oklch(95.00% 0.00585 271.18)"
+          "oklch(15% 0.0166 168.13)",
+          "oklch(26% 0.0166 168.13)",
+          "oklch(38% 0.0166 168.13)",
+          "oklch(49% 0.0166 168.13)",
+          "oklch(61% 0.0166 168.13)",
+          "oklch(72% 0.0166 168.13)",
+          "oklch(84% 0.0166 168.13)",
+          "oklch(95% 0.0166 168.13)"
         ]
       },
-      "dark-surface": {
+      "dark-card": {
         "role": "neutral",
-        "displayName": "Dark Utility Surface",
+        "displayName": "Dark Card",
         "tonalRamp": [
-          "oklch(15.00% 0.00564 271.22)",
-          "oklch(26.43% 0.00564 271.22)",
-          "oklch(37.86% 0.00564 271.22)",
-          "oklch(49.29% 0.00564 271.22)",
-          "oklch(60.71% 0.00564 271.22)",
-          "oklch(72.14% 0.00564 271.22)",
-          "oklch(83.57% 0.00564 271.22)",
-          "oklch(95.00% 0.00564 271.22)"
+          "oklch(15% 0.0241 164.27)",
+          "oklch(26% 0.0241 164.27)",
+          "oklch(38% 0.0241 164.27)",
+          "oklch(49% 0.0241 164.27)",
+          "oklch(61% 0.0241 164.27)",
+          "oklch(72% 0.0241 164.27)",
+          "oklch(84% 0.0241 164.27)",
+          "oklch(95% 0.0241 164.27)"
         ]
       },
       "dark-toolbar": {
         "role": "neutral",
-        "displayName": "Dark Toolbar Surface",
+        "displayName": "Dark Toolbar",
         "tonalRamp": [
-          "oklch(15.00% 0.00712 274.76)",
-          "oklch(26.43% 0.00712 274.76)",
-          "oklch(37.86% 0.00712 274.76)",
-          "oklch(49.29% 0.00712 274.76)",
-          "oklch(60.71% 0.00712 274.76)",
-          "oklch(72.14% 0.00712 274.76)",
-          "oklch(83.57% 0.00712 274.76)",
-          "oklch(95.00% 0.00712 274.76)"
+          "oklch(15% 0.0278 161.00)",
+          "oklch(26% 0.0278 161.00)",
+          "oklch(38% 0.0278 161.00)",
+          "oklch(49% 0.0278 161.00)",
+          "oklch(61% 0.0278 161.00)",
+          "oklch(72% 0.0278 161.00)",
+          "oklch(84% 0.0278 161.00)",
+          "oklch(95% 0.0278 161.00)"
         ]
       },
-      "dark-ink": {
+      "dark-foreground": {
         "role": "neutral",
-        "displayName": "Dark Reading Ink",
+        "displayName": "Dark Foreground",
         "tonalRamp": [
-          "oklch(15.00% 0.00458 258.33)",
-          "oklch(26.43% 0.00458 258.33)",
-          "oklch(37.86% 0.00458 258.33)",
-          "oklch(49.29% 0.00458 258.33)",
-          "oklch(60.71% 0.00458 258.33)",
-          "oklch(72.14% 0.00458 258.33)",
-          "oklch(83.57% 0.00458 258.33)",
-          "oklch(95.00% 0.00458 258.33)"
+          "oklch(15% 0.0179 123.97)",
+          "oklch(26% 0.0179 123.97)",
+          "oklch(38% 0.0179 123.97)",
+          "oklch(49% 0.0179 123.97)",
+          "oklch(61% 0.0179 123.97)",
+          "oklch(72% 0.0179 123.97)",
+          "oklch(84% 0.0179 123.97)",
+          "oklch(95% 0.0179 123.97)"
         ]
       },
       "dark-muted": {
         "role": "neutral",
-        "displayName": "Dark Supporting Gray",
+        "displayName": "Dark Muted",
         "tonalRamp": [
-          "oklch(15.00% 0.02308 256.75)",
-          "oklch(26.43% 0.02308 256.75)",
-          "oklch(37.86% 0.02308 256.75)",
-          "oklch(49.29% 0.02308 256.75)",
-          "oklch(60.71% 0.02308 256.75)",
-          "oklch(72.14% 0.02308 256.75)",
-          "oklch(83.57% 0.02308 256.75)",
-          "oklch(95.00% 0.02308 256.75)"
+          "oklch(15% 0.0324 158.10)",
+          "oklch(26% 0.0324 158.10)",
+          "oklch(38% 0.0324 158.10)",
+          "oklch(49% 0.0324 158.10)",
+          "oklch(61% 0.0324 158.10)",
+          "oklch(72% 0.0324 158.10)",
+          "oklch(84% 0.0324 158.10)",
+          "oklch(95% 0.0324 158.10)"
         ]
       },
-      "dark-line": {
+      "dark-muted-foreground": {
         "role": "neutral",
-        "displayName": "Dark Divider Gray",
+        "displayName": "Dark Muted Foreground",
         "tonalRamp": [
-          "oklch(15.00% 0.00515 271.29)",
-          "oklch(26.43% 0.00515 271.29)",
-          "oklch(37.86% 0.00515 271.29)",
-          "oklch(49.29% 0.00515 271.29)",
-          "oklch(60.71% 0.00515 271.29)",
-          "oklch(72.14% 0.00515 271.29)",
-          "oklch(83.57% 0.00515 271.29)",
-          "oklch(95.00% 0.00515 271.29)"
+          "oklch(15% 0.0322 142.31)",
+          "oklch(26% 0.0322 142.31)",
+          "oklch(38% 0.0322 142.31)",
+          "oklch(49% 0.0322 142.31)",
+          "oklch(61% 0.0322 142.31)",
+          "oklch(72% 0.0322 142.31)",
+          "oklch(84% 0.0322 142.31)",
+          "oklch(95% 0.0322 142.31)"
+        ]
+      },
+      "dark-border": {
+        "role": "neutral",
+        "displayName": "Dark Border",
+        "tonalRamp": [
+          "oklch(15% 0.0375 155.88)",
+          "oklch(26% 0.0375 155.88)",
+          "oklch(38% 0.0375 155.88)",
+          "oklch(49% 0.0375 155.88)",
+          "oklch(61% 0.0375 155.88)",
+          "oklch(72% 0.0375 155.88)",
+          "oklch(84% 0.0375 155.88)",
+          "oklch(95% 0.0375 155.88)"
+        ]
+      },
+      "dark-input": {
+        "role": "neutral",
+        "displayName": "Dark Input",
+        "tonalRamp": [
+          "oklch(15% 0.0464 142.83)",
+          "oklch(26% 0.0464 142.83)",
+          "oklch(38% 0.0464 142.83)",
+          "oklch(49% 0.0464 142.83)",
+          "oklch(61% 0.0464 142.83)",
+          "oklch(72% 0.0464 142.83)",
+          "oklch(84% 0.0464 142.83)",
+          "oklch(95% 0.0464 142.83)"
+        ]
+      },
+      "dark-primary": {
+        "role": "primary",
+        "displayName": "Dark-theme action",
+        "tonalRamp": [
+          "oklch(15% 0.1815 123.16)",
+          "oklch(26% 0.1815 123.16)",
+          "oklch(38% 0.1815 123.16)",
+          "oklch(49% 0.1815 123.16)",
+          "oklch(61% 0.1815 123.16)",
+          "oklch(72% 0.1815 123.16)",
+          "oklch(84% 0.1815 123.16)",
+          "oklch(95% 0.1815 123.16)"
+        ]
+      },
+      "dark-primary-foreground": {
+        "role": "primary",
+        "displayName": "Dark Primary Foreground",
+        "tonalRamp": [
+          "oklch(15% 0.0427 178.67)",
+          "oklch(26% 0.0427 178.67)",
+          "oklch(38% 0.0427 178.67)",
+          "oklch(49% 0.0427 178.67)",
+          "oklch(61% 0.0427 178.67)",
+          "oklch(72% 0.0427 178.67)",
+          "oklch(84% 0.0427 178.67)",
+          "oklch(95% 0.0427 178.67)"
         ]
       },
       "dark-accent": {
         "role": "primary",
-        "displayName": "Dark Utility Blue",
+        "displayName": "Dark Green Selection",
         "tonalRamp": [
-          "oklch(15.00% 0.09772 252.29)",
-          "oklch(26.43% 0.09772 252.29)",
-          "oklch(37.86% 0.09772 252.29)",
-          "oklch(49.29% 0.09772 252.29)",
-          "oklch(60.71% 0.09772 252.29)",
-          "oklch(72.14% 0.09772 252.29)",
-          "oklch(83.57% 0.09772 252.29)",
-          "oklch(95.00% 0.09772 252.29)"
+          "oklch(15% 0.0580 139.48)",
+          "oklch(26% 0.0580 139.48)",
+          "oklch(38% 0.0580 139.48)",
+          "oklch(49% 0.0580 139.48)",
+          "oklch(61% 0.0580 139.48)",
+          "oklch(72% 0.0580 139.48)",
+          "oklch(84% 0.0580 139.48)",
+          "oklch(95% 0.0580 139.48)"
         ]
       },
-      "dark-accent-soft": {
-        "role": "primary",
-        "displayName": "Dark Soft Blue Selection",
-        "tonalRamp": [
-          "oklch(15.00% 0.05228 255.35)",
-          "oklch(26.43% 0.05228 255.35)",
-          "oklch(37.86% 0.05228 255.35)",
-          "oklch(49.29% 0.05228 255.35)",
-          "oklch(60.71% 0.05228 255.35)",
-          "oklch(72.14% 0.05228 255.35)",
-          "oklch(83.57% 0.05228 255.35)",
-          "oklch(95.00% 0.05228 255.35)"
-        ]
-      },
-      "dark-danger": {
-        "role": "secondary",
+      "dark-destructive": {
+        "role": "neutral",
         "displayName": "Dark Recovery Red",
         "tonalRamp": [
-          "oklch(15.00% 0.09670 19.44)",
-          "oklch(26.43% 0.09670 19.44)",
-          "oklch(37.86% 0.09670 19.44)",
-          "oklch(49.29% 0.09670 19.44)",
-          "oklch(60.71% 0.09670 19.44)",
-          "oklch(72.14% 0.09670 19.44)",
-          "oklch(83.57% 0.09670 19.44)",
-          "oklch(95.00% 0.09670 19.44)"
+          "oklch(15% 0.0944 23.39)",
+          "oklch(26% 0.0944 23.39)",
+          "oklch(38% 0.0944 23.39)",
+          "oklch(49% 0.0944 23.39)",
+          "oklch(61% 0.0944 23.39)",
+          "oklch(72% 0.0944 23.39)",
+          "oklch(84% 0.0944 23.39)",
+          "oklch(95% 0.0944 23.39)"
         ]
       },
-      "dark-hover": {
+      "dark-secondary": {
         "role": "neutral",
-        "displayName": "Dark Hover Gray",
+        "displayName": "Dark Secondary",
         "tonalRamp": [
-          "oklch(15.00% 0.02329 261.20)",
-          "oklch(26.43% 0.02329 261.20)",
-          "oklch(37.86% 0.02329 261.20)",
-          "oklch(49.29% 0.02329 261.20)",
-          "oklch(60.71% 0.02329 261.20)",
-          "oklch(72.14% 0.02329 261.20)",
-          "oklch(83.57% 0.02329 261.20)",
-          "oklch(95.00% 0.02329 261.20)"
+          "oklch(15% 0.0343 155.63)",
+          "oklch(26% 0.0343 155.63)",
+          "oklch(38% 0.0343 155.63)",
+          "oklch(49% 0.0343 155.63)",
+          "oklch(61% 0.0343 155.63)",
+          "oklch(72% 0.0343 155.63)",
+          "oklch(84% 0.0343 155.63)",
+          "oklch(95% 0.0343 155.63)"
         ]
       },
       "connected": {
-        "role": "secondary",
-        "displayName": "Ready Green",
+        "role": "neutral",
+        "displayName": "Connection Ready",
         "tonalRamp": [
-          "oklch(15.00% 0.11097 161.54)",
-          "oklch(26.43% 0.11097 161.54)",
-          "oklch(37.86% 0.11097 161.54)",
-          "oklch(49.29% 0.11097 161.54)",
-          "oklch(60.71% 0.11097 161.54)",
-          "oklch(72.14% 0.11097 161.54)",
-          "oklch(83.57% 0.11097 161.54)",
-          "oklch(95.00% 0.11097 161.54)"
+          "oklch(15% 0.1110 161.54)",
+          "oklch(26% 0.1110 161.54)",
+          "oklch(38% 0.1110 161.54)",
+          "oklch(49% 0.1110 161.54)",
+          "oklch(61% 0.1110 161.54)",
+          "oklch(72% 0.1110 161.54)",
+          "oklch(84% 0.1110 161.54)",
+          "oklch(95% 0.1110 161.54)"
         ]
+      }
+    },
+    "typographyMeta": {
+      "brand": {
+        "displayName": "Atma product name",
+        "purpose": "Freebo only; real Atma SemiBold 600, no font synthesis."
+      },
+      "title": {
+        "displayName": "Page title",
+        "purpose": "Owned utility pages."
+      },
+      "headline": {
+        "displayName": "Section heading",
+        "purpose": "Setup and settings sections."
+      },
+      "body": {
+        "displayName": "UI body",
+        "purpose": "Chinese and English instructions, using system typography."
+      },
+      "control": {
+        "displayName": "Shared control",
+        "purpose": "shadcn buttons and desktop form controls."
+      },
+      "metadata": {
+        "displayName": "Metadata",
+        "purpose": "Player paths, provider names and playback detail."
       }
     },
     "shadows": [
       {
-        "name": "queue-panel",
-        "value": "-12px 0 32px #0002",
-        "purpose": "Separates the open right-side queue task layer from the workspace."
+        "name": "control-xs",
+        "value": "0 1px 2px rgb(0 0 0 / 0.05)",
+        "purpose": "shadcn outline buttons, inputs and switches; routine surfaces stay flat."
       }
     ],
     "motion": [
       {
-        "name": "switch-background",
-        "value": "background 0.15s",
-        "purpose": "Checked-state track feedback."
+        "name": "control-transition",
+        "value": "150ms ease",
+        "purpose": "Shared control state feedback."
       },
       {
-        "name": "switch-thumb",
-        "value": "left 0.15s",
-        "purpose": "Switch thumb movement."
-      },
-      {
-        "name": "loading-rotation",
-        "value": "spin 1s linear infinite",
-        "purpose": "Loading and discovery activity; removed by reduced-motion preference."
+        "name": "reduced-motion",
+        "value": "animation: none; transition: none",
+        "purpose": "Owned UI honors prefers-reduced-motion."
       }
     ],
     "breakpoints": [
       {
-        "name": "compact-desktop",
+        "name": "desktop-compaction",
         "value": "1000px"
       },
       {
-        "name": "narrow-preview",
+        "name": "narrow-css-fallback",
         "value": "650px"
       }
-    ],
-    "typographyMeta": {
-      "title": {
-        "displayName": "Page Title",
-        "purpose": "Main server-page heading."
-      },
-      "headline": {
-        "displayName": "Utility Heading",
-        "purpose": "Settings panels, server form and queue heading."
-      },
-      "title-small": {
-        "displayName": "Row Title",
-        "purpose": "Setting and guide titles."
-      },
-      "body": {
-        "displayName": "Body",
-        "purpose": "Compact explanatory paragraphs."
-      },
-      "control": {
-        "displayName": "Control",
-        "purpose": "Buttons and selected settings entry weight."
-      },
-      "navigation": {
-        "displayName": "Settings Navigation",
-        "purpose": "Labeled settings rail entries."
-      },
-      "field": {
-        "displayName": "Editable Field",
-        "purpose": "Server address, optional name and provider field text."
-      },
-      "tab": {
-        "displayName": "Browser Tab",
-        "purpose": "Browser tab labels; compact supporting copy shares this size."
-      },
-      "metadata": {
-        "displayName": "Metadata",
-        "purpose": "Executable paths, playback times, connection detail and default labels."
-      }
-    },
-    "iterationStatus": "First-use setup, Home, server settings and floating playback panel implemented locally. The user deferred final visual review and captures until interaction acceptance. Existing raster assets and component examples belong to the previous review."
+    ]
   },
   "components": [
     {
-      "name": "Primary Button",
+      "name": "Primary button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Compact blue action for adding or saving a server.",
-      "html": "<button class=\"ds-primary\" type=\"button\"><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14M12 5v14\"/></svg>添加服务器</button>",
-      "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;cursor:pointer;font:550 13px/1.5 -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Noto Sans\", sans-serif;border-radius:7px;padding:11px 18px;background:var(--accent,#1a5fc5);color:var(--surface,#fff);}.ds-primary:hover:not(:disabled){filter:brightness(0.94);}.ds-primary:focus-visible{outline:2px solid var(--accent,#1a5fc5);outline-offset:3px;}.ds-primary:disabled{cursor:default;opacity:0.45;}"
+      "description": "The main action in setup and server forms.",
+      "html": "<button class=\"ds-primary\">Start setup</button>",
+      "css": ".ds-primary{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",\"Noto Sans\",sans-serif;height:36px;padding:8px 16px;border:0;border-radius:6px;background:var(--primary,#193c35);color:var(--primary-foreground,#fbfcf9);font-size:14px;font-weight:500;cursor:pointer;transition:background .15s,box-shadow .15s}.ds-primary:hover{background:color-mix(in srgb,var(--primary,#193c35) 90%,transparent)}.ds-primary:focus-visible{outline:3px solid color-mix(in srgb,var(--primary,#193c35) 50%,transparent);outline-offset:2px;}.ds-primary:active{filter:brightness(.95)}.ds-primary:disabled{opacity:.5;pointer-events:none}"
     },
     {
-      "name": "Quiet Button",
+      "name": "Outline button",
       "kind": "button",
-      "refersTo": "button-quiet",
-      "description": "Neutral bordered supporting action.",
-      "html": "<button class=\"ds-quiet\" type=\"button\">重新扫描</button>",
-      "css": ".ds-quiet{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;cursor:pointer;font:550 13px/1.5 -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Noto Sans\", sans-serif;border-radius:7px;padding:8px 12px;border:1px solid var(--line,#dce0e7);background:var(--surface,#fff);color:var(--ink,#202124);}.ds-quiet:hover:not(:disabled){background:var(--hover,#e3e7ed);}.ds-quiet:focus-visible{outline:2px solid var(--accent,#1a5fc5);outline-offset:3px;}.ds-quiet:disabled{cursor:default;opacity:0.45;}"
+      "refersTo": "button-outline",
+      "description": "Supporting actions such as manual player scans.",
+      "html": "<button class=\"ds-outline\">Scan players</button>",
+      "css": ".ds-outline{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",\"Noto Sans\",sans-serif;height:36px;padding:8px 16px;border:1px solid var(--border,#d8e1d3);border-radius:6px;background:var(--background,#fbfcf9);color:var(--foreground,#193c35);font-size:14px;font-weight:500;box-shadow:0 1px 2px rgb(0 0 0 / .05);cursor:pointer;transition:background .15s,box-shadow .15s}.ds-outline:hover{background:var(--accent,#eaf3d3);color:var(--primary,#193c35)}.ds-outline:focus-visible{outline:3px solid color-mix(in srgb,var(--primary,#193c35) 50%,transparent);outline-offset:2px;}.ds-outline:active{filter:brightness(.95)}"
     },
     {
-      "name": "Text Button",
+      "name": "Ghost button",
       "kind": "button",
-      "refersTo": "button-text",
-      "description": "Lightweight recovery or utility navigation.",
-      "html": "<button class=\"ds-text\" type=\"button\">查看安装指引</button>",
-      "css": ".ds-text{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;cursor:pointer;font:550 13px/1.5 -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Noto Sans\", sans-serif;border-radius:7px;padding:4px 0;background:transparent;color:var(--accent,#1a5fc5);}.ds-text:hover{text-decoration:underline;text-underline-offset:3px;}.ds-text:focus-visible{outline:2px solid var(--accent,#1a5fc5);outline-offset:3px;}.ds-text:disabled{cursor:default;opacity:0.45;}"
+      "refersTo": "button-ghost",
+      "description": "Quiet icon actions keep the toolbar compact.",
+      "html": "<button class=\"ds-ghost\" aria-label=\"Open settings\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6\"/></svg></button>",
+      "css": ".ds-ghost{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border:0;border-radius:6px;background:transparent;color:var(--foreground,#193c35);cursor:pointer;transition:background .15s,box-shadow .15s}.ds-ghost:hover{background:var(--accent,#eaf3d3);color:var(--primary,#193c35)}.ds-ghost:focus-visible{outline:3px solid color-mix(in srgb,var(--primary,#193c35) 50%,transparent);outline-offset:2px;}.ds-ghost:active{filter:brightness(.95)}"
     },
     {
-      "name": "Selected Toolbar Action",
-      "kind": "button",
-      "refersTo": "button-icon-selected",
-      "description": "Selected settings or media action in the address toolbar.",
-      "html": "<button class=\"ds-icon ds-icon-selected\" type=\"button\" aria-label=\"打开设置\"><svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M14 17H5M19 7h-9\"/><circle cx=\"17\" cy=\"17\" r=\"3\"/><circle cx=\"7\" cy=\"7\" r=\"3\"/></svg></button>",
-      "css": ".ds-icon{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:0;border-radius:6px;cursor:pointer;background:transparent;color:var(--ink,#202124);}.ds-icon-selected{background:var(--accent-soft,#e7f0fb);color:var(--accent,#1a5fc5);}.ds-icon:hover:not(:disabled){background:var(--hover,#e3e7ed);}.ds-icon:focus-visible{outline:2px solid var(--accent,#1a5fc5);outline-offset:3px;}.ds-icon:disabled{cursor:default;opacity:0.45;}"
-    },
-    {
-      "name": "Read-only Address Field",
+      "name": "Server field",
       "kind": "input",
-      "refersTo": "address-bar",
-      "description": "Rounded browser location field, reflecting a server URL or an internal utility page.",
-      "html": "<div class=\"ds-address\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21.54 15H17a2 2 0 0 0-2 2v4.54\"/><path d=\"M7 3.34V5a3 3 0 0 0 3 3a2 2 0 0 1 2 2c0 1.1.9 2 2 2a2 2 0 0 0 2-2c0-1.1.9-2 2-2h3.17\"/><path d=\"M11 21.95V18a2 2 0 0 0-2-2a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05\"/><circle cx=\"12\" cy=\"12\" r=\"10\"/></svg><input readonly aria-label=\"地址\" value=\"freebo://settings\" spellcheck=\"false\"/></div>",
-      "css": ".ds-address{display:flex;align-items:center;gap:10px;min-width:0;height:34px;padding:0 13px;border-radius:18px;background:var(--address,#f1f3f4);color:var(--muted,#5f6368);}.ds-address input{width:100%;min-width:0;border:0;background:transparent;color:var(--ink,#202124);font:13px -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Noto Sans\", sans-serif;outline:none;caret-color:var(--accent,#1a5fc5);}.ds-address:focus-within{outline:2px solid var(--accent,#1a5fc5);outline-offset:0;}"
+      "refersTo": "input-server",
+      "description": "Labeled URL-friendly input with a visible focus ring.",
+      "html": "<label class=\"ds-field\">Server address<input type=\"text\" inputmode=\"url\" placeholder=\"https://emby.example.com\" /></label>",
+      "css": ".ds-field{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",\"Noto Sans\",sans-serif;display:grid;gap:10px;color:var(--foreground,#193c35);font-size:14px;font-weight:500}.ds-field input{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",\"Noto Sans\",sans-serif;height:36px;width:100%;min-width:0;padding:4px 12px;border:1px solid var(--input,#a8b99f);border-radius:6px;background:transparent;color:var(--foreground,#193c35);font-size:14px;box-shadow:0 1px 2px rgb(0 0 0 / .05);transition:border-color .15s,box-shadow .15s}.ds-field input::placeholder{color:var(--muted-foreground,#52675b)}.ds-field input:hover{border-color:var(--primary,#193c35)}.ds-field input:focus-visible{outline:3px solid color-mix(in srgb,var(--primary,#193c35) 50%,transparent);outline-offset:2px;border-color:var(--primary,#193c35)}"
     },
     {
-      "name": "Browser Tab Strip",
-      "kind": "nav",
-      "refersTo": "browser-tab-active",
-      "description": "Chrome-style bottom-aligned tabs with independent select and close controls.",
-      "html": "<div class=\"ds-strip\"><nav class=\"ds-tabs\" aria-label=\"服务器\"><div class=\"ds-tab ds-tab-active\"><button class=\"ds-tab-select\" type=\"button\" aria-current=\"page\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21.54 15H17a2 2 0 0 0-2 2v4.54\"/><path d=\"M7 3.34V5a3 3 0 0 0 3 3a2 2 0 0 1 2 2c0 1.1.9 2 2 2a2 2 0 0 0 2-2c0-1.1.9-2 2-2h3.17\"/><path d=\"M11 21.95V18a2 2 0 0 0-2-2a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05\"/><circle cx=\"12\" cy=\"12\" r=\"10\"/></svg><span>Emby</span></button><button class=\"ds-tab-close\" type=\"button\" aria-label=\"关闭 Emby 标签页\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" aria-hidden=\"true\"><path d=\"M18 6 6 18M6 6l12 12\"/></svg></button></div><div class=\"ds-tab\"><button class=\"ds-tab-select\" type=\"button\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M14 17H5M19 7h-9\"/><circle cx=\"17\" cy=\"17\" r=\"3\"/><circle cx=\"7\" cy=\"7\" r=\"3\"/></svg><span>设置</span></button><button class=\"ds-tab-close\" type=\"button\" aria-label=\"关闭设置标签页\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" aria-hidden=\"true\"><path d=\"M18 6 6 18M6 6l12 12\"/></svg></button></div></nav><button class=\"ds-new-tab\" type=\"button\" aria-label=\"新建标签页\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14M12 5v14\"/></svg></button><div class=\"ds-drag-space\"></div></div>",
-      "css": ".ds-strip{display:flex;align-items:end;gap:4px;height:40px;padding:6px 10px 0;background:var(--tab-strip,#dee1e6);-webkit-app-region:drag;}.ds-tabs{display:flex;align-items:end;gap:2px;min-width:0;overflow-x:auto;scrollbar-width:none;-webkit-app-region:no-drag;}.ds-tab{height:34px;width:190px;border-radius:9px 9px 0 0;display:flex;align-items:center;flex-shrink:0;gap:10px;color:var(--muted,#5f6368);font:12px -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Noto Sans\", sans-serif;}.ds-tab-active{background:var(--toolbar,#fff);color:var(--ink,#202124);}.ds-tab:hover:not(.ds-tab-active){background:var(--hover,#e3e7ed);}.ds-tab-select{display:flex;align-items:center;gap:9px;min-width:0;flex:1;height:100%;padding:0 0 0 13px;text-align:left;cursor:pointer;border:0;background:transparent;color:inherit;font:inherit;}.ds-tab-select span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.ds-tab-close{display:grid;place-items:center;margin-right:6px;border-radius:50%;width:24px;height:24px;border:0;background:transparent;color:inherit;cursor:pointer;}.ds-tab-close:hover,.ds-new-tab:hover{background:var(--hover,#e3e7ed);}.ds-new-tab{align-self:center;display:grid;place-items:center;width:28px;height:28px;border:0;border-radius:50%;background:transparent;color:var(--ink,#202124);cursor:pointer;-webkit-app-region:no-drag;}.ds-drag-space{flex:1;min-width:26px;height:100%;}.ds-tab-select:focus-visible{outline:2px solid var(--accent,#1a5fc5);outline-offset:3px;}.ds-tab-close:focus-visible{outline:2px solid var(--accent,#1a5fc5);outline-offset:3px;}.ds-new-tab:focus-visible{outline:2px solid var(--accent,#1a5fc5);outline-offset:3px;}@media(max-width:1000px){.ds-tab{width:160px;}}"
-    },
-    {
-      "name": "Settings Rail",
+      "name": "Settings navigation",
       "kind": "nav",
       "refersTo": "navigation-settings-active",
-      "description": "Labeled pill-ended rail entries select one utility panel.",
-      "html": "<nav class=\"ds-settings-nav\" aria-label=\"设置\"><button class=\"ds-settings-active\" type=\"button\" aria-current=\"page\"><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M15.033 9.44a.647.647 0 0 1 0 1.12l-4.065 2.352a.645.645 0 0 1-.968-.56V7.648a.645.645 0 0 1 .967-.56z\"/><path d=\"M12 17v4M8 21h8\"/><rect x=\"2\" y=\"3\" width=\"20\" height=\"14\" rx=\"2\"/></svg>播放器</button><button type=\"button\"><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21.54 15H17a2 2 0 0 0-2 2v4.54\"/><path d=\"M7 3.34V5a3 3 0 0 0 3 3a2 2 0 0 1 2 2c0 1.1.9 2 2 2a2 2 0 0 0 2-2c0-1.1.9-2 2-2h3.17\"/><path d=\"M11 21.95V18a2 2 0 0 0-2-2a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05\"/><circle cx=\"12\" cy=\"12\" r=\"10\"/></svg>服务器</button></nav>",
-      "css": ".ds-settings-nav{width:216px;display:flex;flex-direction:column;gap:3px;padding:24px 12px;border-right:1px solid var(--line,#dce0e7);font:13px -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Noto Sans\", sans-serif;}.ds-settings-nav button{display:flex;align-items:center;gap:12px;padding:12px 16px;border:0;border-radius:0 22px 22px 0;text-align:left;font:inherit;cursor:pointer;background:transparent;color:var(--muted,#5f6368);}.ds-settings-nav button:hover{background:var(--hover,#e3e7ed);}.ds-settings-nav button.ds-settings-active{background:var(--accent-soft,#e7f0fb);color:var(--accent,#1a5fc5);font-weight:550;}.ds-settings-nav button:focus-visible{outline:2px solid var(--accent,#1a5fc5);outline-offset:3px;}@media(max-width:1000px){.ds-settings-nav{width:190px;}}@media(max-width:650px){.ds-settings-nav{width:150px;padding:20px 8px;}}"
+      "description": "One selected utility panel with a rounded right edge.",
+      "html": "<nav class=\"ds-settings\" aria-label=\"Settings\"><button aria-current=\"page\"><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"2\" y=\"3\" width=\"20\" height=\"14\" rx=\"2\"/><path d=\"M8 21h8M12 17v4\"/></svg><span>Players</span></button><button><span>Appearance and language</span></button></nav>",
+      "css": ".ds-settings{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",\"Noto Sans\",sans-serif;display:grid;gap:3px;width:190px}.ds-settings button{display:flex;align-items:center;gap:12px;padding:12px 16px;border:0;border-radius:0 22px 22px 0;background:transparent;color:var(--muted-foreground,#52675b);text-align:left;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s}.ds-settings span{min-width:0;white-space:normal;line-height:1.5}.ds-settings button[aria-current=\"page\"],.ds-settings button:hover{background:var(--accent,#eaf3d3);color:var(--primary,#193c35)}.ds-settings button:focus-visible{outline:3px solid color-mix(in srgb,var(--primary,#193c35) 50%,transparent);outline-offset:2px;}"
     },
     {
-      "name": "Server Form Surface",
+      "name": "Server form",
       "kind": "card",
       "refersTo": "form-server",
-      "description": "Flat bordered form and visible label with a URL-friendly editable field.",
-      "html": "<section class=\"ds-form\"><h2>添加服务器</h2><label>服务器地址<input type=\"text\" inputmode=\"url\" placeholder=\"https://emby.example.com\" autocomplete=\"off\"/></label><p>账号和密码在下一步的 Emby 网页中填写。</p></section>",
-      "css": ".ds-form{width:min(100%,510px);padding:24px;background:var(--surface,#fff);border:1px solid var(--line,#dce0e7);border-radius:12px;color:var(--ink,#202124);font-family:-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Noto Sans\", sans-serif;}.ds-form h2{font-size:17px;font-weight:620;line-height:1.4;margin:0 0 26px;}.ds-form label{display:block;font-size:13px;font-weight:550;margin-top:22px;}.ds-form input{display:block;width:100%;margin-top:9px;padding:11px 12px;border:1px solid var(--line,#dce0e7);border-radius:6px;background:var(--bg,#f8f9fa);color:var(--ink,#202124);font:14px -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Noto Sans\", sans-serif;caret-color:var(--accent,#1a5fc5);}.ds-form input::placeholder{color:var(--muted,#5f6368);opacity:1;}.ds-form input:focus-visible{outline:2px solid var(--accent,#1a5fc5);outline-offset:3px;}.ds-form p{margin:22px 0 0;font-size:12px;line-height:1.65;color:var(--muted,#5f6368);}"
+      "description": "A flat bordered form; use its larger corner only for containers.",
+      "html": "<section class=\"ds-form\"><h2>Add server</h2><p>Sign in on the Emby website after adding the address.</p><a href=\"#server\">Set up server</a></section>",
+      "css": ".ds-form{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",\"Noto Sans\",sans-serif;max-width:510px;padding:24px;border:1px solid var(--border,#d8e1d3);border-radius:12px;background:var(--card,#ffffff);color:var(--foreground,#193c35)}.ds-form h2{margin:0 0 26px;font-size:17px;line-height:1.4;font-weight:600}.ds-form p{margin:0 0 22px;color:var(--muted-foreground,#52675b);font-size:13px;line-height:1.625}.ds-form a{color:var(--primary,#193c35);font-size:14px;text-underline-offset:4px}.ds-form a:hover{text-decoration:underline}.ds-form a:focus-visible{outline:3px solid color-mix(in srgb,var(--primary,#193c35) 50%,transparent);outline-offset:2px;}"
     },
     {
-      "name": "Playback Setting Switch",
-      "kind": "input",
-      "refersTo": "switch-checked",
-      "description": "Native checkbox semantics with compact checked-state feedback.",
-      "html": "<input class=\"ds-switch\" type=\"checkbox\" role=\"switch\" aria-label=\"连续播放\" checked/>",
-      "css": ".ds-switch{appearance:none;width:36px;height:21px;border-radius:20px;background:var(--muted,#5f6368);position:relative;cursor:pointer;transition:background 0.15s;}.ds-switch::after{content:\"\";display:block;width:15px;height:15px;border-radius:50%;background:var(--surface,#fff);position:absolute;left:3px;top:3px;transition:left 0.15s;}.ds-switch:checked{background:var(--accent,#1a5fc5);}.ds-switch:checked::after{left:18px;}.ds-switch:focus-visible{outline:2px solid var(--accent,#1a5fc5);outline-offset:3px;}@media(prefers-reduced-motion:reduce){.ds-switch,.ds-switch::after{transition:none;}}"
+      "name": "Browser tab",
+      "kind": "nav",
+      "refersTo": "browser-tab-active",
+      "description": "The active tab joins the toolbar beneath it.",
+      "html": "<div class=\"ds-tabstrip\"><button class=\"ds-tab\" aria-current=\"page\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M2 12h20M12 2a18 18 0 0 1 0 20 18 18 0 0 1 0-20\"/></svg><span>My server</span></button></div>",
+      "css": ".ds-tabstrip{display:flex;align-items:flex-end;padding:6px 10px 0;background:var(--tab-strip,#e0e8db)}.ds-tab{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",\"Noto Sans\",sans-serif;display:flex;align-items:center;gap:9px;width:190px;height:34px;padding:0 13px;border:0;border-radius:9px 9px 0 0;background:var(--toolbar,#ffffff);color:var(--foreground,#193c35);font-size:12px;cursor:pointer}.ds-tab span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.ds-tab:hover{background:var(--secondary,#edf3e8)}.ds-tab:focus-visible{outline:3px solid color-mix(in srgb,var(--primary,#193c35) 50%,transparent);outline-offset:2px;}"
     },
     {
-      "name": "Current Queue Item",
+      "name": "Switch",
       "kind": "custom",
-      "refersTo": "queue-item-current",
-      "description": "Numbered current item within the native floating playback panel.",
-      "html": "<button class=\"ds-queue-current\" type=\"button\"><span>1</span>示例影片<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z\"/></svg></button>",
-      "css": ".ds-queue-current{text-align:left;width:100%;display:flex;align-items:center;gap:12px;padding:13px 9px;border:0;border-radius:6px;cursor:pointer;font:13px/1.6 -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Noto Sans\", sans-serif;background:var(--accent-soft,#e7f0fb);color:var(--accent,#1a5fc5);}.ds-queue-current span{color:var(--muted,#5f6368);font-size:11px;min-width:20px;}.ds-queue-current svg{margin-left:auto;}.ds-queue-current:focus-visible{outline:2px solid var(--accent,#1a5fc5);outline-offset:3px;}"
+      "refersTo": "switch-checked",
+      "description": "A compact boolean setting with a moving thumb.",
+      "html": "<label class=\"ds-switch\"><input type=\"checkbox\" checked aria-label=\"Continuous playback\" /><span class=\"ds-switch-track\"></span></label>",
+      "css": ".ds-switch{display:inline-flex;position:relative;cursor:pointer}.ds-switch input{position:absolute;opacity:0;width:32px;height:18.4px;margin:0}.ds-switch-track{display:block;width:32px;height:1.15rem;border:1px solid transparent;border-radius:9999px;background:var(--input,#a8b99f);box-shadow:0 1px 2px rgb(0 0 0 / .05);transition:background .15s}.ds-switch-track::before{content:\"\";display:block;width:16px;height:16px;border-radius:50%;background:var(--background,#fbfcf9);transition:transform .15s}.ds-switch input:checked+.ds-switch-track{background:var(--primary,#193c35)}.ds-switch input:checked+.ds-switch-track::before{transform:translateX(14px)}.ds-switch input:focus-visible+.ds-switch-track{outline:3px solid color-mix(in srgb,var(--primary,#193c35) 50%,transparent);outline-offset:2px;}.ds-switch:hover .ds-switch-track{filter:brightness(.95)}"
     }
   ],
   "narrative": {
-    "northStar": "Chrome desktop browser",
-    "overview": "Chrome's desktop browser shell is the confirmed visual reference for Freebo / 福瑞播. A gray tab strip, a separate navigation toolbar and a rounded address field frame compact utility pages. The previous IINA-like shell is superseded by the user's approved Chrome direction; the build is code-first and has no approved image comp.\n\nSystem typography and neutral light/dark surfaces keep the application familiar in Chinese and English. Blue identifies actions, selection and keyboard focus. Emby supplies the library and sign-in interface inside the native guest view; Freebo's own chrome manages server tabs, setup, playback and recovery.",
+    "northStar": "The friendly guide dog",
+    "overview": "Freebo pairs the approved guide-dog mark with Atma SemiBold. Deep pine gives the identity a steady outline; lime provides a clear, lively point of recognition. The asymmetric ears and friendly expression belong to the mark's identity. Use the supplied vector family for the name, logo and app icon, with Freebo capitalized in every locale.\n\nThe identity sits within the user's confirmed Chrome desktop layout: tabs above a navigation toolbar and rounded address field. Warm green surfaces carry compact utility pages. System typography keeps instructions and controls readable in Chinese and English; the character font is reserved for the product name in application chrome. Emby owns its library and sign-in interface in a native guest view. Freebo owns server management, setup, playback controls and recovery.",
     "keyCharacteristics": [
-      "A two-row browser shell with native operating-system window controls.",
-      "Neutral light/dark surfaces, system typography and a restrained blue accent.",
-      "Compact server lists and a settings rail that shows one utility panel at a time.",
-      "An address-toolbar media button opens controls and the queue in a separate native floating window."
+      "An approved guide-dog mark and a real Atma 600 wordmark.",
+      "Deep pine, lime and paper, with semantic light/dark utility surfaces.",
+      "A two-row desktop browser shell with native operating-system controls.",
+      "Flat, compact settings and server rows; temporary playback in a native floating window."
     ],
     "rules": [
       {
-        "name": "The Local Appearance Rule",
-        "body": "Follow the system appearance or the explicit app setting through the existing CSS variables. Emby's appearance remains controlled by Emby; shell language and theme changes affect owned chrome.",
+        "name": "The Semantic Appearance Rule",
+        "body": "Use semantic CSS variables and shadcn variants for owned controls. Follow system or explicit app appearance. Emby's appearance remains controlled by Emby.",
         "section": "colors"
       },
       {
-        "name": "The Readable Detail Rule",
-        "body": "Keep explanatory text beside its setting, wrap long server URLs and executable paths, and retain action-specific accessible names for icon-only controls. Chinese and English use the same hierarchy.",
+        "name": "The Name Type Rule",
+        "body": "Within the application, Atma spells Freebo. Instructions, URLs, settings and translated copy use the system UI stack. The independent brand-kit page may use its documented Atma display heading.",
         "section": "typography"
       },
       {
         "name": "The Native Geometry Rule",
-        "body": "The guest starts below the 88px shell and shifts down by 64px for a server or generic error. Playback state and the floating panel never subtract from its width or height.",
+        "body": "The Emby guest begins below the 88px shell and moves down by 64px when a server or generic recovery bar appears. Playback controls and queue stay in a separate native window and do not subtract from the guest's size.",
         "section": "layout"
       },
       {
         "name": "The Task Depth Rule",
-        "body": "Keep ordinary settings and server rows flat. Use a native floating window for playback tasks, with the operating system shadow.",
+        "body": "Keep routine settings flat. Use a native window for the temporary playback task layer.",
         "section": "elevation"
       },
       {
         "name": "The Purposeful Motion Rule",
-        "body": "Use motion for loading rotation and switch state feedback. Honor the existing reduced-motion rule, which removes animation and transition from owned UI.",
+        "body": "Loading rotation, switch feedback and shared control transitions communicate state. Honor reduced motion by disabling animation and transition in owned UI.",
         "section": "components"
       }
     ],
     "dos": [
-      "Do preserve the user's Chrome desktop shell with tabs, navigation and a rounded address field.",
-      "Do use the existing CSS variables for both light and dark appearance.",
-      "Do keep shell and recovery dimensions synchronized with native guest bounds, while playback floats independently.",
-      "Do show one settings panel at a time and keep its label and selected rail entry consistent.",
-      "Do give recovery controls the name of the action they perform.",
-      "Do preserve Chinese and English labels, visible keyboard focus and accessible icon names.",
-      "Do use actual clean app captures for public interface imagery and retain their provenance."
+      "Do use the approved vector logo family, Atma 600 and the bundled font license.",
+      "Do keep Freebo capitalized in every locale and in all brand materials.",
+      "Do preserve Chrome-style desktop tabs, navigation and the rounded address field.",
+      "Do keep shell and recovery geometry synchronized with native guest bounds.",
+      "Do use shadcn controls and existing semantic variables for both appearances.",
+      "Do keep translated labels, keyboard focus and action-specific icon names readable.",
+      "Do use clean actual-app screenshots and state their validation scope."
     ],
     "donts": [
-      "Don't restyle Emby's library or account interface as Freebo chrome.",
-      "Don't turn row-based settings and server lists into decorative elevated card grids.",
-      "Don't treat closing a browser tab as deletion of its registered server.",
-      "Don't infer mobile, Windows/Linux or physical window-drag acceptance from CSS or macOS content captures.",
-      "Don't treat a content-only shell capture or scoped finish verdict as whole-product runtime acceptance."
+      "Don't redraw the wordmark, stretch the mark or add a Chinese alias to brand assets.",
+      "Don't use a grayscale filter as a substitute for the supplied monochrome vector cutouts.",
+      "Don't apply Atma to utility instructions, settings or Emby's interface.",
+      "Don't restyle Emby's library/account pages as Freebo chrome.",
+      "Don't turn ordinary settings and server rows into decorative elevated card grids.",
+      "Don't treat closing a tab as deletion of its registered server.",
+      "Don't infer native window resizing, real playback or cross-platform acceptance from CSS captures."
     ]
   }
 }

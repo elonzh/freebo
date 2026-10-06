@@ -38,7 +38,7 @@ Preserve the Emby browsing experience. Explain failures with a recovery action. 
 
 ## Brand Commitments
 
-The product is Freebo (福瑞播 in Chinese), repository and directory freebo. The user explicitly chose a familiar Chrome-style desktop shell with a custom title bar, tabs and address bar, and a code-first build. Emby receives the main viewing area; the application UI appears for server management, player setup and recovery.
+The product name is Freebo, capitalized as a person's name in every locale and in all brand assets. The Chinese nickname is informal and does not participate in brand materials. Repository and directory names remain freebo. The approved identity is the friendly guide dog with deep pine (#193C35), lime (#BDE64D) and paper (#FBFCF9). The chosen wordmark uses real Atma SemiBold 600 with tracking -0.015em; its portable SVGs are outlined from the licensed font, and editable sources retain font-backed text. Preserve the asymmetric ears, expression and supplied logo proportions. Atma is for the product name; interface copy uses system typography. The authoritative usage and regeneration record is [docs/brand/README.md](docs/brand/README.md). The user explicitly chose a familiar Chrome-style desktop shell with custom title bar, tabs and address bar. Emby receives the main viewing area; Freebo UI appears for server management, player setup and recovery.
 
 ## Open Decisions
 

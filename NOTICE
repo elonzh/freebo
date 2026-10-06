@@ -13,3 +13,9 @@ repository is independently written.
 UI components in src/components/ui are derived from shadcn/ui
 (https://github.com/shadcn-ui/ui), Copyright (c) 2023 shadcn.
 They are licensed under the MIT License; see docs/licenses/shadcn-ui.txt.
+
+The Freebo name wordmark uses Atma SemiBold (600).
+Copyright 2010 The Atma Project Authors (https://github.com/BlackFoundryCom/Atma).
+The original font and its WOFF2 format are distributed under the SIL Open Font
+License 1.1; see docs/licenses/Atma-OFL.txt and dist/fonts/Atma-OFL.txt.
+Brand vector artwork and reproducible exports are provided in assets/brand/freebo.

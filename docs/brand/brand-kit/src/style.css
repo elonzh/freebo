@@ -1,0 +1,75 @@
+@import "tailwindcss";
+@source "../../../../src/components/ui";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--foreground);
+  --color-border: var(--border);
+  --color-input: var(--border);
+  --color-ring: var(--primary);
+  --color-popover: white;
+  --color-popover-foreground: var(--foreground);
+}
+
+:root {
+  --background: #fbfcf9;
+  --foreground: #193c35;
+  --primary: #193c35;
+  --primary-foreground: #fbfcf9;
+  --secondary: #edf3e8;
+  --muted: #e1e8dc;
+  --muted-foreground: #52675b;
+  --accent: #edf3e8;
+  --border: #d8e1d3;
+  --lime: #bde64d;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--foreground);
+  background: var(--background);
+  font-size: 14px;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+input {
+  font: inherit;
+}
+button,
+a,
+input {
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: wait;
+}
+::selection {
+  background: var(--lime);
+  color: var(--foreground);
+}
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+a {
+  color: inherit;
+  text-underline-offset: 4px;
+}
+input {
+  caret-color: var(--primary);
+}

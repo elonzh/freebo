@@ -1,0 +1,195 @@
+{
+  "brand": "Freebo",
+  "font": {
+    "family": "Atma",
+    "weight": 600,
+    "letterSpacingEm": -0.015,
+    "sha256": "15b935a57290a675391c6ca6bac4bd7fc746ead44e35495d6dc2562b2265a28f",
+    "source": "https://github.com/google/fonts/tree/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/atma",
+    "license": "SIL OFL 1.1"
+  },
+  "colors": {
+    "pine": "#193C35",
+    "lime": "#BDE64D",
+    "paper": "#FBFCF9"
+  },
+  "geometry": {
+    "logoWidth": 370.68455771555557,
+    "logoHeight": 94.18444444444447,
+    "wordWidth": 280.4,
+    "wordHeight": 85.62222222222223,
+    "headToInkHeight": 1.1,
+    "gapToInkHeight": 0.1,
+    "markAspect": 0.867684
+  },
+  "rasterJobs": [
+    {
+      "svg": "assets/brand/freebo/svg/logo.svg",
+      "output": "assets/brand/freebo/png/logo.png",
+      "width": 1600,
+      "height": 407
+    },
+    {
+      "svg": "assets/brand/freebo/svg/logo-on-dark.svg",
+      "output": "assets/brand/freebo/png/logo-on-dark.png",
+      "width": 1600,
+      "height": 407
+    },
+    {
+      "svg": "assets/brand/freebo/svg/logo-mono.svg",
+      "output": "assets/brand/freebo/png/logo-mono.png",
+      "width": 1600,
+      "height": 407
+    },
+    {
+      "svg": "assets/brand/freebo/svg/logo-white.svg",
+      "output": "assets/brand/freebo/png/logo-white.png",
+      "width": 1600,
+      "height": 407
+    },
+    {
+      "svg": "assets/brand/freebo/svg/logo-black.svg",
+      "output": "assets/brand/freebo/png/logo-black.png",
+      "width": 1600,
+      "height": 407
+    },
+    {
+      "svg": "assets/brand/freebo/svg/logo-stacked.svg",
+      "output": "assets/brand/freebo/png/logo-stacked.png",
+      "width": 1000,
+      "height": 678
+    },
+    {
+      "svg": "assets/brand/freebo/svg/logo-stacked-on-dark.svg",
+      "output": "assets/brand/freebo/png/logo-stacked-on-dark.png",
+      "width": 1000,
+      "height": 678
+    },
+    {
+      "svg": "assets/brand/freebo/icons/app-icon.svg",
+      "output": "assets/brand/freebo/icons/icon-16.png",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "svg": "assets/brand/freebo/icons/app-icon.svg",
+      "output": "assets/brand/freebo/icons/icon-24.png",
+      "width": 24,
+      "height": 24
+    },
+    {
+      "svg": "assets/brand/freebo/icons/app-icon.svg",
+      "output": "assets/brand/freebo/icons/icon-32.png",
+      "width": 32,
+      "height": 32
+    },
+    {
+      "svg": "assets/brand/freebo/icons/app-icon.svg",
+      "output": "assets/brand/freebo/icons/icon-48.png",
+      "width": 48,
+      "height": 48
+    },
+    {
+      "svg": "assets/brand/freebo/icons/app-icon.svg",
+      "output": "assets/brand/freebo/icons/icon-64.png",
+      "width": 64,
+      "height": 64
+    },
+    {
+      "svg": "assets/brand/freebo/icons/app-icon.svg",
+      "output": "assets/brand/freebo/icons/icon-128.png",
+      "width": 128,
+      "height": 128
+    },
+    {
+      "svg": "assets/brand/freebo/icons/app-icon.svg",
+      "output": "assets/brand/freebo/icons/icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "svg": "assets/brand/freebo/icons/app-icon.svg",
+      "output": "assets/brand/freebo/icons/icon-512.png",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "svg": "assets/brand/freebo/icons/app-icon.svg",
+      "output": "assets/brand/freebo/icons/icon-1024.png",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "svg": "assets/brand/freebo/svg/mark-color.svg",
+      "output": "assets/brand/freebo/png/mark-color.png",
+      "width": 889,
+      "height": 1024
+    },
+    {
+      "svg": "assets/brand/freebo/svg/mark-pine.svg",
+      "output": "assets/brand/freebo/png/mark-pine.png",
+      "width": 889,
+      "height": 1024
+    },
+    {
+      "svg": "assets/brand/freebo/svg/mark-white.svg",
+      "output": "assets/brand/freebo/png/mark-white.png",
+      "width": 889,
+      "height": 1024
+    },
+    {
+      "svg": "assets/brand/freebo/svg/mark-black.svg",
+      "output": "assets/brand/freebo/png/mark-black.png",
+      "width": 889,
+      "height": 1024
+    },
+    {
+      "svg": "assets/brand/freebo/svg/wordmark-pine.svg",
+      "output": "assets/brand/freebo/png/wordmark-pine.png",
+      "width": 1400,
+      "height": 428
+    },
+    {
+      "svg": "assets/brand/freebo/svg/wordmark-white.svg",
+      "output": "assets/brand/freebo/png/wordmark-white.png",
+      "width": 1400,
+      "height": 428
+    },
+    {
+      "svg": "assets/brand/freebo/svg/wordmark-black.svg",
+      "output": "assets/brand/freebo/png/wordmark-black.png",
+      "width": 1400,
+      "height": 428
+    },
+    {
+      "svg": "assets/brand/freebo/svg/wordmark-lime.svg",
+      "output": "assets/brand/freebo/png/wordmark-lime.png",
+      "width": 1400,
+      "height": 428
+    },
+    {
+      "svg": "assets/brand/freebo/social/social.svg",
+      "output": "assets/brand/freebo/social/social.png",
+      "width": 1280,
+      "height": 640
+    },
+    {
+      "svg": "assets/brand/freebo/social/cover-16x9.svg",
+      "output": "assets/brand/freebo/social/cover-16x9.png",
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "svg": "assets/brand/freebo/wallpapers/wallpaper-pine.svg",
+      "output": "assets/brand/freebo/wallpapers/wallpaper-pine.png",
+      "width": 2560,
+      "height": 1440
+    },
+    {
+      "svg": "assets/brand/freebo/wallpapers/wallpaper-paper.svg",
+      "output": "assets/brand/freebo/wallpapers/wallpaper-paper.png",
+      "width": 2560,
+      "height": 1440
+    }
+  ]
+}

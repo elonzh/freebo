@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@font-face {
+  font-family: "Freebo Atma";
+  src: url("/fonts/Atma-SemiBold.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -31,41 +39,51 @@
 
 :root {
   color-scheme: light;
-  --background: #f8f9fa;
-  --tab-strip: #dee1e6;
-  --address: #f1f3f4;
-  --card: #fff;
-  --toolbar: #fff;
-  --foreground: #202124;
-  --muted: #e3e7ed;
-  --muted-foreground: #5f6368;
-  --border: #dce0e7;
-  --input: #b7bdc7;
-  --primary: #1a5fc5;
-  --primary-foreground: #fff;
-  --accent: #e7f0fb;
-  --destructive: #b13a3a;
-  --secondary: #e3e7ed;
+  --background: #fbfcf9;
+  --tab-strip: #e0e8db;
+  --address: #eef3e9;
+  --card: #ffffff;
+  --toolbar: #ffffff;
+  --foreground: #193c35;
+  --muted: #e4ebdf;
+  --muted-foreground: #52675b;
+  --border: #d8e1d3;
+  --input: #a8b99f;
+  --primary: #193c35;
+  --primary-foreground: #fbfcf9;
+  --accent: #eaf3d3;
+  --destructive: #ad3636;
+  --secondary: #edf3e8;
   --radius: 8px;
 }
 
 :root.dark {
   color-scheme: dark;
-  --background: #292a2d;
-  --tab-strip: #202124;
-  --address: #202124;
-  --card: #292a2d;
-  --toolbar: #35363a;
-  --foreground: #e8eaed;
-  --muted: #48494c;
-  --muted-foreground: #a4aebc;
-  --border: #48494c;
-  --input: #636970;
-  --primary: #88baf3;
-  --primary-foreground: #202124;
-  --accent: #293d57;
-  --destructive: #f3a2a2;
-  --secondary: #303743;
+  --background: #17231f;
+  --tab-strip: #111b17;
+  --address: #111b17;
+  --card: #1d2c25;
+  --toolbar: #213229;
+  --foreground: #f1f6e9;
+  --muted: #34483c;
+  --muted-foreground: #b4c5b2;
+  --border: #3e5546;
+  --input: #667d64;
+  --primary: #bde64d;
+  --primary-foreground: #193c35;
+  --accent: #2e4628;
+  --destructive: #f5a6a1;
+  --secondary: #293d30;
+}
+
+.brand-name {
+  font-family: "Freebo Atma", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  font-synthesis: none;
+}
+.home-tab .brand-name {
+  font-size: 16px;
 }
 
 @layer base {

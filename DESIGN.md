@@ -1,42 +1,54 @@
 ---
-name: Freebo / 福瑞播
-description: Chrome-style desktop tabs and utility controls around the original Emby browsing interface.
+name: Freebo
+description: A friendly guide dog for Emby browsing and local playback, within a familiar desktop browser shell.
 colors:
-  bg: "#f8f9fa"
-  tab-strip: "#dee1e6"
-  address: "#f1f3f4"
-  surface: "#fff"
-  toolbar: "#fff"
-  ink: "#202124"
-  muted: "#5f6368"
-  line: "#dce0e7"
-  accent: "#1a5fc5"
-  accent-soft: "#e7f0fb"
-  danger: "#b13a3a"
-  hover: "#e3e7ed"
-  dark-bg: "#292a2d"
-  dark-tab-strip: "#202124"
-  dark-address: "#202124"
-  dark-surface: "#292a2d"
-  dark-toolbar: "#35363a"
-  dark-ink: "#e8eaed"
-  dark-muted: "#a4aebc"
-  dark-line: "#48494c"
-  dark-accent: "#88baf3"
-  dark-accent-soft: "#293d57"
-  dark-danger: "#f3a2a2"
-  dark-hover: "#303743"
+  pine: "#193c35"
+  lime: "#bde64d"
+  background: "#fbfcf9"
+  tab-strip: "#e0e8db"
+  address: "#eef3e9"
+  card: "#ffffff"
+  toolbar: "#ffffff"
+  foreground: "#193c35"
+  muted: "#e4ebdf"
+  muted-foreground: "#52675b"
+  border: "#d8e1d3"
+  input: "#a8b99f"
+  primary: "#193c35"
+  primary-foreground: "#fbfcf9"
+  accent: "#eaf3d3"
+  destructive: "#ad3636"
+  secondary: "#edf3e8"
+  dark-background: "#17231f"
+  dark-tab-strip: "#111b17"
+  dark-address: "#111b17"
+  dark-card: "#1d2c25"
+  dark-toolbar: "#213229"
+  dark-foreground: "#f1f6e9"
+  dark-muted: "#34483c"
+  dark-muted-foreground: "#b4c5b2"
+  dark-border: "#3e5546"
+  dark-input: "#667d64"
+  dark-primary: "#bde64d"
+  dark-primary-foreground: "#193c35"
+  dark-accent: "#2e4628"
+  dark-destructive: "#f5a6a1"
+  dark-secondary: "#293d30"
   connected: "#2a8d64"
 typography:
+  brand:
+    fontFamily: '"Freebo Atma", sans-serif'
+    fontWeight: 600
+    letterSpacing: "-0.015em"
   title:
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", sans-serif'
     fontSize: "21px"
-    fontWeight: 650
+    fontWeight: 600
     lineHeight: 1.3
   headline:
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", sans-serif'
     fontSize: "17px"
-    fontWeight: 620
+    fontWeight: 600
     lineHeight: 1.4
   title-small:
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", sans-serif'
@@ -46,18 +58,16 @@ typography:
   body:
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", sans-serif'
     fontSize: "13px"
-    lineHeight: 1.65
+    lineHeight: 1.625
   control:
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", sans-serif'
-    fontSize: "13px"
-    fontWeight: 550
-    lineHeight: 1.5
+    fontSize: "14px"
+    fontWeight: 500
+    lineHeight: 1.428571
   navigation:
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", sans-serif'
     fontSize: "13px"
-  field:
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", sans-serif'
-    fontSize: "14px"
+    fontWeight: 500
   tab:
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", sans-serif'
     fontSize: "12px"
@@ -65,14 +75,14 @@ typography:
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", sans-serif'
     fontSize: "11px"
 rounded:
+  small: "4px"
   control: "6px"
-  button: "7px"
-  row: "8px"
+  surface: "8px"
   tab: "9px 9px 0 0"
   form: "12px"
   address: "18px"
-  switch: "20px"
   navigation: "0 22px 22px 0"
+  pill: "9999px"
   circle: "50%"
 spacing:
   tight: "6px"
@@ -86,218 +96,205 @@ spacing:
   wide: "40px"
 components:
   button-primary:
-    backgroundColor: "{colors.accent}"
-    textColor: "{colors.surface}"
+    backgroundColor: "{colors.primary}"
+    textColor: "{colors.primary-foreground}"
     typography: "{typography.control}"
-    rounded: "{rounded.button}"
-    padding: "11px 18px"
-  button-quiet:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.ink}"
+    rounded: "{rounded.control}"
+    padding: "8px 16px"
+    height: "36px"
+  button-outline:
+    backgroundColor: "{colors.background}"
+    textColor: "{colors.foreground}"
     typography: "{typography.control}"
-    rounded: "{rounded.button}"
-    padding: "8px 12px"
-  button-text:
-    textColor: "{colors.accent}"
+    rounded: "{rounded.control}"
+    padding: "8px 16px"
+    height: "36px"
+  button-ghost:
+    textColor: "{colors.foreground}"
     typography: "{typography.control}"
-    rounded: "{rounded.button}"
-    padding: "4px 0"
+    rounded: "{rounded.control}"
+    padding: "8px 16px"
+    height: "36px"
   button-icon:
-    textColor: "{colors.ink}"
+    textColor: "{colors.foreground}"
     rounded: "{rounded.control}"
-    height: "34px"
-    width: "34px"
+    height: "36px"
+    width: "36px"
   button-icon-selected:
-    backgroundColor: "{colors.accent-soft}"
-    textColor: "{colors.accent}"
+    backgroundColor: "{colors.accent}"
+    textColor: "{colors.primary}"
     rounded: "{rounded.control}"
-    height: "34px"
-    width: "34px"
+    height: "36px"
+    width: "36px"
   browser-tab:
-    textColor: "{colors.muted}"
+    textColor: "{colors.muted-foreground}"
     typography: "{typography.tab}"
     rounded: "{rounded.tab}"
     height: "34px"
     width: "190px"
   browser-tab-active:
     backgroundColor: "{colors.toolbar}"
-    textColor: "{colors.ink}"
+    textColor: "{colors.foreground}"
     typography: "{typography.tab}"
     rounded: "{rounded.tab}"
     height: "34px"
     width: "190px"
   address-bar:
     backgroundColor: "{colors.address}"
-    textColor: "{colors.muted}"
+    textColor: "{colors.muted-foreground}"
     rounded: "{rounded.address}"
     padding: "0 13px"
     height: "34px"
   input-server:
-    backgroundColor: "{colors.bg}"
-    textColor: "{colors.ink}"
-    typography: "{typography.field}"
+    textColor: "{colors.foreground}"
+    typography: "{typography.control}"
     rounded: "{rounded.control}"
-    padding: "11px 12px"
+    padding: "4px 12px"
+    height: "36px"
     width: "100%"
-  navigation-settings:
-    textColor: "{colors.muted}"
-    typography: "{typography.navigation}"
-    rounded: "{rounded.navigation}"
-    padding: "12px 16px"
   navigation-settings-active:
-    backgroundColor: "{colors.accent-soft}"
-    textColor: "{colors.accent}"
+    backgroundColor: "{colors.accent}"
+    textColor: "{colors.primary}"
     typography: "{typography.navigation}"
     rounded: "{rounded.navigation}"
     padding: "12px 16px"
   form-server:
-    backgroundColor: "{colors.surface}"
+    backgroundColor: "{colors.card}"
     rounded: "{rounded.form}"
     padding: "{spacing.section-gap}"
     width: "min(100%, 510px)"
-  player-row-selected:
-    backgroundColor: "{colors.accent-soft}"
-    rounded: "{rounded.row}"
-    padding: "14px 12px"
   switch:
-    backgroundColor: "{colors.muted}"
-    rounded: "{rounded.switch}"
-    height: "21px"
-    width: "36px"
+    backgroundColor: "{colors.input}"
+    rounded: "{rounded.pill}"
+    height: "1.15rem"
+    width: "32px"
   switch-checked:
-    backgroundColor: "{colors.accent}"
-    rounded: "{rounded.switch}"
-    height: "21px"
-    width: "36px"
-  queue-item-current:
-    backgroundColor: "{colors.accent-soft}"
-    textColor: "{colors.accent}"
-    rounded: "{rounded.control}"
-    padding: "13px 9px"
+    backgroundColor: "{colors.primary}"
+    rounded: "{rounded.pill}"
+    height: "1.15rem"
+    width: "32px"
 ---
 
-# Design System: Freebo / 福瑞播
+# Design System: Freebo
 
 ## Overview
 
-**Creative North Star: "Chrome desktop browser"**
+**Creative North Star: "The friendly guide dog"**
 
-Chrome's desktop browser shell is the confirmed visual reference for Freebo / 福瑞播. A gray tab strip, a separate navigation toolbar and a rounded address field frame compact utility pages. The previous IINA-like shell is superseded by the user's approved Chrome direction; the build is code-first and has no approved image comp.
+Freebo pairs the approved guide-dog mark with Atma SemiBold. Deep pine gives the identity a steady outline; lime provides a clear, lively point of recognition. The asymmetric ears and friendly expression belong to the mark's identity. Use the supplied vector family for the name, logo and app icon, with Freebo capitalized in every locale.
 
-System typography and neutral light/dark surfaces keep the application familiar in Chinese and English. Blue identifies actions, selection and keyboard focus. Emby supplies the library and sign-in interface inside the native guest view; Freebo's own chrome manages server tabs, setup, playback and recovery.
+The identity sits within the user's confirmed Chrome desktop layout: tabs above a navigation toolbar and rounded address field. Warm green surfaces carry compact utility pages. System typography keeps instructions and controls readable in Chinese and English; the character font is reserved for the product name in application chrome. Emby owns its library and sign-in interface in a native guest view. Freebo owns server management, setup, playback controls and recovery.
 
 **Key Characteristics:**
 
-- A two-row browser shell with native operating-system window controls.
-- Neutral light/dark surfaces, system typography and a restrained blue accent.
-- Compact server lists and a settings rail that shows one utility panel at a time.
-- Persistent playback controls and recovery areas outside the native guest view.
+- An approved guide-dog mark and a real Atma 600 wordmark.
+- Deep pine, lime and paper, with semantic light/dark utility surfaces.
+- A two-row desktop browser shell with native operating-system controls.
+- Flat, compact settings and server rows; temporary playback in a native floating window.
 
 ## Colors
 
-A neutral browser shell carries one blue action and selection family. The frontmatter records the browser visual language. Runtime colors now use shadcn semantic tokens: `background`, `foreground`, `card`, `primary`, `accent`, `muted-foreground`, `border`, `secondary` and `destructive`. `tab-strip`, `address` and `toolbar` remain shell-specific variables. Component sizing and state styles come from `src/components/ui/`; those implementations supersede the earlier hand-written control metrics in the frontmatter.
+The frontmatter extracts the current semantic palette from [src/style.css](src/style.css). The brand's three foundation colors and vector usage are recorded in [the brand specification](docs/brand/README.md); interface tokens derive the light and dark utility surfaces from that identity.
 
 ### Primary
 
-- **Utility Blue** (`accent`): primary buttons, links, caret, focus outline, selected navigation and playback controls.
-- **Soft Blue Selection** (`accent-soft`): selected settings entries, player rows, queue items and text selection.
+- **Deep Pine** (`pine`, `primary`): brand structure, light-theme actions, links and focus feedback.
+- **Lime** (`lime`, `dark-primary`): the dog-mark accent, sharing materials and dark-theme actions. It is not a blanket background for every panel.
+- **Soft Green Selection** (`accent`, `dark-accent`): selected navigation, player rows and playback items.
 
 ### Neutral
 
-- **Workspace Paper** (`bg`): the scrollable utility workspace; **Tab Gray** (`tab-strip`): the draggable title-bar strip; **Address Gray** (`address`): the inset address field.
-- **Utility Surface** (`surface`) and **Toolbar Surface** (`toolbar`): form/panel surfaces and the active tab/toolbar. They share a light value and separate in dark appearance.
-- **Reading Ink** (`ink`), **Supporting Gray** (`muted`), **Divider Gray** (`line`) and **Hover Gray** (`hover`): content, secondary detail, thin boundaries and pointer feedback.
+- **Paper** (`background`) and **Night Green** (`dark-background`): the owned workspace.
+- **Tab Surface**, **Address Surface**, **Card Surface** and **Toolbar Surface**: separate the browser layers and utility containers without decorative gradients.
+- **Reading Ink**, **Supporting Ink**, **Divider** and **Field Stroke**: preserve readable text and clear control boundaries in both themes.
 
-The `danger` pair marks recovery errors and removal actions. `connected` is the ready connection dot and currently retains the same value in both themes; it is state feedback, not an additional brand accent.
+`destructive` marks removal and recovery errors. `connected` marks a ready connection and is state feedback rather than a fourth identity color.
 
-**The Local Appearance Rule.** Follow the system appearance or the explicit app setting through the existing CSS variables. Emby's appearance remains controlled by Emby; shell language and theme changes affect owned chrome.
+**The Semantic Appearance Rule.** Use semantic CSS variables and shadcn variants for owned controls. Follow system or explicit app appearance. Emby's appearance remains controlled by Emby.
 
 ## Typography
 
-The system UI stack serves headings, body copy and controls; there is no separate display family. Utility headings use the title, headline and small-title roles in the frontmatter. Body paragraphs use the compact body role, while buttons use the slightly stronger control role. Fields, tabs and metadata retain their own observed sizes.
+**Display Font:** Atma SemiBold, served locally as `Freebo Atma`, for Freebo's name in the app. The brand-kit display headings have their own documented presentation scale.
+**Body Font:** The system sans-serif stack in the frontmatter, including Noto Sans fallback.
 
-Local component treatments remain local: the settings rail heading is smaller than the page title (20px), the welcome heading is slightly larger than the normal section heading (19px, weight 600), and explanatory setting text uses the tab-size step (12px). Executable paths, provider labels, queue positions and playback times use metadata. Playback times use tabular numerals. Browser tab labels and current playback titles ellipsize; URLs and executable paths wrap.
+The chosen wordmark is real Atma at weight 600 with tracking −0.015em. Portable wordmarks are shaped with HarfBuzz and outlined with fontTools; the editable SVG sources retain font-backed text. Do not redraw the letters. Disable synthetic bold and italic. The home-tab name uses 16px type; the logo assets preserve their own glyph geometry.
 
-**The Readable Detail Rule.** Keep explanatory text beside its setting, wrap long server URLs and executable paths, and retain action-specific accessible names for icon-only controls. Chinese and English use the same hierarchy.
+Utility page titles, section headings and smaller headings use the title, headline and title-small roles. Paragraphs use body; shadcn buttons and desktop inputs use control. Tabs and navigation have their compact roles. The Home empty-state heading uses 19px and the settings-rail heading uses 20px; these are local hierarchy choices, while the Atma home-tab name stays at 16px. Explanatory setting copy uses 12px, executable paths and provider labels use metadata, and playback times use tabular numerals. Long URLs and paths wrap; tab and playback titles ellipsize.
+
+**The Name Type Rule.** Within the application, Atma spells Freebo. Instructions, URLs, settings and translated copy use the system UI stack. The independent brand-kit page may use its documented Atma display heading.
 
 ## Layout
 
-The application is a full-height flex frame with a scrolling workspace. The persistent browser shell is two rows (88px total): a draggable tab strip (40px) above the navigation/address toolbar (48px). Tabs are aligned to the bottom of the strip. Normal server/utility tabs are 190px wide; the home tab is 150px wide. The tab list scrolls horizontally as needed. On non-fullscreen macOS, the strip reserves 84px at the left for native traffic lights; Windows/Linux reserve 148px at the right for the native control overlay. Clickable tabs and the new-tab button are outside the drag region.
+The full-height desktop frame keeps a fixed browser shell (88px): a draggable tab strip (40px) above a navigation/address toolbar (48px). Tabs align to its bottom. Standard tabs are 190px wide and Home is 150px; the list scrolls horizontally when needed. macOS reserves 84px at the left for traffic lights outside fullscreen. Windows/Linux reserve 148px at the right for native control overlays. Interactive tab controls sit outside the drag region.
 
-Server content is centered in a maximum-width container (960px), with page padding (32px 36px 20px). A bordered server form is capped at 510px. Settings use a left rail (216px) and a flexible content column; the body is capped at 880px with padding (28px 40px 40px). The rail is sticky and its available height subtracts only the browser shell. Settings render one selected panel at a time.
+Home uses a centered container capped at 960px, with padding of 32px 36px 20px. First-use setup is capped at 760px with 36px horizontal and 32px vertical padding. It uses a single centered logo on welcome, followed by ordinary setup steps. Empty Home and About also use the approved lockup; routine utility rows do not repeat it.
 
-The toolbar media action opens a separate native floating window, capped at 420px wide and 640px high and clamped to the display work area. Its size also accommodates smaller main windows. Playback controls, recovery and the queue stay inside that window; the server page keeps its full size. Home is a server list, with management actions in Settings. A first-use guide selects a player and registers a server; player discovery runs once there and is persisted.
+Settings use a 216px rail and flexible content column. The content is capped at 880px, with 28px 40px 40px padding. The rail stays below the browser shell and presents one selected panel at a time. A server form is capped at 510px, with 24px internal padding. Home lists servers; management belongs in Settings.
 
-**The Native Geometry Rule.** The guest starts below the 88px shell and shifts down by 64px for a server or generic error. Playback state and the floating panel never subtract from the guest's width or height.
+**The Native Geometry Rule.** The Emby guest begins below the 88px shell and moves down by 64px when a server or generic recovery bar appears. Playback controls and queue stay in a separate native window and do not subtract from the guest's size.
 
-The native window opens at 1280 × 850 and has a minimum size of 820 × 600. At 1000px CSS narrows the settings rail to 190px, uses 28px settings-body padding, narrows standard/home tabs to 160px/130px, hides secondary connection detail. At 650px the rail becomes 150px, setting/guide rows wrap. The latter is below the native minimum and is a narrow-preview fallback, not a mobile application contract.
+The native window opens at 1280 × 850 with a minimum of 820 × 600. At 1000px, settings use a 190px rail and 28px content padding; standard/Home tabs narrow to 160px/130px and secondary connection text hides. At 650px, the rail becomes 150px and utility rows wrap. This narrower CSS fallback is below the native minimum and does not establish a mobile-app contract. Playback's native floating window is capped at 420 × 640 and clamped to the display work area.
 
 ## Elevation & Depth
 
-The shell, utility pages, server form and settings rows are flat. Tones and one-pixel dividers establish hierarchy. The playback popup is a native task window with the operating system shadow. shadcn controls use their standard visible focus rings. The address field keeps an accent outline around its whole container with no offset. Select menus use shadcn's popover surface, border and soft shadow.
+The shell, utility pages and ordinary settings/server rows remain flat. Surface tones and one-pixel boundaries establish hierarchy. shadcn outline controls and inputs retain their small component shadow; Select uses a bordered popover and soft shadow. The playback popup receives the operating system's native window shadow. Keyboard focus stays visible through shadcn rings; the address field uses a primary outline around its entire pill.
 
-**The Task Depth Rule.** Keep ordinary settings and server rows flat. Use a native window for the temporary playback task layer; hierarchy elsewhere comes from surface tone, selection and thin dividers.
+**The Task Depth Rule.** Keep routine settings flat. Use a native window for the temporary playback task layer.
 
 ## Shapes
 
-Tabs have curved top corners and square bottom corners so the active tab joins its toolbar. The address field is a pill. Settings entries use a straight left edge and a rounded right end, distinct from the lightly rounded controls and selected player rows. The bordered server form has the larger container corner in the tokens. Close/new-tab controls and switch thumbs are circular; the switch track is a compact pill. Server and ordinary settings rows use horizontal dividers rather than repeated cards. The authored SVG application icon remains the Freebo identity asset.
+Tabs have curved top corners and square bottom corners so the active tab joins the toolbar. The address field is a pill. Settings navigation has a straight left edge and rounded right end. shadcn controls use the control radius; the server form uses the larger form radius. Close/new-tab buttons and switch thumbs are circular. Ordinary rows use dividers rather than repeated raised cards.
+
+The mark preserves the asymmetric ears, face and three-color silhouette in the editable [vector master](assets/brand/freebo/source/mark.svg). Horizontal lockups size the dog to 1.1 times the wordmark's visible ink height and separate it by 0.1 times that height. Center the visible dog and glyph bounds vertically. Use the supplied stacked and monochrome variants rather than altering the primary lockup. Detailed clear space and minimum-size rules live in [the brand specification](docs/brand/README.md).
 
 ## Components
 
-### Buttons
+### Buttons and fields
 
-shadcn Button variants carry action hierarchy: default for primary actions, outline for quiet actions, link for text actions and ghost for icon/navigation actions. Blue action and soft-blue selection colors retain the Freebo palette. Component variants own hover, disabled and keyboard focus states; page CSS does not override them. Buttons default to `type="button"`; the server form explicitly marks its save action as submit.
+Use shadcn Button default, outline, ghost and link variants for primary, supporting, icon and text actions. Default buttons are 36px tall; the selected icon surface uses `accent` with `primary` ink. Keep hover, disabled, destructive and keyboard-focus states in the shared components. Buttons default to `type="button"`; form saving explicitly uses submit.
+
+shadcn Input and Label supply field states and accessible labeling. OptionSelect uses shadcn Select with its Portal menu, selected-item check and keyboard behavior. The provider is disabled when only one exists or a server is edited. Credentials are entered on the Emby webpage. Keep field help beside the relevant field and saving feedback inside the action.
 
 ### Browser tabs and address toolbar
 
-The active tab adopts the toolbar fill and reading ink; inactive tabs use muted ink with a neutral hover fill. Each server tab separates its selectable title from its circular close action. Closing a tab keeps the server registered. The plus control opens the server form. A settings tab appears once settings is opened and can be closed independently.
+The active tab takes the toolbar surface and foreground ink; inactive tabs use supporting ink with neutral hover. Server title and close actions remain separate. Closing a tab keeps its server registered. Settings has its own closable tab. The plus action opens Home.
 
-Back, forward, reload and home sit before the address field. Their disabled states follow the active library page and navigation state. The address input is read-only: it reflects the current server URL or `freebo://servers` / `freebo://settings`, and is not an arbitrary URL-entry feature. The focus-within outline encloses the rounded field. A compact ready/connecting indicator is secondary detail and hides at the desktop compaction breakpoint.
+Back, forward, reload and Home precede the address field. The address is read-only and reflects the server URL or an internal Freebo page; it does not accept arbitrary URL entry. Media status and Settings actions sit after it. BrandName renders the home-tab name with the bundled Atma font; BrandLogo supplies identical light/dark vector geometry with an accessible Freebo name.
 
-### Server form and fields
+### Settings, players and first-use setup
 
-The flat bordered form uses a visible heading and field labels, a provider select, a URL-friendly server-address field and an optional name. shadcn Input and Label provide field, focus and label states. OptionSelect composes shadcn Select with a Portal menu, a visible selected-item check, keyboard navigation and focus restoration on Escape. The provider is disabled when only one provider exists or an existing server is being edited. Credentials are entered in the following Emby webpage. Saving feedback appears within the main action; supporting field help stays next to the field.
+The rail selects players, playback, appearance, servers, diagnostics or About. Soft green with primary ink marks selection. Player rows use shadcn RadioGroup and a full clickable label with a selected surface. Preserve readable player names, paths and default markers. shadcn Collapsible shows installation help, initially expanded when no player is found.
 
-### Settings rail and utility rows
-
-Muted labeled buttons with SVG icons select one of six panels: players, playback, appearance, servers, diagnostics and about. Active entries use soft blue, blue ink and the stronger control weight. Hover uses the neutral hover fill. Appearance contains separate theme and language selectors, each offering a system default. Persisted language changes update owned shell labels and recovery messages; server-page language remains independent.
-
-Player rows use shadcn RadioGroup and Label, a full clickable label row and a soft-blue selected surface. Name, executable path and default marker remain readable. shadcn Collapsible presents installation guidance, initially expanded when no player is discovered. Ordinary setting rows pair their title/help with the relevant switch, selector or action and a divider below.
-
-### Switches
-
-shadcn Switch provides the switch role, checked state, thumb motion and keyboard interaction. Use its component dimensions and state styles rather than a checkbox pseudo-element.
+A first-use player scan runs once and persists its completed state; later scans are manual. Setup offers language selection, player discovery, server registration and completion. Use Switch for boolean settings and separate Selects for theme and language, each with a system default. Locale changes affect owned shell and recovery messages; server-page language remains independent.
 
 ### Recovery, playback and queue
 
-Server-load errors offer reload; generic action errors offer close; playback/synchronization errors lead to settings. Recovery surfaces use readable danger text and keep the action separate. Playback shows the current title, player/status, named previous/play-pause/stop/next controls, tabular times and a shadcn Slider. Seeking previews the selected time locally and sends a seek command on value commit. Previous/next and unavailable playback actions preserve their disabled boundaries. Queue entries are numbered; the current item receives soft blue, blue text and a play icon.
+Recovery uses readable destructive text with an action named for reload, close or settings. The native playback window holds title, player/status, previous/play-pause/stop/next controls, tabular times, Slider and queue. Seeking previews locally and commits a seek command on value commit. Unavailable actions remain disabled; selected queue entries use accent and primary ink.
 
-**The Purposeful Motion Rule.** Use motion for loading rotation and switch state feedback. Honor the existing reduced-motion rule, which removes animation and transition from owned UI.
+**The Purposeful Motion Rule.** Loading rotation, switch feedback and shared control transitions communicate state. Honor reduced motion by disabling animation and transition in owned UI.
 
 ## Do's and Don'ts
 
 ### Do:
 
-- Do preserve the user's Chrome desktop shell with tabs, navigation and a rounded address field.
-- Do use the existing CSS variables for both light and dark appearance.
-- Do keep the shell and server recovery dimensions synchronized with native guest bounds, while playback floats independently.
-- Do show one settings panel at a time and keep its label and selected rail entry consistent.
-- Do give recovery controls the name of the action they perform.
-- Do preserve Chinese and English labels, visible keyboard focus and accessible icon names.
-- Do use actual clean app captures for public interface imagery and retain their provenance.
+- Do use the approved vector logo family, Atma 600 and the bundled font license.
+- Do keep Freebo capitalized in every locale and in all brand materials.
+- Do preserve Chrome-style desktop tabs, navigation and the rounded address field.
+- Do keep shell and recovery geometry synchronized with native guest bounds.
+- Do use shadcn controls and existing semantic variables for both appearances.
+- Do keep translated labels, keyboard focus and action-specific icon names readable.
+- Do use clean actual-app screenshots and state their validation scope.
 
 ### Don't:
 
-- Don't restyle Emby's library or account interface as Freebo chrome.
-- Don't turn row-based settings and server lists into decorative elevated card grids.
-- Don't treat closing a browser tab as deletion of its registered server.
-- Don't infer mobile, Windows/Linux or physical window-drag acceptance from CSS or macOS content captures.
-- Don't treat a content-only shell capture or scoped finish verdict as whole-product runtime acceptance.
+- Don't redraw the wordmark, stretch the mark or add a Chinese alias to brand assets.
+- Don't use a grayscale filter as a substitute for the supplied monochrome vector cutouts.
+- Don't apply Atma to utility instructions, settings or Emby's interface.
+- Don't restyle Emby's library/account pages as Freebo chrome.
+- Don't turn ordinary settings and server rows into decorative elevated card grids.
+- Don't treat closing a tab as deletion of its registered server.
+- Don't infer native window resizing, real playback or cross-platform acceptance from CSS captures.
 
-Sources: [product context](PRODUCT.md), [approved app surface](docs/app-surface.md), [quality bar](docs/quality-bar.md), `src/style.css`, `src/App.tsx` and `electron/main.ts`. The previous [independent finish review](docs/design-review.md) returned `ship` with no material fixes in its stated shell scope. The current [capture matrix](.impeccable/review/freebo/matrix.md) records 11 actual-app captures spanning Chinese/English, light/dark, server/setup/recovery and the minimum desktop window, plus a private playback/queue shell capture. Content captures exclude native window controls and the guest view. macOS native controls were separately observed through CUA accessibility; Windows/Linux control overlays are code-checked, and physical window dragging is not runtime accepted. The separate website retains its own incumbent design authority.
+The 2026-10-06 brand implementation replaces the former blue palette and provisional typography under the user's approved identity change. Current clean captures are [Chinese welcome](docs/assets/welcome.png), [English welcome](docs/assets/welcome-en.png), [Chinese settings](docs/assets/settings.png) and [English settings](docs/assets/settings-en.png). The scoped evidence is recorded in [validation](docs/validation.md); historical shell reviews remain evidence for their original iteration. The branding pass verifies actual Electron preload/IPC, appearance/language, IINA discovery and popup opening. Its 820 × 600 check is a CSS viewport exercise, not native window-resize acceptance, and it did not exercise server authentication or media playback. The separate site's existing design authority remains in force; [site-surface.md](docs/site-surface.md) specifies supplied materials only.
 
-Not canonized: the superseded IINA-like palette, type/radius scale and geometry. This record replaces them under the approved Chrome system change; the single detector pass's 16 advisory notes against the old record do not become new design rules. No material defect was reported in the fresh finish review. The sidecar's synthesized tonal ramps are preview metadata, not additional colors used by the application.
-
-## Current interaction iteration
-
-The user deferred full tests, UI detection, capture updates and independent review until the interaction is agreed. The first-use guide, home list and native playback popup are currently implemented locally; the earlier screenshots and `ship` verdict do not validate them. Raster assets and examples will be refreshed together at final acceptance.
+Sources: [PRODUCT.md](PRODUCT.md), [brand specification](docs/brand/README.md), [app surface](docs/app-surface.md), [quality bar](docs/quality-bar.md), `src/style.css`, `src/components/ui/`, `src/components/Brand.tsx`, `src/App.tsx`, `src/components/SetupGuide.tsx`, `electron/main.ts` and `assets/brand/freebo/brand.json`. The sidecar's synthesized tonal ramps are preview metadata, not new runtime color tokens.

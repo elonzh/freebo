@@ -1,0 +1,377 @@
+@font-face {
+  font-family: "Freebo Atma";
+  src: url("/fonts/Atma-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+.brand-kit {
+  background: #fbfcf9;
+  color: #193c35;
+  font-size: 15px;
+}
+.kit-header {
+  padding: 22px 5vw;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  background: #193c35;
+  color: #fbfcf9;
+}
+.kit-header > a img {
+  width: 135px;
+  height: auto;
+}
+.kit-header > span {
+  color: #dce8d0;
+}
+.kit-header nav {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.kit-header nav a {
+  color: #fbfcf9;
+}
+.kit-header nav [data-variant="default"] {
+  background: #bde64d;
+  color: #193c35;
+}
+.brand-kit main {
+  max-width: 1450px;
+  margin: auto;
+  padding: 40px 5vw 70px;
+}
+.kit-intro {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 50px;
+  align-items: center;
+  margin-bottom: 80px;
+}
+.kit-signature {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 70px 35px;
+  background: #193c35;
+  min-height: 320px;
+  border-radius: 16px;
+}
+.kit-signature img {
+  width: 100%;
+  height: auto;
+}
+.kit-intro h1 {
+  font-family: "Freebo Atma", sans-serif;
+  font-size: 42px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  margin-bottom: 20px;
+}
+.kit-intro p {
+  max-width: 40ch;
+  line-height: 1.65;
+  font-size: 15px;
+}
+.kit-intro .kit-choice {
+  font-size: 12px;
+  margin: 20px 0;
+  color: #52675b;
+}
+.kit-section {
+  margin-bottom: 76px;
+}
+.kit-section-head {
+  display: flex;
+  gap: 24px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+.kit-section h2,
+.kit-rules h2 {
+  font-size: 25px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.kit-section p,
+.kit-rules p {
+  color: #52675b;
+  line-height: 1.65;
+  margin-top: 9px;
+}
+.kit-section-head p {
+  font-size: 13px;
+  margin: 0;
+}
+.kit-logos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px 22px;
+}
+.kit-logo-stage {
+  height: 180px;
+  background: white;
+  border: 1px solid #d8e1d3;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 28px;
+}
+.kit-logo-stage.pine {
+  background: #193c35;
+  border-color: #193c35;
+}
+.kit-logo-stage img {
+  width: 100%;
+  max-height: 125px;
+  object-fit: contain;
+}
+.kit-asset-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+}
+.kit-asset-title h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+.kit-asset-title > div {
+  display: flex;
+  gap: 10px;
+  font-size: 11px;
+}
+.kit-logos article > p {
+  font-size: 12px;
+  margin-top: 7px;
+}
+.kit-foundations {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 55px;
+}
+.kit-palettes {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+.kit-palettes > div {
+  flex: 1;
+  min-width: 0;
+}
+.kit-palettes > div > div {
+  height: 90px;
+  border-radius: 10px;
+  border: 1px solid #d8e1d3;
+}
+.kit-palettes h3 {
+  font-size: 14px;
+  margin: 12px 0 5px;
+}
+.kit-palettes button {
+  padding: 0 2px;
+  font-size: 12px;
+  gap: 5px;
+}
+.kit-type {
+  border-left: 1px solid #d8e1d3;
+  padding-left: 35px;
+}
+.kit-type > img {
+  width: 260px;
+  max-width: 100%;
+  margin: 26px 0 14px;
+}
+.kit-type p {
+  max-width: 52ch;
+}
+.kit-type-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 20px;
+  font-size: 12px;
+}
+.kit-icon-sizes {
+  display: flex;
+  align-items: flex-end;
+  gap: 28px;
+  padding: 30px 0;
+  overflow-x: auto;
+}
+.kit-icon-sizes > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+  font-size: 11px;
+  color: #52675b;
+}
+.kit-downloads {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  margin-top: 20px;
+}
+.kit-sharing {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+}
+.kit-sharing a {
+  text-decoration: none;
+}
+.kit-sharing img {
+  width: 100%;
+  border-radius: 12px;
+  aspect-ratio: 2 / 1;
+  object-fit: cover;
+}
+.kit-sharing a:nth-child(2) img {
+  object-fit: contain;
+  background: #193c35;
+}
+.kit-sharing span {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  padding-top: 13px;
+}
+.kit-rules {
+  border-top: 1px solid #d8e1d3;
+  padding-top: 30px;
+}
+.kit-rules > div {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-top: 16px;
+}
+.kit-rules p {
+  font-size: 13px;
+}
+.kit-footer {
+  max-width: 1450px;
+  margin: auto;
+  padding: 30px 5vw 45px;
+  border-top: 1px solid #d8e1d3;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.kit-footer img {
+  width: 100px;
+}
+.kit-footer p {
+  font-size: 12px;
+  color: #52675b;
+  flex: 1;
+}
+.kit-footer a {
+  font-size: 12px;
+}
+@media (max-width: 900px) {
+  .kit-logos {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .kit-intro {
+    gap: 30px;
+  }
+  .kit-intro h1 {
+    font-size: 33px;
+  }
+  .kit-signature {
+    min-height: 260px;
+    padding: 40px 25px;
+  }
+  .kit-icon-sizes {
+    gap: 20px;
+  }
+  .kit-section-head {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+@media (max-width: 620px) {
+  .kit-header {
+    padding: 20px;
+    gap: 10px;
+  }
+  .kit-header > span {
+    display: none;
+  }
+  .kit-header > a img {
+    width: 100px;
+  }
+  .kit-header nav {
+    gap: 8px;
+  }
+  .kit-header nav a {
+    font-size: 11px;
+    padding-inline: 8px;
+  }
+  .brand-kit main {
+    padding: 25px 20px 50px;
+  }
+  .kit-intro {
+    grid-template-columns: 1fr;
+    gap: 26px;
+    margin-bottom: 50px;
+  }
+  .kit-signature {
+    min-height: 210px;
+  }
+  .kit-intro h1 {
+    font-size: 36px;
+  }
+  .kit-intro p {
+    max-width: 45ch;
+  }
+  .kit-section {
+    margin-bottom: 50px;
+  }
+  .kit-logos {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .kit-logo-stage {
+    height: 155px;
+  }
+  .kit-foundations {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .kit-type {
+    padding: 0;
+    border: 0;
+  }
+  .kit-sharing {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  .kit-rules > div {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .kit-footer {
+    padding: 25px 20px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .kit-footer p {
+    flex-basis: calc(100% - 120px);
+  }
+}

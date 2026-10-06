@@ -1,0 +1,250 @@
+{
+  "brand": "Freebo",
+  "font": {
+    "family": "Atma",
+    "weight": 600,
+    "letterSpacingEm": -0.015,
+    "sha256": "15b935a57290a675391c6ca6bac4bd7fc746ead44e35495d6dc2562b2265a28f",
+    "source": "https://github.com/google/fonts/tree/7085eb89a950e85db5b166b7a58d414544b4140c/ofl/atma",
+    "license": "SIL OFL 1.1"
+  },
+  "colors": {
+    "pine": "#193C35",
+    "lime": "#BDE64D",
+    "paper": "#FBFCF9"
+  },
+  "files": {
+    "Freebo-brand-guide.pdf": {
+      "bytes": 184892,
+      "sha256": "5214609a5001f38b28c18b872db4344b5937c263f60be05182b2fc78d0cf9867"
+    },
+    "brand.json": {
+      "bytes": 5423,
+      "sha256": "3ecd430e31391afb2f79a866642a726174415e68b4ad1bf723b638f0ad0687d8"
+    },
+    "fonts/Atma-SemiBold.ttf": {
+      "bytes": 219984,
+      "sha256": "15b935a57290a675391c6ca6bac4bd7fc746ead44e35495d6dc2562b2265a28f"
+    },
+    "fonts/Atma-SemiBold.woff2": {
+      "bytes": 83540,
+      "sha256": "250bbd4a2a05d7da92721c042fd6f94d5662eb385cb601e4c3cb914805ff9e28"
+    },
+    "fonts/OFL.txt": {
+      "bytes": 4385,
+      "sha256": "30ac5dae4c0ceeadd011cb25012b34907cabefbc99c66086fd0541850995ab0f"
+    },
+    "icons/app-icon.svg": {
+      "bytes": 14646,
+      "sha256": "3766917588d63abb7dc6ab6196e9456f7052509b0a2d82e5d090781575c73791"
+    },
+    "icons/icon-1024.png": {
+      "bytes": 26891,
+      "sha256": "e952500495c03a4af8950f2fb1cebc8a6a1b750044585b3dfa452636fdef07bf"
+    },
+    "icons/icon-128.png": {
+      "bytes": 3056,
+      "sha256": "3efbd7333d3b292b8088e34b5d58abc9f33764eb962bcc513d176b695d77ebdd"
+    },
+    "icons/icon-16.png": {
+      "bytes": 545,
+      "sha256": "966ee3d9cd0699cad9defd1733c588e2d2f26997815ec645f0a132f8684ac187"
+    },
+    "icons/icon-24.png": {
+      "bytes": 779,
+      "sha256": "d07dae78804d5b2c43e3d3d126e90cea7f2e77096f82b6e9c395bc11446eaf47"
+    },
+    "icons/icon-256.png": {
+      "bytes": 6016,
+      "sha256": "a3141ea2de8ec7af9ebf603032105404bf1c72a1119cc5c8fbdf3a04ac6520f8"
+    },
+    "icons/icon-32.png": {
+      "bytes": 890,
+      "sha256": "9c4030720fd525403c0e9975d1e2a8e32acd78309fcbca63b588bb7871b864f6"
+    },
+    "icons/icon-48.png": {
+      "bytes": 1203,
+      "sha256": "bba5839622cddd43f0f5493d564ed63e5364d4c710287be02c4d8639c68f0bb5"
+    },
+    "icons/icon-512.png": {
+      "bytes": 12703,
+      "sha256": "204f2c019b5cb341e1c87a218133297d1ee635bc23ae04141cade90fa414df90"
+    },
+    "icons/icon-64.png": {
+      "bytes": 1603,
+      "sha256": "7ca4491293676eb2de1dec6b72abcc07d905eea7d36976a4263765a751986840"
+    },
+    "icons/icon.icns": {
+      "bytes": 146181,
+      "sha256": "a0622be29c6107a3828fb69e0fec17eef9f6d7c97c42abb0196e008f76740278"
+    },
+    "icons/icon.ico": {
+      "bytes": 42044,
+      "sha256": "69024f5b9d3c1f9d07c65ec44b227f9e442a1c3327bbd6c7db8827592a3fb96b"
+    },
+    "png/logo-black.png": {
+      "bytes": 16417,
+      "sha256": "8d78c20b65180702f6ac1a5b0914792d521a084e2c3cc39e98abdb4e31bf0483"
+    },
+    "png/logo-mono.png": {
+      "bytes": 20589,
+      "sha256": "75931eaa22a398fd9f957cb9b78b3c13672c557879b14ef6245061046c4de900"
+    },
+    "png/logo-on-dark.png": {
+      "bytes": 27452,
+      "sha256": "a5069e0a5d28964dda55777fc8d484f96ed8c4812cbe5bdf236fdcd737d481c7"
+    },
+    "png/logo-stacked-on-dark.png": {
+      "bytes": 22703,
+      "sha256": "3e240dd55639e843d8797f01744e13118847e83e0470bd2461889c43c08d8541"
+    },
+    "png/logo-stacked.png": {
+      "bytes": 22777,
+      "sha256": "95b6475e8d99ea9b015b9636149a58f3a63352d7f5d2bf112af343b214a3bea7"
+    },
+    "png/logo-white.png": {
+      "bytes": 18071,
+      "sha256": "db271efd4bb619cbf668e3bfceb2144c9b9d672425914e537c6e98b6bb4bd176"
+    },
+    "png/logo.png": {
+      "bytes": 27712,
+      "sha256": "b0d235b8cf7b178f0a540ad010519c339155e8fb75e0cef16912ae8b50a51b79"
+    },
+    "png/mark-black.png": {
+      "bytes": 18746,
+      "sha256": "1c4b889a730f2663adac456b5356733db0589700707bbd3fcb41d047fdb3d4db"
+    },
+    "png/mark-color.png": {
+      "bytes": 31614,
+      "sha256": "004ac6faaa1f76c1e3a74e4abe89ab07279490bc6687570ddb5a423d5aef3e4a"
+    },
+    "png/mark-pine.png": {
+      "bytes": 22137,
+      "sha256": "6703cd0e7f4d5bbdec0573446ae81642e2d016e96ef47ae62cdc62b72702491d"
+    },
+    "png/mark-white.png": {
+      "bytes": 18702,
+      "sha256": "8c77c0c752a6113271aa662e0a44a857b63e8e07a9320d8f50377e2dd665f869"
+    },
+    "png/wordmark-black.png": {
+      "bytes": 12458,
+      "sha256": "7b00565a443eea6c316736c422ef580138fde36318f74c9b6e0a0f46d2680fdb"
+    },
+    "png/wordmark-lime.png": {
+      "bytes": 15244,
+      "sha256": "1239f47a00e8f7db9c28f8081f71cdf7afdcfb38ab7b34993eb0e6d6d69f1b46"
+    },
+    "png/wordmark-pine.png": {
+      "bytes": 14653,
+      "sha256": "f6de00c6a94bdfbf15d0c442d4ccf339e0fa51911431418ced18a22ef35e56e5"
+    },
+    "png/wordmark-white.png": {
+      "bytes": 13307,
+      "sha256": "5dbbbe7daa8d3af46a9043f54c5e284df7a39aa42c959c773aecaef8a40f1692"
+    },
+    "social/cover-16x9.png": {
+      "bytes": 31510,
+      "sha256": "82c0af8ed681e141dac51902858be1c85ecd854b5d4a4b285dfaed1d4fa32487"
+    },
+    "social/cover-16x9.svg": {
+      "bytes": 18121,
+      "sha256": "37f5108198aa79ef3ddf4948efe05bdf6be5e482e64c1790923c27dcaa7af0c1"
+    },
+    "social/social.png": {
+      "bytes": 33478,
+      "sha256": "e802da736b2cfad2f190675105b761d4a1fb896909e07180a8c0716758ab32fb"
+    },
+    "social/social.svg": {
+      "bytes": 18400,
+      "sha256": "4748097a3a5c66111a2a57a0d48cafe55cc099e196cee5e1f95c3066a7761348"
+    },
+    "source/logo-editable.svg": {
+      "bytes": 126239,
+      "sha256": "7d045e21a90ad2215e7da8ccc8c6129f112971e50e0de05fe1f699ae33e8e494"
+    },
+    "source/mark.svg": {
+      "bytes": 14826,
+      "sha256": "8d19aa8e243e10807782b4e13e44ad796e49f548ce3638a676a49a53fa3dcda8"
+    },
+    "source/wordmark-editable.svg": {
+      "bytes": 111783,
+      "sha256": "224da3c282f57f92c7947e12b2753d4a3b32ba2dc82d8c1d9f3108e1b57a1415"
+    },
+    "svg/logo-black.svg": {
+      "bytes": 11017,
+      "sha256": "b5840175634559eb14ce786c6e1007685811a2bc2947d88ef79292b7a2cb795d"
+    },
+    "svg/logo-mono.svg": {
+      "bytes": 11017,
+      "sha256": "5ef9f14f63545a7f4d5913deb9dc076ed8dc49e3a97e48af6d8908e21bf6d12c"
+    },
+    "svg/logo-on-dark.svg": {
+      "bytes": 17845,
+      "sha256": "b679990f9e6d231a93c86ebd23d6353e9a33e55f398e7663063994de0264a379"
+    },
+    "svg/logo-stacked-on-dark.svg": {
+      "bytes": 17860,
+      "sha256": "0eff3c14551bc87f16bc4824b5050f296e758d6925b4b57d92e671fc6da13a65"
+    },
+    "svg/logo-stacked.svg": {
+      "bytes": 17860,
+      "sha256": "7727b86e8a28090e76c348b44e09ac86666875db790979aa62a0bdd77dd8f843"
+    },
+    "svg/logo-white.svg": {
+      "bytes": 11017,
+      "sha256": "2e2b178332b4797cb886201befa93baa9d17d925199288a91bef6ea2d3189ec7"
+    },
+    "svg/logo.svg": {
+      "bytes": 17845,
+      "sha256": "a06a79b924429138e51aaada4c38a05875f4e2ab5a9d021e8c90d1da25fb466f"
+    },
+    "svg/mark-black.svg": {
+      "bytes": 7698,
+      "sha256": "33b6bf4e74503ae233e1fc3cf2ecd77aea36287db15f3580b63d3f06310fb045"
+    },
+    "svg/mark-color.svg": {
+      "bytes": 14526,
+      "sha256": "347dd583f0d2d58af380e147e4a7623087891ef7304eb19cbb4b060ab0bf0244"
+    },
+    "svg/mark-pine.svg": {
+      "bytes": 7698,
+      "sha256": "480b66b9bfa5cdac37068a9c190b03eddf4aa252b9f2c9bbfb023c1d4f2e9e1d"
+    },
+    "svg/mark-white.svg": {
+      "bytes": 7698,
+      "sha256": "03d96b1a63475699a0decd6c9c32be58f8e5245059e41adf8c695c4f1ae18584"
+    },
+    "svg/wordmark-black.svg": {
+      "bytes": 3428,
+      "sha256": "1b6bbb27339dd8b755915cb6c51ef032ac54dd586f79d5716424887dd319d683"
+    },
+    "svg/wordmark-lime.svg": {
+      "bytes": 3428,
+      "sha256": "97abd2ffdbe7ab2f1498fe5d0a61a8a73e8b795956f87080b10f6c7b5e9c4e59"
+    },
+    "svg/wordmark-pine.svg": {
+      "bytes": 3428,
+      "sha256": "7b64ddd640c73febceae04872e65c2ce063b8e93040e16585e5cdd00618cce3d"
+    },
+    "svg/wordmark-white.svg": {
+      "bytes": 3428,
+      "sha256": "d42f1b47e9e8c371a8ae28c2c39ee0b91b1d6e49f360475fff079821069c098d"
+    },
+    "wallpapers/wallpaper-paper.png": {
+      "bytes": 36962,
+      "sha256": "fc61fadb6615a06ecaf875e356770d9a27eb4c5929278466ce7d8503683a0700"
+    },
+    "wallpapers/wallpaper-paper.svg": {
+      "bytes": 17978,
+      "sha256": "0a3e11a3fbe47284ae2e1d6b6adb53750af64142b9e32d7e9d5f13106255b013"
+    },
+    "wallpapers/wallpaper-pine.png": {
+      "bytes": 36287,
+      "sha256": "8fc4f315939c9b9ef516b816b004839c89572c276201e9381e1fb4f040f4737a"
+    },
+    "wallpapers/wallpaper-pine.svg": {
+      "bytes": 17978,
+      "sha256": "d14fa008d2fa2872fda543561d336a87fb443af4da0a953637f215b3f8f2ebb7"
+    }
+  }
+}

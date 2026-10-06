@@ -1,12 +1,25 @@
 # Freebo
 
-福瑞播 · [English](README.en.md)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/brand/freebo/svg/logo-on-dark.svg" />
+  <img src="assets/brand/freebo/svg/logo.svg" width="280" alt="Freebo" />
+</picture>
+
+[English](README.en.md)
 
 在 Emby 网页中选择视频，用本地播放器观看。
 
 Freebo 把服务器管理、播放器发现和播放衔接放在一个桌面应用里。打开应用，添加 Emby 地址，在原有网页中登录，即可将视频交给本地播放器。无需安装浏览器脚本、配置 Python 或单独启动服务。
 
 项目处于首版开发阶段。支持范围和实际验证结果见 [验证记录](docs/validation.md)。
+
+## 界面与品牌
+
+![Freebo 首次配置](docs/assets/welcome.png)
+
+[播放器设置](docs/assets/settings.png) · [品牌规范与源文件](docs/brand/README.md) · [品牌素材 ZIP](assets/brand/freebo/Freebo-brand-kit.zip) · [PDF 指南](assets/brand/freebo/Freebo-brand-guide.pdf)
+
+截图来自真实 macOS Electron 应用的干净隔离配置，展示已选导盲犬与 Atma 600 品牌；截图不扩大真实播放和跨平台验收结论。本轮品牌调整未更新外部项目网站。
 
 ## 功能
 
@@ -44,6 +57,8 @@ pnpm install
 pnpm dev
 ```
 
+使用 `prek install` 安装提交前检查；提交时统一执行应用与品牌预览的格式、lint、类型、测试和构建检查。
+
 直接运行本地生产版使用 `pnpm start`，会先完整构建页面、主进程和预加载，再启动 Electron，避免新旧构建产物混用。
 
 ```sh
@@ -60,6 +75,8 @@ pnpm package
 GitHub Actions 配置为在 macOS、Windows、Linux 上执行检查，分别生成 macOS arm64/x64、Windows x64、Linux x64 安装包。工作流运行后保留安装包供下载；`v*` 标签生成包含校验和的草稿 Release。
 
 当前工作流默认生成未签名安装包。正式签名和 macOS 公证需要维护者配置证书与对应凭据。
+
+品牌素材使用 `pnpm brand:generate` 生成，`pnpm brand:preview` 在本地提供品牌素材下载页。源文件、字体授权及复现说明见 [品牌规范](docs/brand/README.md)。本轮品牌调整维持版本 0.1.0。
 
 ## 许可证
 

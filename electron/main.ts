@@ -37,6 +37,10 @@ app.setPath("userData", join(app.getPath("appData"), "Freebo"));
 if (process.env.FREEBO_DEV_URL && process.env.FREEBO_USER_DATA_DIR)
   app.setPath("userData", process.env.FREEBO_USER_DATA_DIR);
 const store = new SettingsStore(join(app.getPath("userData"), "settings.json"));
+const windowIcon = join(
+  __dirname,
+  process.env.FREEBO_DEV_URL ? "../public/icon.png" : "../dist/icon.png",
+);
 const providers = new ProviderRegistry([embyProvider]);
 const playback = new PlaybackManager();
 function locale() {
@@ -320,7 +324,7 @@ async function togglePlaybackPopup(anchor: {
       fullscreenable: false,
       skipTaskbar: true,
       hasShadow: true,
-      backgroundColor: nativeTheme.shouldUseDarkColors ? "#292a2d" : "#ffffff",
+      backgroundColor: nativeTheme.shouldUseDarkColors ? "#17231f" : "#fbfcf9",
       webPreferences: {
         preload: join(__dirname, "preload.cjs"),
         sandbox: true,
@@ -655,8 +659,8 @@ function updateChrome() {
   if (process.platform !== "darwin")
     window.setTitleBarOverlay({
       height: 40,
-      color: nativeTheme.shouldUseDarkColors ? "#202124" : "#dee1e6",
-      symbolColor: nativeTheme.shouldUseDarkColors ? "#e8eaed" : "#202124",
+      color: nativeTheme.shouldUseDarkColors ? "#111b17" : "#e0e8db",
+      symbolColor: nativeTheme.shouldUseDarkColors ? "#f1f6e9" : "#193c35",
     });
 }
 function buildMenu() {
@@ -771,17 +775,18 @@ void app.whenReady().then(async () => {
     minWidth: 820,
     minHeight: 600,
     title: t("brand"),
+    icon: windowIcon,
     titleBarStyle: "hidden",
     ...(process.platform === "darwin"
       ? { trafficLightPosition: { x: 12, y: 13 } }
       : {
           titleBarOverlay: {
             height: 40,
-            color: nativeTheme.shouldUseDarkColors ? "#202124" : "#dee1e6",
-            symbolColor: nativeTheme.shouldUseDarkColors ? "#e8eaed" : "#202124",
+            color: nativeTheme.shouldUseDarkColors ? "#111b17" : "#e0e8db",
+            symbolColor: nativeTheme.shouldUseDarkColors ? "#f1f6e9" : "#193c35",
           },
         }),
-    backgroundColor: nativeTheme.shouldUseDarkColors ? "#202124" : "#ffffff",
+    backgroundColor: nativeTheme.shouldUseDarkColors ? "#17231f" : "#fbfcf9",
     webPreferences: {
       preload: join(__dirname, "preload.cjs"),
       sandbox: true,
@@ -789,6 +794,7 @@ void app.whenReady().then(async () => {
       nodeIntegration: false,
     },
   });
+  if (process.platform === "darwin") app.dock?.setIcon(windowIcon);
   buildMenu();
   setupIPC();
   playback.on("state", () => {
