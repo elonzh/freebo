@@ -1,0 +1,7 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "import"],
+  "categories": { "correctness": "error" },
+  "ignorePatterns": ["dist", "dist-electron", "release", "node_modules"],
+  "rules": { "no-unused-vars": "error" }
+}

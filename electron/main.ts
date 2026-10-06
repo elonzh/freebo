@@ -1,0 +1,836 @@
+import {
+  app,
+  BrowserWindow,
+  WebContentsView,
+  ipcMain,
+  session,
+  dialog,
+  shell,
+  nativeTheme,
+  Menu,
+  screen,
+  type IpcMainInvokeEvent,
+} from "electron";
+import { join } from "node:path";
+import { writeFile, access, mkdir } from "node:fs/promises";
+import { constants } from "node:fs";
+import { z } from "zod";
+import { SettingsStore } from "./core/settings";
+import { discoverPlayers, manualPlayer, playerGuides } from "./core/players";
+import { PlaybackManager } from "./core/playback-manager";
+import { ProviderRegistry } from "./providers/registry";
+import { embyProvider } from "./providers/emby";
+import { migrateLegacyProfile } from "./core/profile-migration";
+import {
+  translate,
+  resolveLocale,
+  UserFacingError,
+  errorToken,
+  type MessageKey,
+} from "../src/shared/i18n";
+import { MediaProxy } from "./core/media-proxy";
+import type { AppState, AppPage, SettingsPage, Platform, Server } from "../src/shared/types";
+import { redact } from "./core/redact";
+
+app.setName("Freebo");
+app.setPath("userData", join(app.getPath("appData"), "Freebo"));
+if (process.env.FREEBO_DEV_URL && process.env.FREEBO_USER_DATA_DIR)
+  app.setPath("userData", process.env.FREEBO_USER_DATA_DIR);
+const store = new SettingsStore(join(app.getPath("userData"), "settings.json"));
+const providers = new ProviderRegistry([embyProvider]);
+const playback = new PlaybackManager();
+function locale() {
+  return resolveLocale(store.value.language, app.getLocale());
+}
+function t(key: MessageKey, params?: Record<string, string | number>) {
+  return translate(locale(), key, params);
+}
+const proxy = new MediaProxy();
+let window: BrowserWindow;
+let guest: WebContentsView | undefined;
+let shown = false;
+let page: AppPage = "home";
+let settingsPage: SettingsPage = "players";
+let playbackPopup: BrowserWindow | undefined;
+let playbackServer: Server | undefined;
+let popupAnchor: { x: number; y: number; width: number; height: number } | undefined;
+let popupBlurTimer: ReturnType<typeof setTimeout> | undefined;
+let errorVisible = false;
+let activeServer: Server | undefined;
+let webStatus: AppState["webStatus"] = "closed";
+let webError: string | undefined;
+let adapterStatus: AppState["adapterStatus"];
+let bootstrapRetries = 0;
+const diagnostics: { time: string; message: string }[] = [];
+function log(message: string) {
+  diagnostics.push({ time: new Date().toISOString(), message: redact(message) });
+  if (diagnostics.length > 200) diagnostics.shift();
+}
+function state(): AppState {
+  const contents = guest && !guest.webContents.isDestroyed() ? guest.webContents : undefined;
+  return {
+    settings: store.value,
+    playback: playback.state,
+    platform: process.platform as Platform,
+    version: app.getVersion(),
+    webStatus,
+    webError,
+    adapterStatus,
+    locale: locale(),
+    providers: providers.list(),
+    page,
+    settingsPage,
+    playbackPopupOpen: playbackPopup?.isVisible() ?? false,
+    playbackSource:
+      playbackServer && playback.state.queue[playback.state.index]
+        ? { serverId: playbackServer.id, itemId: playback.state.queue[playback.state.index].id }
+        : undefined,
+    browser: {
+      url: contents?.getURL() ?? "",
+      serverId: activeServer?.id,
+      canGoBack: contents?.navigationHistory.canGoBack() ?? false,
+      canGoForward: contents?.navigationHistory.canGoForward() ?? false,
+    },
+    fullscreen: window && !window.isDestroyed() ? window.isFullScreen() : false,
+  };
+}
+function publish() {
+  const snapshot = state();
+  for (const target of [window, playbackPopup])
+    if (target && !target.isDestroyed()) target.webContents.send("app:state", snapshot);
+}
+function layout() {
+  if (!guest || !window || window.isDestroyed()) return;
+  const [width, height] = window.getContentSize();
+  const top = 88 + (webError || errorVisible ? 64 : 0);
+  guest.setBounds({
+    x: 0,
+    y: shown ? top : height,
+    width,
+    height: Math.max(0, height - top),
+  });
+}
+function own(event: IpcMainInvokeEvent) {
+  const contents = [window, playbackPopup].find(
+    (target) => target && !target.isDestroyed() && event.sender === target.webContents,
+  )?.webContents;
+  if (!contents || event.senderFrame !== contents.mainFrame)
+    throw new UserFacingError("invalidOrigin");
+}
+const idSchema = z.string().min(1).max(200);
+const kindSchema = z.enum(["iina", "mpv", "mpvnet", "vlc"]);
+const controlSchema = z.discriminatedUnion("action", [
+  z.object({ action: z.enum(["pause", "next", "previous", "stop"]) }),
+  z.object({ action: z.literal("seek"), seconds: z.number().finite().min(0) }),
+  z.object({ action: z.literal("jump"), index: z.number().int().min(0) }),
+]);
+let scanning: Promise<void> | undefined;
+async function scan() {
+  if (scanning) return scanning;
+  scanning = performScan().finally(() => {
+    scanning = undefined;
+  });
+  return scanning;
+}
+async function performScan() {
+  const players = await discoverPlayers(process.platform as Platform, store.value.players);
+  const defaultPlayerId = players.some((p) => p.id === store.value.defaultPlayerId)
+    ? store.value.defaultPlayerId
+    : players[0]?.id;
+  await store.save({ ...store.value, players, defaultPlayerId, playerScanCompleted: true });
+  publish();
+}
+function closeGuest() {
+  if (!guest) return;
+  window.contentView.removeChildView(guest);
+  guest.webContents.close();
+  guest = undefined;
+  activeServer = undefined;
+  adapterStatus = undefined;
+  bootstrapRetries = 0;
+  webStatus = "closed";
+}
+async function openServer(id: string, destination?: string) {
+  const server = store.value.servers.find((s) => s.id === id);
+  if (!server) throw new UserFacingError("serverMissing");
+  if (
+    activeServer?.id === id &&
+    activeServer.url === server.url &&
+    activeServer.providerId === server.providerId &&
+    guest
+  ) {
+    shown = true;
+    page = "library";
+    layout();
+    if (destination)
+      void guest.webContents.loadURL(destination).catch((error) => log(String(error)));
+    publish();
+    return;
+  }
+  const provider = providers.get(server.providerId);
+  closeGuest();
+  activeServer = server;
+  shown = true;
+  page = "library";
+  webError = undefined;
+  webStatus = "loading";
+  const ses = session.fromPartition(providers.partition(server));
+  // Emby treats Electron as its own desktop client and requests a missing native plugin.
+  ses.setUserAgent(ses.getUserAgent().replace(/Electron\/[\d.]+\s*/g, ""));
+  ses.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
+  guest = new WebContentsView({
+    webPreferences: {
+      preload: join(__dirname, provider.preload),
+      partition: providers.partition(server),
+      sandbox: true,
+      contextIsolation: true,
+      nodeIntegration: false,
+      webSecurity: true,
+    },
+  });
+  const view = guest;
+  view.webContents.on("console-message", (event) => {
+    if (event.level === "error") {
+      log(`Emby: ${event.message}`);
+      if (process.env.FREEBO_DEV_URL) console.warn(redact(`Emby: ${event.message}`));
+    }
+  });
+  const origin = new URL(server.url).origin;
+  view.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith("https://") && new URL(url).origin !== origin) void shell.openExternal(url);
+    return { action: "deny" };
+  });
+  view.webContents.on("will-navigate", (event, url) => {
+    if (new URL(url).origin !== origin) {
+      event.preventDefault();
+      webError = errorToken("externalNavigation");
+      layout();
+      publish();
+    }
+  });
+  view.webContents.on("dom-ready", () => {
+    if (guest !== view) return;
+    if (webStatus !== "error" && !view.webContents.getURL().startsWith("chrome-error:")) {
+      webStatus = "ready";
+      layout();
+      publish();
+    }
+    if (provider.adapterScript)
+      void view.webContents
+        .executeJavaScript(provider.adapterScript)
+        .catch((error) => log(String(error)));
+  });
+  view.webContents.on("did-start-navigation", (event) => {
+    if (guest !== view || !event.isMainFrame || event.isSameDocument) return;
+    webStatus = "loading";
+    webError = undefined;
+    adapterStatus = undefined;
+    layout();
+    publish();
+  });
+  view.webContents.on("did-finish-load", () => {
+    if (
+      guest !== view ||
+      webStatus === "error" ||
+      view.webContents.getURL().startsWith("chrome-error:")
+    )
+      return;
+    webStatus = "ready";
+    webError = undefined;
+    layout();
+    publish();
+  });
+  view.webContents.on("did-fail-load", (_event, code, _description, _url, mainFrame) => {
+    if (!mainFrame || code === -3 || guest !== view) return;
+    webStatus = "error";
+    webError = errorToken("webFailed", { code });
+    layout();
+    publish();
+  });
+  view.webContents.on("did-navigate-in-page", publish);
+  view.webContents.on("did-navigate", publish);
+  view.webContents.on("render-process-gone", () => {
+    if (guest !== view) return;
+    webStatus = "error";
+    webError = errorToken("webFailed", { code: "renderer" });
+    layout();
+    publish();
+  });
+  window.contentView.addChildView(view);
+  layout();
+  await store.save({ ...store.value, activeServerId: id });
+  publish();
+  void view.webContents
+    .loadURL(destination ?? provider.entryUrl(server))
+    .catch((error) => log(String(error)));
+}
+
+function hidePlaybackPopup() {
+  clearTimeout(popupBlurTimer);
+  playbackPopup?.hide();
+  publish();
+}
+function positionPlaybackPopup() {
+  if (!playbackPopup || !popupAnchor || !window || window.isDestroyed()) return;
+  const bounds = window.getContentBounds();
+  const area = screen.getDisplayMatching(window.getBounds()).workArea;
+  const width = Math.min(420, area.width - 24);
+  const height = Math.min(640, Math.max(320, bounds.height - 104), area.height - 24);
+  playbackPopup.setBounds({
+    width,
+    height,
+    x: Math.max(
+      area.x + 12,
+      Math.min(
+        bounds.x + popupAnchor.x + popupAnchor.width - width,
+        area.x + area.width - width - 12,
+      ),
+    ),
+    y: Math.max(
+      area.y + 12,
+      Math.min(
+        bounds.y + popupAnchor.y + popupAnchor.height + 8,
+        area.y + area.height - height - 12,
+      ),
+    ),
+  });
+}
+async function togglePlaybackPopup(anchor: {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}) {
+  clearTimeout(popupBlurTimer);
+  if (playbackPopup?.isVisible()) {
+    hidePlaybackPopup();
+    return;
+  }
+  popupAnchor = anchor;
+  if (!playbackPopup || playbackPopup.isDestroyed()) {
+    const panel = (playbackPopup = new BrowserWindow({
+      parent: window,
+      width: 420,
+      height: 640,
+      frame: false,
+      show: false,
+      resizable: false,
+      minimizable: false,
+      maximizable: false,
+      fullscreenable: false,
+      skipTaskbar: true,
+      hasShadow: true,
+      backgroundColor: nativeTheme.shouldUseDarkColors ? "#292a2d" : "#ffffff",
+      webPreferences: {
+        preload: join(__dirname, "preload.cjs"),
+        sandbox: true,
+        contextIsolation: true,
+        nodeIntegration: false,
+      },
+    }));
+    panel.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+    panel.webContents.on("will-navigate", (event) => event.preventDefault());
+    panel.on("blur", () => {
+      popupBlurTimer = setTimeout(hidePlaybackPopup, 150);
+    });
+    panel.on("closed", () => {
+      playbackPopup = undefined;
+      publish();
+    });
+    if (process.env.FREEBO_DEV_URL) {
+      const url = new URL(process.env.FREEBO_DEV_URL);
+      url.searchParams.set("surface", "playback");
+      await panel.loadURL(url.toString());
+    } else
+      await panel.loadFile(join(__dirname, "../dist/index.html"), {
+        query: { surface: "playback" },
+      });
+  }
+  if (window.isDestroyed() || playbackPopup.isDestroyed()) return;
+  positionPlaybackPopup();
+  playbackPopup.show();
+  publish();
+}
+
+function setupIPC() {
+  const handle = (channel: string, callback: (input: any) => unknown) =>
+    ipcMain.handle(channel, async (event, input) => {
+      own(event);
+      try {
+        return await callback(input);
+      } catch (error) {
+        log(String(error));
+        if (error instanceof UserFacingError) throw error;
+        throw new UserFacingError(error instanceof z.ZodError ? "invalidInput" : "actionFailed");
+      }
+    });
+  handle("app:state", () => state());
+  handle("app:error-visible", (input) => {
+    errorVisible = z.boolean().parse(input);
+    layout();
+  });
+  handle("app:save-server", async (input) => {
+    const server = z
+      .object({
+        id: z.uuid().optional(),
+        name: z.string(),
+        url: z.string(),
+        providerId: z.string(),
+      })
+      .parse(input);
+    const provider = providers.get(server.providerId);
+    await store.upsertServer({ ...server, url: provider.normalizeUrl(server.url) });
+    publish();
+    return state();
+  });
+  handle("app:remove-server", async (input) => {
+    const id = idSchema.parse(input);
+    if (activeServer?.id === id) closeGuest();
+    if (page === "library" && !guest) page = "home";
+    const servers = store.value.servers.filter((s) => s.id !== id);
+    await store.save({
+      ...store.value,
+      servers,
+      activeServerId:
+        store.value.activeServerId === id ? servers[0]?.id : store.value.activeServerId,
+    });
+    publish();
+    return state();
+  });
+  handle("app:open-server", async (input) => {
+    await openServer(idSchema.parse(input));
+    return state();
+  });
+  handle("app:page", (input) => {
+    const request = z
+      .object({
+        page: z.enum(["home", "library", "settings", "setup"]),
+        section: z
+          .enum(["players", "playback", "appearance", "servers", "diagnostics", "about"])
+          .optional(),
+      })
+      .parse(input);
+    page = request.page;
+    if (request.section) settingsPage = request.section;
+    shown = page === "library";
+    hidePlaybackPopup();
+    layout();
+    publish();
+  });
+  handle("app:playback-popup", async (input) => {
+    if (input === null) {
+      hidePlaybackPopup();
+      return;
+    }
+    const coordinate = z.number().finite().min(0).max(100_000);
+    const anchor = z
+      .object({ x: coordinate, y: coordinate, width: coordinate, height: coordinate })
+      .parse(input);
+    await togglePlaybackPopup(anchor);
+  });
+  handle("app:playback-item", async () => {
+    const server = store.value.servers.find((server) => server.id === playbackServer?.id);
+    const item = playback.state.queue[playback.state.index];
+    if (!server || !item) throw new UserFacingError("itemMissing");
+    const destination = providers.get(server.providerId).itemUrl?.(server, item.id);
+    if (!destination) throw new UserFacingError("providerMissing");
+    hidePlaybackPopup();
+    await openServer(server.id, destination);
+    window.show();
+    window.focus();
+  });
+  handle("app:discover-players", async () => {
+    await scan();
+    return state();
+  });
+  handle("app:choose-player", async (input) => {
+    const kind = kindSchema.parse(input);
+    const result = await dialog.showOpenDialog(window, {
+      title: t("selectPlayerTitle", { name: playerGuides[kind].name }),
+      properties: ["openFile"],
+      ...(process.platform === "darwin"
+        ? { filters: [{ name: t("playerApp"), extensions: ["app", "*"] }] }
+        : {}),
+    });
+    if (!result.canceled && result.filePaths[0]) {
+      const player = manualPlayer(kind, result.filePaths[0]);
+      await access(
+        player.executable,
+        process.platform === "win32" ? constants.F_OK : constants.X_OK,
+      );
+      await store.save({
+        ...store.value,
+        players: store.value.players.filter((p) => p.id !== player.id).concat(player),
+        defaultPlayerId: player.id,
+        playerScanCompleted: true,
+      });
+    }
+    publish();
+    return state();
+  });
+  handle("app:settings", async (input) => {
+    const settings = z
+      .object({
+        defaultPlayerId: z.string().optional(),
+        autoNext: z.boolean().optional(),
+        fullscreen: z.boolean().optional(),
+        theme: z.enum(["system", "dark", "light"]).optional(),
+        language: z.enum(["system", "zh", "en"]).optional(),
+        setupCompleted: z.boolean().optional(),
+      })
+      .strict()
+      .parse(input);
+    if (
+      settings.defaultPlayerId &&
+      !store.value.players.some((p) => p.id === settings.defaultPlayerId)
+    )
+      throw new UserFacingError("playerMissing");
+    await store.save({ ...store.value, ...settings });
+    if (settings.setupCompleted && page === "setup") page = "home";
+    nativeTheme.themeSource = store.value.theme;
+    updateChrome();
+    buildMenu();
+    publish();
+    return state();
+  });
+  handle("app:control", async (input) => {
+    await playback.control(controlSchema.parse(input));
+  });
+  handle("app:navigate", (input) => {
+    const action = z.enum(["back", "forward", "reload", "home"]).parse(input);
+    if (!guest || !activeServer) return;
+    if (action === "home")
+      void guest.webContents.loadURL(
+        providers.get(activeServer.providerId).entryUrl(activeServer, true),
+      );
+    else if (action === "reload") {
+      webError = undefined;
+      webStatus = "loading";
+      bootstrapRetries = 0;
+      layout();
+      publish();
+      guest.webContents.reload();
+    } else if (action === "back" && guest.webContents.navigationHistory.canGoBack())
+      guest.webContents.navigationHistory.goBack();
+    else if (action === "forward" && guest.webContents.navigationHistory.canGoForward())
+      guest.webContents.navigationHistory.goForward();
+  });
+  handle("app:reset-session", async (input) => {
+    const id = idSchema.parse(input);
+    const server = store.value.servers.find((s) => s.id === id);
+    if (!server) throw new UserFacingError("serverMissing");
+    if (activeServer?.id === id) closeGuest();
+    await session.fromPartition(providers.partition(server)).clearStorageData();
+    publish();
+    return state();
+  });
+  handle("app:confirm", async (input) => {
+    const { action, id } = z
+      .object({ action: z.enum(["remove", "sign-out"]), id: idSchema })
+      .parse(input);
+    const server = store.value.servers.find((s) => s.id === id);
+    if (!server) throw new UserFacingError("serverMissing");
+    const result = await dialog.showMessageBox(window, {
+      type: "question",
+      message: t(action === "remove" ? "removeConfirm" : "signOutConfirm", { name: server.name }),
+      buttons: [t("cancel"), t(action === "remove" ? "remove" : "signOut", { name: server.name })],
+      defaultId: 0,
+      cancelId: 0,
+    });
+    return result.response === 1;
+  });
+  handle("app:guide", async (input) => {
+    await shell.openExternal(playerGuides[kindSchema.parse(input)].url);
+  });
+  handle("app:diagnostics", async () => {
+    const result = await dialog.showSaveDialog(window, {
+      defaultPath: "freebo-diagnostics.json",
+    });
+    if (result.canceled || !result.filePath) return null;
+    await writeFile(
+      result.filePath,
+      JSON.stringify(
+        {
+          version: app.getVersion(),
+          platform: process.platform,
+          webStatus,
+          adapterStatus,
+          playback: {
+            status: playback.state.status,
+            error: playback.state.error,
+            syncError: playback.state.syncError,
+          },
+          players: store.value.players.map((p) => ({ name: p.name, kind: p.kind })),
+          diagnostics,
+        },
+        null,
+        2,
+      ),
+    );
+    return result.filePath;
+  });
+  ipcMain.on("server:ready", (event, status) => {
+    if (
+      guest &&
+      event.sender === guest.webContents &&
+      event.senderFrame === guest.webContents.mainFrame
+    ) {
+      const result = z.enum(["waiting", "sign-in", "ready", "error", "stalled"]).safeParse(status);
+      if (result.success) {
+        if (result.data === "stalled") {
+          if (bootstrapRetries++ === 0) {
+            log("Initial server bootstrap stalled; retrying once");
+            guest.webContents.reload();
+          } else adapterStatus = "error";
+          publish();
+          return;
+        }
+        adapterStatus = result.data;
+        publish();
+      }
+    }
+  });
+  ipcMain.handle("server:play", async (event, input) => {
+    if (
+      !guest ||
+      !activeServer ||
+      event.sender !== guest.webContents ||
+      event.senderFrame !== guest.webContents.mainFrame
+    )
+      throw new UserFacingError("invalidOrigin");
+    const provider = providers.get(activeServer.providerId);
+    const request = provider.parsePlayback(input, activeServer);
+    const { intent } = request;
+    const registered = new URL(activeServer.url);
+    const player = store.value.players.find((p) => p.id === store.value.defaultPlayerId);
+    if (!player) {
+      shown = false;
+      page = "settings";
+      settingsPage = "players";
+      layout();
+      playback.state = {
+        ...playback.state,
+        status: "error",
+        error: errorToken("noPlayer"),
+      };
+      publish();
+      return;
+    }
+    const server = activeServer;
+    playbackServer = server;
+    const browserSession = guest.webContents.session;
+    const fetcher = async (url: string, init?: RequestInit) => {
+      const headers = new Headers(init?.headers);
+      headers.set("User-Agent", browserSession.getUserAgent());
+      headers.set("Origin", registered.origin);
+      headers.set("Referer", provider.entryUrl(server));
+      const response = await browserSession.fetch(url, {
+        ...init,
+        credentials: "include",
+        headers,
+      });
+      if (!response.ok) {
+        const message = `Emby API ${init?.method ?? "GET"} ${new URL(url).pathname}: ${response.status}, ${response.headers.get("content-type")}, ${response.headers.get("cf-mitigated") ?? ""}`;
+        log(message);
+        if (process.env.FREEBO_DEV_URL) console.warn(message);
+      }
+      return response;
+    };
+    const client = request.createClient(fetcher);
+    const originalPrepare = client.prepare.bind(client);
+    client.prepare = async (...args) => {
+      const media = await originalPrepare(...args);
+      media.url = proxy.register(media.url, fetcher);
+      if (media.subtitleUrl) media.subtitleUrl = proxy.register(media.subtitleUrl, fetcher);
+      return media;
+    };
+    // Keep old proxy routes while queued stop reports are draining; playback replaces the queue.
+    void playback.play(client, intent, player, store.value);
+  });
+}
+
+function updateChrome() {
+  if (!window || window.isDestroyed()) return;
+  window.setTitle(t("brand"));
+  if (process.platform !== "darwin")
+    window.setTitleBarOverlay({
+      height: 40,
+      color: nativeTheme.shouldUseDarkColors ? "#202124" : "#dee1e6",
+      symbolColor: nativeTheme.shouldUseDarkColors ? "#e8eaed" : "#202124",
+    });
+}
+function buildMenu() {
+  Menu.setApplicationMenu(
+    Menu.buildFromTemplate([
+      {
+        label: t("brand"),
+        submenu: [
+          { role: "about", label: t("about") },
+          { type: "separator" },
+          { role: "quit", label: t("quit") },
+        ],
+      },
+      {
+        label: t("editMenu"),
+        submenu: [
+          { role: "undo", label: t("undo") },
+          { role: "redo", label: t("redo") },
+          { type: "separator" },
+          { role: "cut", label: t("cut") },
+          { role: "copy", label: t("copy") },
+          { role: "paste", label: t("paste") },
+          { role: "selectAll", label: t("selectAll") },
+        ],
+      },
+      {
+        label: t("viewMenu"),
+        submenu: [
+          { role: "resetZoom", label: t("resetZoom") },
+          { role: "zoomIn", label: t("zoomIn") },
+          { role: "zoomOut", label: t("zoomOut") },
+          { role: "togglefullscreen", label: t("toggleFullscreen") },
+        ],
+      },
+      {
+        label: t("windowMenu"),
+        submenu: [
+          { role: "minimize", label: t("minimize") },
+          { role: "close", label: t("closeWindow") },
+        ],
+      },
+      ...(process.env.FREEBO_DEV_URL && process.env.FREEBO_CAPTURE_DIR
+        ? [
+            {
+              label: t("development"),
+              submenu: [
+                {
+                  label: "Minimum window (820 × 600)",
+                  accelerator: "CmdOrCtrl+Shift+1",
+                  click: () => window.setSize(820, 600),
+                },
+                {
+                  label: "Standard window (1280 × 850)",
+                  accelerator: "CmdOrCtrl+Shift+2",
+                  click: () => window.setSize(1280, 850),
+                },
+                {
+                  label: t("capture"),
+                  accelerator: "CmdOrCtrl+Shift+S",
+                  click: async () => {
+                    const directory = process.env.FREEBO_CAPTURE_DIR!;
+                    await mkdir(directory, { recursive: true });
+                    const filename = `app-${Date.now()}`;
+                    await writeFile(
+                      join(directory, `${filename}.png`),
+                      (await window.capturePage()).toPNG(),
+                    );
+                    await writeFile(
+                      join(directory, `${filename}.json`),
+                      JSON.stringify(
+                        {
+                          bounds: window.getBounds(),
+                          locale: locale(),
+                          theme: nativeTheme.shouldUseDarkColors ? "dark" : "light",
+                        },
+                        null,
+                        2,
+                      ),
+                    );
+                  },
+                },
+              ],
+            },
+          ]
+        : []),
+    ]),
+  );
+}
+
+app.on("web-contents-created", (_event, contents) => {
+  contents.on("will-attach-webview", (event) => event.preventDefault());
+});
+void app.whenReady().then(async () => {
+  if (!process.env.FREEBO_USER_DATA_DIR) {
+    await migrateLegacyProfile(app.getPath("userData"), [
+      join(app.getPath("appData"), "Emby Free Play"),
+      join(app.getPath("appData"), "emby-free-play"),
+    ]).catch((error) => log(String(error)));
+  }
+  try {
+    await store.load();
+  } catch (error) {
+    log(String(error));
+    await dialog.showMessageBox({ type: "error", message: String(error) });
+  }
+  await proxy.open();
+  nativeTheme.themeSource = store.value.theme;
+  page = store.value.setupCompleted ? "home" : "setup";
+  window = new BrowserWindow({
+    width: 1280,
+    height: 850,
+    minWidth: 820,
+    minHeight: 600,
+    title: t("brand"),
+    titleBarStyle: "hidden",
+    ...(process.platform === "darwin"
+      ? { trafficLightPosition: { x: 12, y: 13 } }
+      : {
+          titleBarOverlay: {
+            height: 40,
+            color: nativeTheme.shouldUseDarkColors ? "#202124" : "#dee1e6",
+            symbolColor: nativeTheme.shouldUseDarkColors ? "#e8eaed" : "#202124",
+          },
+        }),
+    backgroundColor: nativeTheme.shouldUseDarkColors ? "#202124" : "#ffffff",
+    webPreferences: {
+      preload: join(__dirname, "preload.cjs"),
+      sandbox: true,
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  buildMenu();
+  setupIPC();
+  playback.on("state", () => {
+    if (playback.state.status === "idle") proxy.clear();
+    publish();
+  });
+  window.on("resize", () => {
+    layout();
+    if (playbackPopup?.isVisible()) positionPlaybackPopup();
+  });
+  window.on("move", () => {
+    if (playbackPopup?.isVisible()) positionPlaybackPopup();
+  });
+  window.on("minimize", hidePlaybackPopup);
+  window.on("closed", () => {
+    playbackPopup?.destroy();
+  });
+  window.on("enter-full-screen", () => {
+    layout();
+    publish();
+  });
+  window.on("leave-full-screen", () => {
+    layout();
+    publish();
+  });
+  nativeTheme.on("updated", updateChrome);
+  window.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  window.webContents.on("will-navigate", (event) => event.preventDefault());
+  if (process.env.FREEBO_DEV_URL) await window.loadURL(process.env.FREEBO_DEV_URL);
+  else await window.loadFile(join(__dirname, "../dist/index.html"));
+});
+let quitting = false;
+app.on("before-quit", (event) => {
+  if (quitting) return;
+  event.preventDefault();
+  quitting = true;
+  void playback.flush().finally(async () => {
+    await proxy.close();
+    app.quit();
+  });
+});
+app.on("window-all-closed", () => app.quit());
+app.on("activate", () => {
+  if (window && !window.isDestroyed()) window.show();
+});

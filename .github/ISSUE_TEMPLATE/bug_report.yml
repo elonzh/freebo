@@ -1,0 +1,38 @@
+name: 播放问题
+description: 报告无法播放、进度或播放列表问题
+body:
+  - type: input
+    id: version
+    attributes:
+      label: 应用版本
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 操作系统
+      options: [macOS, Windows, Linux]
+    validations:
+      required: true
+  - type: input
+    id: player
+    attributes:
+      label: 播放器及版本
+    validations:
+      required: true
+  - type: input
+    id: emby
+    attributes:
+      label: Emby Server 版本
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤和实际结果
+      description: 请勿填写密码、访问令牌或带凭证的视频地址。
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: 诊断日志
+      description: 可在设置中导出日志，检查内容后上传。

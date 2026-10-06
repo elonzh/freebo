@@ -1,0 +1,15 @@
+Freebo
+Copyright 2026 elonzh
+
+Licensed under the Apache License, Version 2.0.
+
+This project is an independent companion for Emby Server and is not affiliated
+with Emby LLC, IINA, mpv, or VideoLAN. Player applications are not included.
+
+embyToLocalPlayer (https://github.com/kjtsune/embyToLocalPlayer), by Kjtsune,
+was used as a reference for Emby playback behavior. The implementation in this
+repository is independently written.
+
+UI components in src/components/ui are derived from shadcn/ui
+(https://github.com/shadcn-ui/ui), Copyright (c) 2023 shadcn.
+They are licensed under the MIT License; see docs/licenses/shadcn-ui.txt.

@@ -1,0 +1,274 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--card);
+  --color-popover-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--primary);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--primary);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  color-scheme: light;
+  --background: #f8f9fa;
+  --tab-strip: #dee1e6;
+  --address: #f1f3f4;
+  --card: #fff;
+  --toolbar: #fff;
+  --foreground: #202124;
+  --muted: #e3e7ed;
+  --muted-foreground: #5f6368;
+  --border: #dce0e7;
+  --input: #b7bdc7;
+  --primary: #1a5fc5;
+  --primary-foreground: #fff;
+  --accent: #e7f0fb;
+  --destructive: #b13a3a;
+  --secondary: #e3e7ed;
+  --radius: 8px;
+}
+
+:root.dark {
+  color-scheme: dark;
+  --background: #292a2d;
+  --tab-strip: #202124;
+  --address: #202124;
+  --card: #292a2d;
+  --toolbar: #35363a;
+  --foreground: #e8eaed;
+  --muted: #48494c;
+  --muted-foreground: #a4aebc;
+  --border: #48494c;
+  --input: #636970;
+  --primary: #88baf3;
+  --primary-foreground: #202124;
+  --accent: #293d57;
+  --destructive: #f3a2a2;
+  --secondary: #303743;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted-foreground) transparent;
+  }
+  body {
+    @apply bg-background font-sans text-[13px] text-foreground antialiased;
+    font-synthesis: none;
+  }
+  h1 {
+    @apply text-[21px] leading-[1.3] font-semibold;
+  }
+  h2 {
+    @apply text-[17px] leading-[1.4] font-semibold;
+  }
+  h3 {
+    @apply text-sm leading-normal font-semibold;
+  }
+  p {
+    @apply text-[13px] leading-relaxed text-muted-foreground;
+  }
+  svg {
+    @apply shrink-0;
+  }
+  button,
+  a,
+  input {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+  a {
+    @apply text-primary underline-offset-4;
+  }
+  input {
+    caret-color: var(--primary);
+  }
+  ::selection {
+    background: var(--accent);
+    color: var(--primary);
+  }
+}
+
+/* Native window dragging and the fixed 88px chrome match Electron guest bounds. */
+.browser-chrome {
+  flex-shrink: 0;
+  height: 88px;
+  background: var(--toolbar);
+}
+.tab-strip {
+  display: flex;
+  align-items: end;
+  gap: 4px;
+  height: 40px;
+  padding: 6px 10px 0;
+  background: var(--tab-strip);
+  -webkit-app-region: drag;
+}
+.platform-darwin:not(.fullscreen) .tab-strip {
+  padding-left: 84px;
+}
+.platform-win32 .tab-strip,
+.platform-linux .tab-strip {
+  padding-right: 148px;
+}
+.tabs {
+  display: flex;
+  align-items: end;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  gap: 2px;
+  -webkit-app-region: no-drag;
+}
+.browser-tab {
+  height: 34px;
+  border-radius: 9px 9px 0 0;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 10px;
+  width: 190px;
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+.browser-tab.active {
+  background: var(--toolbar);
+  color: var(--foreground);
+}
+.browser-tab:hover:not(.active) {
+  background: var(--secondary);
+}
+.browser-tab > span,
+.tab-select > span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.home-tab {
+  justify-content: flex-start;
+  width: 150px;
+  padding: 0 14px;
+}
+.tab-select {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  flex: 1;
+  height: 100%;
+  padding: 0 0 0 13px;
+  text-align: left;
+  justify-content: flex-start;
+  border-radius: 0;
+}
+.tab-close {
+  display: grid;
+  place-items: center;
+  margin-right: 6px;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+}
+.tab-close:hover {
+  background: var(--secondary);
+}
+.new-tab {
+  align-self: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  -webkit-app-region: no-drag;
+}
+.drag-space {
+  flex: 1;
+  min-width: 26px;
+  height: 100%;
+}
+.toolbar {
+  height: 48px;
+  padding: 0 12px 0 8px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: var(--toolbar);
+  border-bottom: 1px solid var(--border);
+}
+.address-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  padding: 0 13px;
+  border-radius: 18px;
+  background: var(--address);
+  color: var(--muted-foreground);
+}
+.address-bar:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 0;
+}
+.address-bar input {
+  height: 100%;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 13px;
+  outline: none;
+}
+.address-bar input:focus-visible {
+  outline: none;
+}
+.navigation {
+  display: flex;
+  gap: 2px;
+}
+
+@media (max-width: 1000px) {
+  .browser-tab {
+    width: 160px;
+  }
+  .home-tab {
+    width: 130px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

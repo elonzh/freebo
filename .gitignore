@@ -1,0 +1,12 @@
+node_modules/
+dist/
+dist-electron/
+release/
+coverage/
+.DS_Store
+.env*
+!.env.example
+.impeccable/review/
+.impeccable/mocks/
+artifacts/private/
+*.log
