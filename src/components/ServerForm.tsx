@@ -156,7 +156,6 @@ export function ServerForm({
         <Label htmlFor={`${fieldId}-url`}>{t("serverAddress")}</Label>
         <Input
           id={`${fieldId}-url`}
-          aria-describedby={`${fieldId}-help`}
           autoFocus
           required
           type="text"
@@ -174,9 +173,6 @@ export function ServerForm({
           autoComplete="off"
         />
       </div>
-      <p id={`${fieldId}-help`} className="mt-2 text-xs">
-        {t("addressHelp")}
-      </p>
       <div className="mt-[22px] grid gap-2.5">
         <Label htmlFor={`${fieldId}-name`}>
           {t("name")}
@@ -268,7 +264,6 @@ export function ServerForm({
           </p>
         )}
       </div>
-      <p className="mt-[22px] text-xs">{t("signInNote")}</p>
       <div className="mt-[26px] flex justify-end gap-2.5">
         <Button variant="outline" type="button" onClick={onCancel}>
           {t("cancel")}

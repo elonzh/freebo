@@ -109,6 +109,7 @@ export interface AppState {
   webStatus: "closed" | "loading" | "ready" | "error";
   webError?: string;
   credentialsAvailable: boolean;
+  serverFavicons: Record<string, string>;
   adapterStatus?: "waiting" | "sign-in" | "ready" | "error";
   locale: import("./i18n").Locale;
   providers: { id: string; name: string }[];

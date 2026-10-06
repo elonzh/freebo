@@ -29,6 +29,8 @@ Emby 接管由沙箱预加载在 DOMContentLoaded 时安装。先等待网页自
 
 网页加载状态由 `did-start-loading` / `did-stop-loading` 驱动，DOM 就绪后仍等待资源加载完成才结束标签图标动画。加载时工具栏刷新按钮变为停止，调用 `webContents.stop()`；失败页面保留错误与恢复操作。非激活标签使用完整圆角 hover 背景，内部标题按钮保持透明，激活标签与工具栏连接，关闭按钮保留独立的圆形操作反馈。
 
+标签页监听 Electron `page-favicon-updated`，使用服务器会话读取网站实际提供的图标，转换为图片 data URL 后传给自有界面，保持现有 CSP。图标限制格式、大小、候选数量和读取时间，按服务器 ID 与注册地址保存在内存中；异步结果不会覆盖已切换的网页。加载期间显示转圈图标，尚无有效缓存或图片解码失败时显示通用网站图标。
+
 ## 账号密码
 
 添加或编辑服务器时直接显示账号密码表单，填写账号后保存即可记住，留空可仅保存服务器。`CredentialStore` 将账号和密码一起加密，存入用户数据目录的 `credentials.json`，不写入 `settings.json`、广播的 `AppState` 或诊断日志。文件采用原子替换和 `0600` 权限，写入串行化；加密或解密失败不会降级为明文。当前使用 Electron [safeStorage 异步接口](https://www.electronjs.org/docs/latest/api/safe-storage)，Linux 缺少系统密钥存储时禁用保存。

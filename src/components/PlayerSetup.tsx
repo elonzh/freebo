@@ -34,7 +34,6 @@ export function PlayerSetup({
   );
   return (
     <>
-      <p className="mt-2.5">{t("playersDescription")}</p>
       {state.settings.players.length ? (
         <RadioGroup
           className="mt-5 mb-4 gap-[5px]"
@@ -114,7 +113,6 @@ export function PlayerSetup({
                 </Button>
               </article>
             ))}
-          <p className="mt-[18px] max-w-[70ch] text-xs">{t("guideNote")}</p>
         </CollapsibleContent>
       </Collapsible>
     </>

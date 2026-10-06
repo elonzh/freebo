@@ -33,6 +33,7 @@ import { MediaProxy } from "./core/media-proxy";
 import type { AppState, AppPage, SettingsPage, Platform, Server } from "../src/shared/types";
 import { redact } from "./core/redact";
 import { CredentialStore, credentialsSchema, credentialOriginMatches } from "./core/credentials";
+import { loadFavicon } from "./core/favicon";
 
 app.setName("Freebo");
 app.setPath("userData", join(app.getPath("appData"), "Freebo"));
@@ -81,6 +82,7 @@ let webStatus: AppState["webStatus"] = "closed";
 let webError: string | undefined;
 let adapterStatus: AppState["adapterStatus"];
 let bootstrapRetries = 0;
+const serverFavicons = new Map<string, { url: string; icon: string }>();
 const diagnostics: { time: string; message: string }[] = [];
 function log(message: string) {
   diagnostics.push({ time: new Date().toISOString(), message: redact(message) });
@@ -96,6 +98,12 @@ function state(): AppState {
     webStatus,
     webError,
     credentialsAvailable,
+    serverFavicons: Object.fromEntries(
+      store.value.servers.flatMap((server) => {
+        const saved = serverFavicons.get(server.id);
+        return saved?.url === server.url ? [[server.id, saved.icon]] : [];
+      }),
+    ),
     adapterStatus,
     locale: locale(),
     providers: providers.list(),
@@ -210,6 +218,27 @@ async function openServer(id: string, destination?: string) {
     },
   });
   const view = guest;
+  let faviconRevision = 0;
+  let faviconKey: string | undefined;
+  view.webContents.on("page-favicon-updated", (_event, favicons) => {
+    if (guest !== view) return;
+    const key = favicons.join("\n");
+    if (key === faviconKey) return;
+    faviconKey = key;
+    const revision = ++faviconRevision;
+    void loadFavicon(favicons, (url, init) =>
+      ses.fetch(url, {
+        ...init,
+        credentials: "include",
+        headers: { "User-Agent": ses.getUserAgent(), Referer: `${server.url}/web/index.html` },
+      }),
+    ).then((icon) => {
+      if (guest !== view || revision !== faviconRevision || view.webContents.isDestroyed()) return;
+      if (icon) serverFavicons.set(server.id, { url: server.url, icon });
+      else if (!favicons.length) serverFavicons.delete(server.id);
+      publish();
+    });
+  });
   view.webContents.on("console-message", (event) => {
     if (event.level === "error") {
       log(`Emby: ${event.message}`);
@@ -254,6 +283,8 @@ async function openServer(id: string, destination?: string) {
   });
   view.webContents.on("did-start-navigation", (event) => {
     if (guest !== view || !event.isMainFrame || event.isSameDocument) return;
+    faviconRevision++;
+    faviconKey = undefined;
     webStatus = "loading";
     webError = undefined;
     adapterStatus = undefined;
@@ -482,6 +513,7 @@ function setupIPC() {
     const server = store.value.servers.find((entry) => entry.id === id);
     if (!server) throw new UserFacingError("serverMissing");
     await credentials.set(server, null);
+    serverFavicons.delete(id);
     if (activeServer?.id === id) closeGuest();
     if (page === "library" && !guest) page = "home";
     const servers = store.value.servers.filter((s) => s.id !== id);

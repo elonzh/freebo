@@ -33,6 +33,7 @@ import { OptionSelect } from "./components/OptionSelect";
 import { Input } from "./components/ui/input";
 import { Switch } from "./components/ui/switch";
 import { BrandLogo, BrandName } from "./components/Brand";
+import { SiteIcon } from "./components/SiteIcon";
 
 const settingPages = [
   { id: "players", icon: MonitorPlay },
@@ -232,7 +233,7 @@ export function App() {
                         aria-label={t("loading", { name: server.name })}
                       />
                     ) : (
-                      <Globe2 size={15} />
+                      <SiteIcon src={state.serverFavicons[server.id]} />
                     )}
                     <span>{server.name}</span>
                   </Button>
@@ -449,7 +450,6 @@ export function App() {
             <div className="flex items-center justify-between gap-5 [&_p]:mt-1.5">
               <div>
                 <h1>{t("appHome")}</h1>
-                <p>{t("homeDescription")}</p>
               </div>
               <Button variant="outline" onClick={() => manageServers()}>
                 <Settings2 size={15} />
@@ -503,7 +503,6 @@ export function App() {
                   <Plus size={16} />
                   {t("addServer")}
                 </Button>
-                <span className="mt-3.5 text-xs text-muted-foreground">{t("supportedServer")}</span>
               </section>
             )}
             <footer className="mt-auto flex items-center justify-between gap-3 border-t pt-3.5 text-xs text-muted-foreground max-[650px]:flex-wrap">
@@ -575,10 +574,7 @@ export function App() {
                   )}
                 </div>
                 {settingsPage === "players" && (
-                  <>
-                    <p className="mt-2.5">{t("setupPlayerDescription")}</p>
-                    <PlayerSetup state={state} t={t} run={run} update={update} />
-                  </>
+                  <PlayerSetup state={state} t={t} run={run} update={update} />
                 )}
                 {settingsPage === "playback" && (
                   <>
@@ -589,7 +585,7 @@ export function App() {
                         onCheckedChange={(checked) => update({ autoNext: checked })}
                       />
                     </SettingRow>
-                    <SettingRow title={t("fullscreen")} description={t("fullscreenDescription")}>
+                    <SettingRow title={t("fullscreen")}>
                       <Switch
                         aria-label={t("fullscreen")}
                         checked={state.settings.fullscreen}
@@ -600,7 +596,7 @@ export function App() {
                 )}
                 {settingsPage === "appearance" && (
                   <>
-                    <SettingRow title={t("theme")} description={t("themeDescription")}>
+                    <SettingRow title={t("theme")}>
                       <OptionSelect
                         label={t("theme")}
                         value={state.settings.theme}
@@ -612,7 +608,7 @@ export function App() {
                         ]}
                       />
                     </SettingRow>
-                    <SettingRow title={t("language")} description={t("languageDescription")}>
+                    <SettingRow title={t("language")}>
                       <OptionSelect
                         label={t("language")}
                         value={state.settings.language}
@@ -628,7 +624,6 @@ export function App() {
                 )}
                 {settingsPage === "servers" && (
                   <>
-                    <p className="mt-2.5">{t("serverManagementDescription")}</p>
                     {editing ? (
                       <ServerForm
                         key={editing.id ?? "new"}
@@ -735,14 +730,14 @@ function SettingRow({
   children,
 }: {
   title: string;
-  description: string;
+  description?: string;
   children: ReactNode;
 }) {
   return (
     <div className="flex items-center justify-between gap-[25px] border-b py-[18px] max-[650px]:flex-wrap [&>div:first-child]:min-w-0 [&>div:first-child]:flex-1 max-[650px]:[&>div:first-child]:basis-full [&_p]:mt-[5px] [&_p]:text-xs [&_p]:wrap-anywhere">
       <div>
         <h3>{title}</h3>
-        <p>{description}</p>
+        {description && <p>{description}</p>}
       </div>
       <div className="flex items-center gap-1.5">{children}</div>
     </div>

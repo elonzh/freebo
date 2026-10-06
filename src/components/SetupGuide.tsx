@@ -122,7 +122,6 @@ export function SetupGuide({
                     {t("scan")}
                   </Button>
                 </div>
-                <p className="mt-2.5">{t("setupPlayerDescription")}</p>
                 {pending === "setup-scan" ? (
                   <div className="flex items-center gap-3 py-9 text-muted-foreground" role="status">
                     <LoaderCircle className="animate-spin" size={20} />
@@ -205,7 +204,6 @@ export function SetupGuide({
             {step === "done" && (
               <>
                 <h1>{t("setupComplete")}</h1>
-                <p className="mt-2.5">{t("setupCompleteDescription")}</p>
                 <dl className="my-6 [&>div]:flex [&>div]:justify-between [&>div]:gap-6 [&>div]:border-b [&>div]:py-[18px] [&_dt]:flex [&_dt]:items-center [&_dt]:gap-2.5 [&_dt]:text-muted-foreground [&_dd]:font-medium">
                   <div>
                     <dt>
