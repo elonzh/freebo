@@ -4,7 +4,6 @@ import { Button } from "./ui/button";
 import { useEffect, useState } from "react";
 import {
   AlertCircle,
-  ExternalLink,
   ListVideo,
   LoaderCircle,
   Pause,
@@ -17,6 +16,7 @@ import {
 import type { AppState } from "../shared/types";
 import { localizeError } from "../shared/i18n";
 import { formatTime, type Translator, type RunAction } from "../ui";
+import { ServerIcon } from "./IntegrationIcon";
 
 export function PlaybackPanel({
   state,
@@ -31,6 +31,9 @@ export function PlaybackPanel({
 }) {
   const [seekPosition, setSeekPosition] = useState<number | null>(null);
   const playback = state.playback;
+  const server = state.settings.servers.find(
+    (server) => server.id === state.playbackSource?.serverId,
+  );
   const playable = playback.status === "playing" || playback.status === "paused";
   const problem = error || playback.error || playback.syncError;
   useEffect(() => {
@@ -77,8 +80,22 @@ export function PlaybackPanel({
       )}
       {playback.queue.length || playback.status === "preparing" ? (
         <>
-          <section className="p-5 [&>h2]:wrap-anywhere [&>p]:mt-1.5 [&>p]:text-xs">
-            <h2>{playback.title ?? t("preparing")}</h2>
+          <section className="p-5 [&>p]:mt-1.5 [&>p]:text-xs">
+            <div className="flex items-start justify-between gap-3">
+              <h2 className="min-w-0 flex-1 wrap-anywhere">{playback.title ?? t("preparing")}</h2>
+              {server && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="-mt-1.5 shrink-0"
+                  aria-label={t("openPlayingItem")}
+                  title={`${t("openPlayingItem")} · ${server.name}`}
+                  onClick={() => void run("playing-item", (desktop) => desktop.openPlaybackItem())}
+                >
+                  <ServerIcon providerId={server.providerId} className="size-6" />
+                </Button>
+              )}
+            </div>
             <p role="status">
               {playback.playerName ? `${playback.playerName} · ` : ""}
               {t(
@@ -156,15 +173,6 @@ export function PlaybackPanel({
               />
               <span>{formatTime(playback.duration)}</span>
             </div>
-            <Button
-              variant="link"
-              className="mt-3.5"
-              disabled={!state.playbackSource}
-              onClick={() => void run("playing-item", (desktop) => desktop.openPlaybackItem())}
-            >
-              <ExternalLink size={15} />
-              {t("openPlayingItem")}
-            </Button>
           </section>
           <section className="min-h-0 flex-1 overflow-auto border-t px-3 pt-4 pb-3 [&>div]:px-2 [&>div]:pb-3 [&_h2]:text-sm">
             <div className="flex items-center justify-between gap-5 [&_p]:mt-[7px] [&>span]:text-xs [&>span]:text-muted-foreground">

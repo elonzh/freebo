@@ -11,6 +11,7 @@ const requestSchema = z.object({
     userId: id,
     token: z.string().min(1).max(4096),
     deviceId: id,
+    serverId: id.optional(),
     clientName: z.string().max(200).optional(),
     clientVersion: z.string().max(200).optional(),
     deviceName: z.string().max(200).optional(),
@@ -42,8 +43,6 @@ export const embyProvider: MediaServerProvider = {
     return url.toString().replace(/\/$/, "");
   },
   entryUrl: (server) => `${server.url}/web/index.html#!/home`,
-  itemUrl: (server, itemId) =>
-    `${server.url}/web/index.html#!/item?id=${encodeURIComponent(itemId)}`,
   parsePlayback(input, server) {
     const { auth, intent } = requestSchema.parse(input);
     const registered = new URL(server.url);
@@ -57,7 +56,12 @@ export const embyProvider: MediaServerProvider = {
     return {
       intent,
       createClient: (fetcher) =>
-        new EmbyClient({ ...auth, baseUrl: normalizeServerUrl(auth.baseUrl) }, fetcher),
+        new EmbyClient(
+          { ...auth, baseUrl: normalizeServerUrl(auth.baseUrl) },
+          fetcher,
+          {},
+          server.url,
+        ),
     };
   },
 };

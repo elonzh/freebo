@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Globe2 } from "lucide-react";
+import { ServerIcon } from "./IntegrationIcon";
 
-export function SiteIcon({ src }: { src?: string }) {
+export function SiteIcon({ src, providerId }: { src?: string; providerId: string }) {
   const [failed, setFailed] = useState<string>();
-  if (!src || src === failed) return <Globe2 size={15} />;
+  if (!src || src === failed) return <ServerIcon providerId={providerId} className="size-[15px]" />;
   return (
     <img
       src={src}

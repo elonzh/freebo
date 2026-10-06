@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { EventEmitter } from "node:events";
 import { createServer } from "node:net";
 import { MpvIPC } from "./mpv-ipc";
+import { activatePlayer, iinaProcessId } from "./player-focus";
 import type { Player, PreparedMedia, PlaybackControl } from "../../src/shared/types";
 
 export interface PlayerSnapshot {
@@ -13,6 +14,14 @@ export interface PlayerSnapshot {
   position: number;
   duration: number;
   paused: boolean;
+}
+export interface PlaybackSession extends EventEmitter {
+  snapshot: PlayerSnapshot;
+  start(media: PreparedMedia[], fullscreen: boolean, queuePending?: boolean): Promise<void>;
+  enqueue(media: PreparedMedia): Promise<void>;
+  completeQueue(): void;
+  control(control: PlaybackControl): Promise<void>;
+  stop(): Promise<void>;
 }
 export class PlayerSession extends EventEmitter {
   private child?: ChildProcess;
@@ -25,6 +34,8 @@ export class PlayerSession extends EventEmitter {
   private vlcIds: number[] = [];
   private queuePending = false;
   private polling = false;
+  private focusedIndex = -1;
+  private windowPid?: number;
   snapshot: PlayerSnapshot = { index: 0, position: 0, duration: 0, paused: false };
   constructor(readonly player: Player) {
     super();
@@ -56,9 +67,20 @@ export class PlayerSession extends EventEmitter {
     this.launch(args);
     const ipc = (this.ipc = new MpvIPC());
     await ipc.open(socket);
+    if (this.stopped) {
+      await ipc.command(["stop"]).catch(() => {});
+      ipc.close();
+      return;
+    }
+    this.windowPid =
+      this.player.kind === "iina" && process.platform === "darwin"
+        ? await iinaProcessId(this.player, socket)
+        : this.child?.pid;
     const version = await ipc.command<string>(["get_property", "mpv-version"]);
     const match = version.match(/(\d+)\.(\d+)/);
     this.modernLoadfile = !match || Number(match[1]) > 0 || Number(match[2]) >= 38;
+    if (process.platform === "darwin" && this.player.kind === "mpv" && this.modernLoadfile)
+      await ipc.command(["set_property", "focus-on", "all"]).catch(() => {});
     ipc.on("event", (event) => {
       if (event.event === "file-loaded") void this.poll();
       if (event.event === "end-file" && event.reason === "error")
@@ -77,7 +99,9 @@ export class PlayerSession extends EventEmitter {
       stdio: "ignore",
       windowsHide: true,
     });
+    this.windowPid = this.child.pid;
     this.child.on("error", () => this.emit("media-error", errorToken("playerStartFailed")));
+    if (this.player.kind !== "iina") void activatePlayer(this.player, this.child.pid);
     // iina-cli exits after handing the URL to IINA; IPC remains authoritative.
     if (this.player.kind !== "iina")
       this.child.on("exit", () => {
@@ -166,6 +190,8 @@ export class PlayerSession extends EventEmitter {
           this.finish();
           return;
         }
+        if (status.state !== "playing" && status.state !== "paused") return;
+        if (!(snapshot.duration > 0)) return;
       } else {
         const results = await Promise.allSettled(
           ["playlist-pos", "time-pos", "duration", "pause", "idle-active"].map((name) =>
@@ -184,9 +210,24 @@ export class PlayerSession extends EventEmitter {
           duration: Number(value(2) ?? 0),
           paused: Boolean(value(3)),
         };
+        // IPC can connect before the demuxer opens the video. Do not report a
+        // false start or overwrite the resume position with unavailable properties.
+        if (value(4) === true || typeof value(1) !== "number" || !(snapshot.duration > 0)) return;
       }
+      if (this.stopped) return;
       this.snapshot = snapshot;
       this.emit("snapshot", snapshot);
+      if (this.focusedIndex !== snapshot.index) {
+        this.focusedIndex = snapshot.index;
+        if (this.player.kind !== "iina" || this.windowPid)
+          void activatePlayer(this.player, this.windowPid).then((activated) => {
+            if (activated !== undefined && !this.stopped)
+              this.emit(
+                "diagnostic",
+                `Player window activation: ${this.player.name} (${activated ? "accepted" : "refused"})`,
+              );
+          });
+      }
     } catch {
       /* IPC disconnect handles termination; transient status errors can recover. */
     } finally {
@@ -195,6 +236,7 @@ export class PlayerSession extends EventEmitter {
   }
   async stop(): Promise<void> {
     if (this.stopped) return;
+    await this.poll();
     try {
       if (this.player.kind === "vlc") await this.vlcRequest("status", { command: "pl_stop" });
       else await this.ipc?.command(["stop"]);
@@ -238,6 +280,7 @@ export class PlayerSession extends EventEmitter {
       }
     }
     if (!ready) throw new UserFacingError("vlcConnection");
+    if (this.stopped) return;
     for (const next of media.slice(1)) await this.enqueue(next);
     await this.refreshVlcPlaylist();
     await this.poll();

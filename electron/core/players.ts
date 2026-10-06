@@ -24,6 +24,17 @@ export const playerGuides: Record<
     url: "https://www.videolan.org/vlc/",
     platforms: ["darwin", "win32", "linux"],
   },
+  potplayer: { name: "PotPlayer", url: "https://potplayer.tv/", platforms: ["win32"] },
+  "mpc-hc": {
+    name: "MPC-HC",
+    url: "https://github.com/clsid2/mpc-hc/releases",
+    platforms: ["win32"],
+  },
+  "mpc-be": {
+    name: "MPC-BE",
+    url: "https://github.com/Aleksoid1978/MPC-BE/releases",
+    platforms: ["win32"],
+  },
 };
 
 export function candidatePlayers(
@@ -57,6 +68,26 @@ export function candidatePlayers(
       add("mpvnet", paths.join(root, "mpvnet/current/mpvnet.exe"));
       add("vlc", paths.join(root, "VideoLAN/VLC/vlc.exe"));
       add("mpv", paths.join(root, "mpv.exe"));
+      for (const binary of ["PotPlayerMini64.exe", "PotPlayerMini.exe"])
+        for (const folder of [
+          "DAUM/PotPlayer",
+          "PotPlayer",
+          "PotPlayer/current",
+          "potplayer/current",
+        ])
+          add("potplayer", paths.join(root, folder, binary));
+      for (const [kind, folder, binaries] of [
+        ["mpc-hc", "MPC-HC", ["mpc-hc64.exe", "mpc-hc.exe"]],
+        ["mpc-be", "MPC-BE", ["mpc-be64.exe", "mpc-be.exe"]],
+      ] as const)
+        for (const binary of binaries)
+          for (const path of [
+            folder,
+            `${folder} x64`,
+            `${kind}/current`,
+            ...(kind === "mpc-hc" ? ["K-Lite Codec Pack/MPC-HC"] : []),
+          ])
+            add(kind, paths.join(root, path, binary));
     }
   } else {
     for (const root of ["/usr/bin", "/usr/local/bin", paths.join(home, ".local/bin")]) {
@@ -67,6 +98,13 @@ export function candidatePlayers(
   for (const root of (env.PATH ?? "").split(paths.delimiter).filter(Boolean)) {
     for (const kind of ["mpv", "mpvnet", "vlc"] as PlayerKind[])
       add(kind, paths.join(root, `${kind}${platform === "win32" ? ".exe" : ""}`));
+    if (platform === "win32")
+      for (const [kind, binaries] of [
+        ["potplayer", ["PotPlayerMini64.exe", "PotPlayerMini.exe"]],
+        ["mpc-hc", ["mpc-hc64.exe", "mpc-hc.exe"]],
+        ["mpc-be", ["mpc-be64.exe", "mpc-be.exe"]],
+      ] as const)
+        for (const binary of binaries) add(kind, paths.join(root, binary));
   }
   return candidates.map(({ kind, path, prefix }) => ({
     id: `${kind}:${path}`,

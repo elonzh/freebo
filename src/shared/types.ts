@@ -1,4 +1,4 @@
-export type PlayerKind = "iina" | "mpv" | "mpvnet" | "vlc";
+export type PlayerKind = "iina" | "mpv" | "mpvnet" | "vlc" | "potplayer" | "mpc-hc" | "mpc-be";
 export type Platform = "darwin" | "win32" | "linux";
 export type AppPage = "home" | "library" | "settings" | "setup";
 export type SettingsPage =
@@ -83,6 +83,7 @@ export interface PreparedMedia {
   playSessionId: string;
   url: string;
   startSeconds: number;
+  runTimeTicks?: number;
   audioId?: number;
   subtitleId?: number | "no";
   audioStreamIndex?: number;
@@ -90,6 +91,17 @@ export interface PreparedMedia {
   subtitleUrl?: string;
   headers: Record<string, string>;
 }
+export type PlaybackRecord =
+  | {
+      status: "verified";
+      position: number;
+      reportedPosition: number;
+      played: boolean;
+      playCount?: number;
+      lastPlayedAt?: string;
+      minimumResumeSeconds?: number;
+    }
+  | { status: "unavailable" };
 export interface PlaybackState {
   status: "idle" | "preparing" | "playing" | "paused" | "error";
   title?: string;
@@ -100,6 +112,34 @@ export interface PlaybackState {
   index: number;
   error?: string;
   syncError?: string;
+  sync?: {
+    status: "pending" | "success" | "error";
+    event: "start" | "progress" | "stop";
+    time?: string;
+    error?: string;
+    record?: PlaybackRecord;
+  };
+}
+export interface Diagnostics {
+  version: string;
+  platform: string;
+  arch: string;
+  osRelease: string;
+  electron: string;
+  chromium: string;
+  node: string;
+  locale: string;
+  theme: string;
+  credentialsAvailable: boolean;
+  serverCount: number;
+  webStatus: AppState["webStatus"];
+  adapterStatus?: AppState["adapterStatus"];
+  playback: Pick<
+    PlaybackState,
+    "status" | "position" | "duration" | "error" | "syncError" | "sync"
+  >;
+  players: { name: string; kind: PlayerKind; default: boolean }[];
+  logs: { time: string; message: string }[];
 }
 export interface AppState {
   settings: Settings;
@@ -116,6 +156,7 @@ export interface AppState {
   page: AppPage;
   settingsPage: SettingsPage;
   playbackPopupOpen: boolean;
+  serverPopupOpen: boolean;
   playbackSource?: { serverId: string; itemId: string };
   browser: { url: string; serverId?: string; canGoBack: boolean; canGoForward: boolean };
   fullscreen: boolean;
@@ -139,6 +180,9 @@ export interface DesktopAPI {
     height: number;
   }): Promise<void>;
   hidePlaybackPopup(): Promise<void>;
+  toggleServerPopup(anchor: { x: number; y: number; width: number; height: number }): Promise<void>;
+  hideServerPopup(): Promise<void>;
+  addServer(): Promise<void>;
   openPlaybackItem(): Promise<void>;
   showError(visible: boolean): Promise<void>;
   discoverPlayers(): Promise<AppState>;
@@ -157,5 +201,9 @@ export interface DesktopAPI {
   resetSession(id: string): Promise<AppState>;
   openGuide(kind: PlayerKind): Promise<void>;
   exportDiagnostics(): Promise<string | null>;
+  getDiagnostics(): Promise<Diagnostics>;
+  copyDiagnostics(): Promise<void>;
+  openLink(target: "product" | "github" | "issue"): Promise<void>;
   onState(callback: (state: AppState) => void): () => void;
+  onAddServer(callback: () => void): () => void;
 }

@@ -6,7 +6,6 @@ import {
   ArrowLeft,
   ArrowRight,
   Bug,
-  Check,
   Globe2,
   Home,
   Info,
@@ -21,6 +20,7 @@ import {
   SlidersHorizontal,
   Trash2,
   X,
+  ExternalLink,
 } from "lucide-react";
 import type { AppPage, AppState, Server } from "./shared/types";
 import { translate, localizeError, resolveLocale } from "./shared/i18n";
@@ -34,16 +34,20 @@ import { Input } from "./components/ui/input";
 import { Switch } from "./components/ui/switch";
 import { BrandLogo, BrandName } from "./components/Brand";
 import { SiteIcon } from "./components/SiteIcon";
+import { PlayerIcon, ServerIcon } from "./components/IntegrationIcon";
+import { ServerMenu } from "./components/ServerMenu";
+import { DiagnosticsPanel } from "./components/DiagnosticsPanel";
 
 const settingPages = [
+  { id: "servers", icon: Globe2 },
   { id: "players", icon: MonitorPlay },
   { id: "playback", icon: SlidersHorizontal },
   { id: "appearance", icon: Languages },
-  { id: "servers", icon: Globe2 },
   { id: "diagnostics", icon: Bug },
   { id: "about", icon: Info },
 ] as const;
-const popupSurface = new URLSearchParams(location.search).get("surface") === "playback";
+const surface = new URLSearchParams(location.search).get("surface");
+const popupSurface = surface === "playback" || surface === "servers";
 export function App() {
   const [state, setState] = useState<AppState>();
   const [page, setPage] = useState<AppPage>("home");
@@ -59,6 +63,7 @@ export function App() {
     setState(next);
     if (popupSurface) return;
     setPage(next.page);
+    if (next.page !== "settings") setEditing(null);
     if (next.page === "settings") setSettingsOpened(true);
     if (next.page === "library" && next.browser.serverId) {
       const id = next.browser.serverId;
@@ -76,9 +81,14 @@ export function App() {
       })
       .catch((err) => setError(String(err)));
     const unsubscribe = api.onState(applyState);
+    const unsubscribeAddServer = api.onAddServer(() => {
+      setEditing({});
+      setError("");
+    });
     return () => {
       current = false;
       unsubscribe();
+      unsubscribeAddServer();
     };
   }, [api, applyState]);
   useEffect(() => {
@@ -92,7 +102,7 @@ export function App() {
     syncTheme();
     systemTheme.addEventListener("change", syncTheme);
     document.documentElement.lang = locale === "zh" ? "zh-CN" : "en";
-    document.title = translate(locale, "brand");
+    document.title = translate(locale, surface === "servers" ? "chooseServer" : "brand");
     return () => systemTheme.removeEventListener("change", syncTheme);
   }, [theme, locale]);
   useEffect(() => {
@@ -158,7 +168,9 @@ export function App() {
         {error && <p role="alert">{localizeError(locale, error)}</p>}
       </main>
     );
-  if (popupSurface) return <PlaybackPanel state={state} t={t} run={run} error={error} />;
+  if (surface === "playback") return <PlaybackPanel state={state} t={t} run={run} error={error} />;
+  if (surface === "servers")
+    return <ServerMenu state={state} t={t} run={run} error={localizeError(locale, error)} />;
   const active = state.settings.servers.find((server) => server.id === state.browser.serverId);
   const currentPlayer = state.settings.players.find(
     (player) => player.id === state.settings.defaultPlayerId,
@@ -233,7 +245,10 @@ export function App() {
                         aria-label={t("loading", { name: server.name })}
                       />
                     ) : (
-                      <SiteIcon src={state.serverFavicons[server.id]} />
+                      <SiteIcon
+                        src={state.serverFavicons[server.id]}
+                        providerId={server.providerId}
+                      />
                     )}
                     <span>{server.name}</span>
                   </Button>
@@ -285,7 +300,14 @@ export function App() {
             size="icon"
             className="new-tab"
             aria-label={t("newTab")}
-            onClick={() => go("home")}
+            aria-haspopup="dialog"
+            aria-expanded={state.serverPopupOpen}
+            onClick={(event) => {
+              const { x, y, width, height } = event.currentTarget.getBoundingClientRect();
+              void run("server-menu", (desktop) =>
+                desktop.toggleServerPopup({ x, y, width, height }),
+              );
+            }}
           >
             <Plus size={18} />
           </Button>
@@ -360,9 +382,10 @@ export function App() {
           </div>
           <Button
             variant="ghost"
-            size="icon"
+            size={state.playback.status === "preparing" ? "default" : "icon"}
             className={cn(
               "relative",
+              state.playback.status === "preparing" && "gap-2 px-3",
               (mediaActive || state.playbackPopupOpen) && "bg-accent text-primary",
             )}
             title={
@@ -380,8 +403,17 @@ export function App() {
               );
             }}
           >
-            <ListVideo size={20} />
-            {(mediaActive || mediaError) && (
+            {state.playback.status === "preparing" ? (
+              <>
+                <LoaderCircle size={18} className="animate-spin motion-reduce:animate-none" />
+                <span className="text-xs" role="status">
+                  {t("preparing")}
+                </span>
+              </>
+            ) : (
+              <ListVideo size={20} />
+            )}
+            {state.playback.status !== "preparing" && (mediaActive || mediaError) && (
               <span
                 className={cn(
                   "absolute right-1 bottom-1 size-1.5 rounded-full border border-(--toolbar)",
@@ -465,7 +497,7 @@ export function App() {
                       className="flex items-center gap-[18px] border-b py-[18px]"
                       key={server.id}
                     >
-                      <Globe2 size={23} className="mx-2 text-muted-foreground" />
+                      <ServerIcon providerId={server.providerId} className="mx-2 size-7" />
                       <Button
                         variant="ghost"
                         className="h-auto min-w-0 flex-1 flex-col items-start gap-2 rounded-md p-2 text-left whitespace-normal [&_strong]:flex [&_strong]:items-center [&_strong]:gap-3 [&_strong]:text-sm [&_small]:text-[11px] [&_small]:font-normal [&_small]:text-muted-foreground [&>span]:text-xs [&>span]:text-muted-foreground [&>span]:wrap-anywhere"
@@ -512,7 +544,7 @@ export function App() {
               <Button variant="link" onClick={() => go("settings", "players")}>
                 {currentPlayer ? (
                   <>
-                    <Check size={14} />
+                    <PlayerIcon kind={currentPlayer.kind} className="size-5" />
                     {t("playerFound", { name: currentPlayer.name })}
                   </>
                 ) : (
@@ -552,7 +584,7 @@ export function App() {
                 <br />v{state.version}
               </span>
             </aside>
-            <div className="w-full max-w-[880px] px-10 pt-7 pb-10 max-[1000px]:p-7 max-[650px]:p-5">
+            <div className="mx-auto w-full max-w-[880px] px-10 pt-7 pb-10 max-[1000px]:p-7 max-[650px]:p-5">
               <section className="mb-6 scroll-mt-[30px]">
                 <div className="flex items-center justify-between gap-5 [&_p]:mt-[7px] [&>span]:text-xs [&>span]:text-muted-foreground">
                   <h2>{t(settingsPage === "servers" ? "serverManagement" : settingsPage)}</h2>
@@ -647,7 +679,12 @@ export function App() {
                     ) : (
                       <>
                         {state.settings.servers.map((server) => (
-                          <SettingRow key={server.id} title={server.name} description={server.url}>
+                          <SettingRow
+                            key={server.id}
+                            title={server.name}
+                            description={server.url}
+                            icon={<ServerIcon providerId={server.providerId} />}
+                          >
                             <Button
                               variant="ghost"
                               size="icon"
@@ -696,16 +733,7 @@ export function App() {
                   </>
                 )}
                 {settingsPage === "diagnostics" && (
-                  <SettingRow title={t("log")} description={t("logDescription")}>
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        void run("diagnostics", (desktop) => desktop.exportDiagnostics())
-                      }
-                    >
-                      {t("exportLog")}
-                    </Button>
-                  </SettingRow>
+                  <DiagnosticsPanel state={state} t={t} run={run} />
                 )}
                 {settingsPage === "about" && (
                   <div className="mt-6 flex flex-col items-start gap-5 [&_p]:mt-1.5">
@@ -713,6 +741,24 @@ export function App() {
                     <div>
                       <p>v{state.version} · Apache-2.0</p>
                       <p>{t("supportedServer")}</p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          void run("product", (desktop) => desktop.openLink("product"))
+                        }
+                      >
+                        {t("productPage")}
+                        <ExternalLink size={14} />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => void run("github", (desktop) => desktop.openLink("github"))}
+                      >
+                        {t("githubRepository")}
+                        <ExternalLink size={14} />
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -727,17 +773,22 @@ export function App() {
 function SettingRow({
   title,
   description,
+  icon,
   children,
 }: {
   title: string;
   description?: string;
+  icon?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <div className="flex items-center justify-between gap-[25px] border-b py-[18px] max-[650px]:flex-wrap [&>div:first-child]:min-w-0 [&>div:first-child]:flex-1 max-[650px]:[&>div:first-child]:basis-full [&_p]:mt-[5px] [&_p]:text-xs [&_p]:wrap-anywhere">
-      <div>
-        <h3>{title}</h3>
-        {description && <p>{description}</p>}
+      <div className="flex items-center gap-3">
+        {icon}
+        <div className="min-w-0">
+          <h3>{title}</h3>
+          {description && <p>{description}</p>}
+        </div>
       </div>
       <div className="flex items-center gap-1.5">{children}</div>
     </div>

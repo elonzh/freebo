@@ -18,6 +18,8 @@ describe("real Emby playback option shapes", () => {
       getCurrentUserId: () => "u",
       accessToken: () => "test",
       deviceId: () => "d",
+      serverId: () => "remote-server",
+      ensureWebSocket: vi.fn(),
     };
     (window as any).Emby = {
       importModule: vi.fn(async (path: string) =>
@@ -37,6 +39,7 @@ describe("real Emby playback option shapes", () => {
     expect(original).not.toHaveBeenCalled();
     expect(request).toHaveBeenCalledWith(
       expect.objectContaining({
+        auth: expect.objectContaining({ serverId: "remote-server" }),
         intent: expect.objectContaining({
           itemIds: ["v"],
           mediaSourceId: undefined,
@@ -46,6 +49,7 @@ describe("real Emby playback option shapes", () => {
         }),
       }),
     );
+    expect(api.ensureWebSocket).toHaveBeenCalledTimes(1);
     await manager.play({
       items: [{ Id: "v", Type: "Movie", MediaSourceId: "item-version" }],
       mediaSourceId: "",

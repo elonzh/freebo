@@ -229,7 +229,7 @@ The full-height desktop frame keeps a fixed browser shell (88px): a draggable ta
 
 Home uses a centered container capped at 960px, with padding of 32px 36px 20px. First-use setup is capped at 760px with 36px horizontal and 32px vertical padding. It uses a single centered logo on welcome, followed by ordinary setup steps. Empty Home and About also use the approved lockup; routine utility rows do not repeat it.
 
-Settings use a 216px rail and flexible content column. The content is capped at 880px, with 28px 40px 40px padding. The rail stays below the browser shell and presents one selected panel at a time. A server form is capped at 510px, with 24px internal padding. Home lists servers; management belongs in Settings.
+Settings use a 216px rail and flexible content column. The content is centered within the remaining column and capped at 880px, with 28px 40px 40px padding. Navigation orders Servers, Players, Playback, Appearance and language, Diagnostics, and About. The rail stays below the browser shell and presents one selected panel at a time. A server form is capped at 510px, with 24px internal padding. Home lists servers; management belongs in Settings. The tab-strip plus opens a native server-list window anchored below it; selecting Add server goes directly to the settings form.
 
 **The Native Geometry Rule.** The Emby guest begins below the 88px shell and moves down by 64px when a server or generic recovery bar appears. Playback controls and queue stay in a separate native window and do not subtract from the guest's size.
 

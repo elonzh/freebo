@@ -197,6 +197,7 @@ describe("Emby video playback", () => {
       url: "https://example.test",
       startSeconds: 0,
       headers: {},
+      runTimeTicks: 2_000_000_000,
     };
     for (const event of ["start", "progress", "stop"] as const)
       await client.report(media, event, 123.5, true);
@@ -204,6 +205,7 @@ describe("Emby video playback", () => {
       "/library/emby/Sessions/Playing",
       "/library/emby/Sessions/Playing/Progress",
       "/library/emby/Sessions/Playing/Stopped",
+      "/library/emby/Users/user1/Items/e",
     ]);
     expect(JSON.parse(fetcher.mock.calls[1][1]!.body as string)).toMatchObject({
       ItemId: "e",
@@ -211,7 +213,99 @@ describe("Emby video playback", () => {
       PlaySessionId: "play",
       PositionTicks: 1_235_000_000,
       IsPaused: true,
+      RunTimeTicks: 2_000_000_000,
+      EventName: "TimeUpdate",
     });
+    expect(new Headers(fetcher.mock.calls[1][1]?.headers).get("X-Emby-Token")).toBe("test-token");
+    await client.report(media, "progress", 124, false);
+    expect(JSON.parse(fetcher.mock.calls.at(-1)![1]!.body as string).EventName).toBe("TimeUpdate");
+    await client.report(media, "progress", 124, true);
+    expect(JSON.parse(fetcher.mock.calls.at(-1)![1]!.body as string).EventName).toBe("Pause");
+    await client.report(media, "progress", 125, false);
+    expect(JSON.parse(fetcher.mock.calls.at(-1)![1]!.body as string).EventName).toBe("Unpause");
+  });
+  it("opens the Emby detail route with the remote server ID and the registered web prefix", async () => {
+    const fetcher = vi.fn<Fetcher>(async () => response({ Id: "remote-server" }));
+    const client = new EmbyClient(auth, fetcher, {}, "https://media.example.test/library");
+    const url = new URL(await client.itemUrl("episode & 1"));
+    expect(url.pathname).toBe("/library/web/index.html");
+    const params = new URLSearchParams(url.hash.split("?")[1]);
+    expect(params.get("id")).toBe("episode & 1");
+    expect(params.get("serverId")).toBe("remote-server");
+    expect(new URL(fetcher.mock.calls[0][0]).pathname).toBe("/library/emby/System/Info/Public");
+    expect(url.toString()).not.toContain("test-token");
+    const known = new EmbyClient({ ...auth, serverId: "known-server" }, fetcher);
+    expect(await known.itemUrl("e")).toContain("serverId=known-server");
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+  it("reads the persisted watch record and identifies a library threshold that cleared the resume point", async () => {
+    const fetcher = vi.fn<Fetcher>(async (input, init) => {
+      const path = new URL(input).pathname;
+      if (init?.method === "POST") return new Response(null, { status: 204 });
+      if (path.endsWith("/Ancestors")) return response([{ Id: "library" }]);
+      if (path.endsWith("/VirtualFolders"))
+        return response([
+          { ItemId: "other", LibraryOptions: { MinResumePct: 5 } },
+          { ItemId: "library", LibraryOptions: { MinResumePct: 3 } },
+        ]);
+      return response({
+        RunTimeTicks: 87_006_500_000,
+        UserData: {
+          PlaybackPositionTicks: 0,
+          PlayCount: 2,
+          LastPlayedDate: "2026-10-06T10:19:30Z",
+          Played: false,
+        },
+      });
+    });
+    const client = new EmbyClient(auth, fetcher);
+    const media = {
+      item: normalizeEmbyItem(episode("e")),
+      source: { id: "s" },
+      playSessionId: "p",
+      url: "",
+      startSeconds: 0,
+      headers: {},
+    };
+    expect(await client.report(media, "stop", 174)).toEqual({
+      status: "verified",
+      position: 0,
+      reportedPosition: 174,
+      playCount: 2,
+      lastPlayedAt: "2026-10-06T10:19:30Z",
+      played: false,
+      minimumResumeSeconds: 261.0195,
+    });
+    expect(fetcher.mock.calls.every((call) => call[1]?.cache === "no-store")).toBe(true);
+  });
+  it("distinguishes a saved resume point from an unreadable record without retrying an accepted stop", async () => {
+    const fetcher = vi.fn<Fetcher>(async (_input, init) =>
+      init?.method === "POST"
+        ? new Response(null, { status: 204 })
+        : response({
+            UserData: { PlaybackPositionTicks: 5_400_000_000, Played: false, PlayCount: 3 },
+          }),
+    );
+    const client = new EmbyClient(auth, fetcher);
+    const media = {
+      item: normalizeEmbyItem(episode("e")),
+      source: { id: "s" },
+      playSessionId: "p",
+      url: "",
+      startSeconds: 0,
+      headers: {},
+    };
+    expect(await client.report(media, "stop", 540)).toMatchObject({
+      status: "verified",
+      position: 540,
+      playCount: 3,
+    });
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    fetcher.mockImplementation(
+      async (_input, init) => new Response(null, { status: init?.method === "POST" ? 204 : 403 }),
+    );
+    expect(await client.report(media, "stop", 540)).toEqual({ status: "unavailable" });
+    expect(fetcher.mock.calls.filter((call) => call[1]?.method === "POST")).toHaveLength(2);
   });
   it("rejects an unavailable selected version and keeps the matching version across episodes", () => {
     expect(() => chooseSource([{ Id: "s" }], "missing")).toThrow("sourceMissing");

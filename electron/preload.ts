@@ -11,6 +11,9 @@ const api: DesktopAPI = {
   showPage: (page, section) => ipcRenderer.invoke("app:page", { page, section }),
   togglePlaybackPopup: (anchor) => ipcRenderer.invoke("app:playback-popup", anchor),
   hidePlaybackPopup: () => ipcRenderer.invoke("app:playback-popup", null),
+  toggleServerPopup: (anchor) => ipcRenderer.invoke("app:server-popup", anchor),
+  hideServerPopup: () => ipcRenderer.invoke("app:server-popup", null),
+  addServer: () => ipcRenderer.invoke("app:add-server"),
   openPlaybackItem: () => ipcRenderer.invoke("app:playback-item"),
   showError: (visible) => ipcRenderer.invoke("app:error-visible", visible),
   discoverPlayers: () => ipcRenderer.invoke("app:discover-players"),
@@ -22,10 +25,17 @@ const api: DesktopAPI = {
   resetSession: (id) => ipcRenderer.invoke("app:reset-session", id),
   openGuide: (kind) => ipcRenderer.invoke("app:guide", kind),
   exportDiagnostics: () => ipcRenderer.invoke("app:diagnostics"),
+  getDiagnostics: () => ipcRenderer.invoke("app:get-diagnostics"),
+  copyDiagnostics: () => ipcRenderer.invoke("app:copy-diagnostics"),
+  openLink: (target) => ipcRenderer.invoke("app:open-link", target),
   onState: (callback) => {
     const listener = (_event: unknown, state: AppState) => callback(state);
     ipcRenderer.on("app:state", listener);
     return () => ipcRenderer.removeListener("app:state", listener);
+  },
+  onAddServer: (callback) => {
+    ipcRenderer.on("app:add-server", callback);
+    return () => ipcRenderer.removeListener("app:add-server", callback);
   },
 };
 contextBridge.exposeInMainWorld("desktop", api);

@@ -69,6 +69,28 @@ describe("server and player setup", () => {
     expect(manualPlayer("iina", "/Applications/IINA.app").executable).toBe(
       "/Applications/IINA.app/Contents/MacOS/iina-cli",
     );
+    const windows = candidatePlayers(
+      "win32",
+      {
+        ProgramFiles: "C:\\Program Files",
+        "ProgramFiles(x86)": "C:\\Program Files (x86)",
+        PATH: "D:\\Portable",
+      },
+      "C:\\Users\\me",
+    );
+    expect(windows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "potplayer",
+          executable: "C:\\Program Files\\DAUM\\PotPlayer\\PotPlayerMini64.exe",
+        }),
+        expect.objectContaining({
+          kind: "mpc-hc",
+          executable: "C:\\Program Files (x86)\\MPC-HC\\mpc-hc.exe",
+        }),
+        expect.objectContaining({ kind: "mpc-be", executable: "D:\\Portable\\mpc-be64.exe" }),
+      ]),
+    );
   });
   it("redacts query credentials and authentication headers from errors", () => {
     const text = redact(

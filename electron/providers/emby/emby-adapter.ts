@@ -102,6 +102,13 @@ export function installEmbyAdapter(): void {
             return original(options, ...rest);
         }
         ids = ids.map(String);
+        // Emby's own start reporter opens this channel so cached Home/detail views
+        // receive UserDataChanged notifications after the external player reports.
+        try {
+          void Promise.resolve(api.ensureWebSocket?.()).catch(() => {});
+        } catch {
+          // Playback reporting works without a websocket; navigation can refresh the view.
+        }
         return page.freeboPlayback.request({
           auth: {
             baseUrl: api.getUrl
@@ -110,6 +117,7 @@ export function installEmbyAdapter(): void {
             userId: String(api.getCurrentUserId()),
             token: api.accessToken(),
             deviceId: api.deviceId(),
+            serverId: api.serverId?.() ?? options.serverId ?? first?.ServerId,
             clientName: api.appName?.(),
             clientVersion: api.appVersion?.(),
             deviceName: api.deviceName?.(),

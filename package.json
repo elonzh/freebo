@@ -73,6 +73,7 @@
       "LICENSE",
       "NOTICE",
       "docs/licenses/shadcn-ui.txt",
+      "docs/integration-icons.md",
       "package.json",
       "docs/licenses/Atma-OFL.txt"
     ],

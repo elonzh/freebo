@@ -8,10 +8,14 @@ import { MonitorPlay, ChevronDown, ExternalLink, FolderOpen } from "lucide-react
 import type { AppState, PlayerKind } from "../shared/types";
 import type { MessageKey } from "../shared/i18n";
 import type { Translator, RunAction, SettingsPatch } from "../ui";
+import { PlayerIcon } from "./IntegrationIcon";
 
 const guides: { kind: PlayerKind; name: string; platforms: string[]; description: MessageKey }[] = [
   { kind: "iina", name: "IINA", platforms: ["darwin"], description: "iinaGuide" },
   { kind: "mpvnet", name: "mpv.net", platforms: ["win32"], description: "mpvnetGuide" },
+  { kind: "potplayer", name: "PotPlayer", platforms: ["win32"], description: "potplayerGuide" },
+  { kind: "mpc-hc", name: "MPC-HC", platforms: ["win32"], description: "mpcGuide" },
+  { kind: "mpc-be", name: "MPC-BE", platforms: ["win32"], description: "mpcGuide" },
   { kind: "mpv", name: "mpv", platforms: ["darwin", "win32", "linux"], description: "mpvGuide" },
   { kind: "vlc", name: "VLC", platforms: ["darwin", "win32", "linux"], description: "vlcGuide" },
 ];
@@ -51,6 +55,7 @@ export function PlayerSetup({
               key={player.id}
             >
               <RadioGroupItem id={`${fieldId}-${player.id}`} value={player.id} />
+              <PlayerIcon kind={player.kind} />
               <span className="min-w-0 flex-1 [&_strong]:block [&_strong]:text-sm [&_small]:mt-1.5 [&_small]:block [&_small]:text-[11px] [&_small]:font-normal [&_small]:text-muted-foreground [&_small]:wrap-anywhere">
                 <strong>{player.name}</strong>
                 <small>{player.executable}</small>
@@ -83,14 +88,15 @@ export function PlayerSetup({
             <ChevronDown className="size-4 transition-transform group-data-[state=open]:rotate-180" />
           </Button>
         </CollapsibleTrigger>
-        <CollapsibleContent>
+        <CollapsibleContent className="divide-y">
           {guides
             .filter((guide) => guide.platforms.includes(state.platform))
             .map((guide) => (
               <article
-                className="flex items-center gap-2.5 border-b py-[18px] max-[650px]:flex-wrap [&>div]:flex-1 max-[650px]:[&>div]:basis-full [&_p]:mt-[5px] [&_p]:text-xs"
+                className="flex items-center gap-2.5 py-[18px] last:pb-0 max-[650px]:flex-wrap [&>div]:flex-1 max-[650px]:[&>div]:basis-full [&_p]:mt-[5px] [&_p]:text-xs"
                 key={guide.kind}
               >
+                <PlayerIcon kind={guide.kind} />
                 <div>
                   <h3>{guide.name}</h3>
                   <p>{t(guide.description)}</p>

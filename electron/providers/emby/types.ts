@@ -34,7 +34,12 @@ export interface MediaItem {
   ParentIndexNumber?: number;
   RunTimeTicks?: number;
   MediaSources?: MediaSource[];
-  UserData?: { PlaybackPositionTicks?: number; Played?: boolean };
+  UserData?: {
+    PlaybackPositionTicks?: number;
+    Played?: boolean;
+    PlayCount?: number;
+    LastPlayedDate?: string;
+  };
   PlaylistItemId?: string;
 }
 export interface PlaybackInfo {
@@ -47,6 +52,7 @@ export interface AuthContext {
   userId: string;
   token: string;
   deviceId: string;
+  serverId?: string;
   clientName?: string;
   clientVersion?: string;
   deviceName?: string;

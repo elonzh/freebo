@@ -4,6 +4,7 @@ import type {
   PlaybackItem,
   PlaybackSource,
   PreparedMedia,
+  PlaybackRecord,
   ServerCredentials,
   ServerConnectionResult,
 } from "../../src/shared/types";
@@ -11,6 +12,7 @@ export type Fetcher = (input: string, init?: RequestInit) => Promise<Response>;
 /** A server adapter owns authentication, its wire types and progress reporting. */
 export interface PlaybackClient {
   readonly identity: string;
+  itemUrl?(itemId: string): Promise<string>;
   resolveQueue(intent: PlayIntent): Promise<PlaybackItem[]>;
   prepare(
     item: PlaybackItem,
@@ -23,7 +25,7 @@ export interface PlaybackClient {
     event: "start" | "progress" | "stop",
     position: number,
     paused?: boolean,
-  ): Promise<void>;
+  ): Promise<PlaybackRecord | void>;
 }
 export interface MediaServerProvider {
   readonly id: string;
@@ -38,7 +40,6 @@ export interface MediaServerProvider {
     version: string,
   ): Promise<ServerConnectionResult>;
   entryUrl(server: Server, home?: boolean): string;
-  itemUrl?(server: Server, itemId: string): string;
   parsePlayback(
     input: unknown,
     server: Server,

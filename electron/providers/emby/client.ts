@@ -6,11 +6,13 @@ import type {
   PreparedMedia,
   PlaybackItem,
   PlaybackSource,
+  PlaybackRecord,
 } from "../../../src/shared/types";
 import type { Fetcher, PlaybackClient } from "../types";
 export type { Fetcher } from "../types";
 
 export class EmbyClient implements PlaybackClient {
+  private pausedSessions = new Map<string, boolean>();
   get identity(): string {
     return `emby:${this.auth.baseUrl}:${this.auth.userId}`;
   }
@@ -18,7 +20,16 @@ export class EmbyClient implements PlaybackClient {
     readonly auth: AuthContext,
     private readonly fetcher: Fetcher,
     readonly playbackHeaders: Record<string, string> = {},
+    private readonly webBaseUrl = auth.baseUrl.replace(/\/emby\/?$/, ""),
   ) {}
+  async itemUrl(itemId: string): Promise<string> {
+    // Emby's item route requires the remote server ID, not Freebo's local server UUID.
+    const serverId =
+      this.auth.serverId ?? (await this.request<{ Id: string }>("System/Info/Public")).Id;
+    if (!serverId) throw new UserFacingError("serverMissing");
+    const params = new URLSearchParams({ id: itemId, serverId });
+    return `${this.webBaseUrl.replace(/\/$/, "")}/web/index.html#!/item?${params}`;
+  }
   url(path: string, params: Record<string, string | number | boolean | undefined> = {}): string {
     const url = new URL(`${this.auth.baseUrl.replace(/\/$/, "")}/${path.replace(/^\//, "")}`);
     for (const [key, value] of Object.entries(params))
@@ -42,10 +53,13 @@ export class EmbyClient implements PlaybackClient {
       {
         method: body === undefined ? "GET" : "POST",
         headers: {
+          Accept: "application/json",
+          "X-Emby-Token": this.auth.token,
           ...(body === undefined ? {} : { "Content-Type": "application/json" }),
         },
         ...(body === undefined ? {} : { body: JSON.stringify(body) }),
         signal: AbortSignal.timeout(25_000),
+        cache: "no-store",
       },
     );
     if (!response.ok)
@@ -222,6 +236,7 @@ export class EmbyClient implements PlaybackClient {
         0,
         (intent.startTicks ?? item.UserData?.PlaybackPositionTicks ?? 0) / 10_000_000,
       ),
+      runTimeTicks: source.RunTimeTicks ?? item.RunTimeTicks,
       audioId: audioIndex === undefined ? undefined : ordinalTrack(audio, audioIndex),
       audioStreamIndex: audioIndex,
       subtitleStreamIndex: subtitleIndex,
@@ -240,12 +255,13 @@ export class EmbyClient implements PlaybackClient {
     event: "start" | "progress" | "stop",
     position: number,
     paused = false,
-  ): Promise<void> {
+  ): Promise<PlaybackRecord | void> {
     const path = {
       start: "Sessions/Playing",
       progress: "Sessions/Playing/Progress",
       stop: "Sessions/Playing/Stopped",
     }[event];
+    const wasPaused = this.pausedSessions.get(media.playSessionId);
     await this.request(
       path,
       { DeviceId: this.auth.deviceId },
@@ -254,15 +270,68 @@ export class EmbyClient implements PlaybackClient {
         MediaSourceId: media.source.id,
         PlaySessionId: media.playSessionId,
         PositionTicks: Math.round(Math.max(0, position) * 10_000_000),
+        RunTimeTicks: media.runTimeTicks,
         IsPaused: paused,
         CanSeek: true,
         PlayMethod: "DirectPlay",
         RepeatMode: "RepeatNone",
-        EventName: event === "progress" ? "timeupdate" : undefined,
+        EventName:
+          event === "progress"
+            ? wasPaused !== undefined && wasPaused !== paused
+              ? paused
+                ? "Pause"
+                : "Unpause"
+              : "TimeUpdate"
+            : undefined,
         AudioStreamIndex: media.audioStreamIndex,
         SubtitleStreamIndex: media.subtitleStreamIndex,
       },
     );
+    if (event === "stop") this.pausedSessions.delete(media.playSessionId);
+    else this.pausedSessions.set(media.playSessionId, paused);
+    if (event !== "stop") return;
+    // A successful report is not proof that Emby retained a resume point.
+    // Read the persisted user data after stopping; library rules may clear short playback.
+    try {
+      const { UserData: data, RunTimeTicks: runTimeTicks } = await this.item(media.item.id);
+      if (!data) return { status: "unavailable" };
+      const savedPosition = (data.PlaybackPositionTicks ?? 0) / 10_000_000;
+      const record: PlaybackRecord = {
+        status: "verified",
+        position: savedPosition,
+        reportedPosition: position,
+        played: data.Played ?? false,
+        playCount: data.PlayCount,
+        lastPlayedAt: data.LastPlayedDate,
+      };
+      if (position > 0 && savedPosition === 0 && !record.played) {
+        record.minimumResumeSeconds = await this.minimumResumeSeconds(
+          media.item.id,
+          runTimeTicks ?? media.runTimeTicks,
+        );
+      }
+      return record;
+    } catch {
+      return { status: "unavailable" };
+    }
+  }
+  private async minimumResumeSeconds(itemId: string, runTimeTicks?: number) {
+    if (!runTimeTicks) return;
+    try {
+      const ancestors = await this.request<{ Id: string }[]>(
+        `Items/${encodeURIComponent(itemId)}/Ancestors`,
+        { UserId: this.auth.userId },
+      );
+      const folders =
+        await this.request<{ ItemId: string; LibraryOptions?: { MinResumePct?: number } }[]>(
+          "Library/VirtualFolders",
+        );
+      const library = folders.find((folder) => ancestors.some((item) => item.Id === folder.ItemId));
+      const percent = library?.LibraryOptions?.MinResumePct;
+      if (percent !== undefined) return (runTimeTicks / 10_000_000) * (percent / 100);
+    } catch {
+      // Some accounts cannot inspect library configuration; saved user data is still valid.
+    }
   }
 }
 function matchingTrack(

@@ -9,7 +9,9 @@ import type {
 } from "../../src/shared/types";
 import type { PlaybackClient } from "../providers/types";
 import { UserFacingError, errorToken } from "../../src/shared/i18n";
-import { PlayerSession, title, type PlayerSnapshot } from "./player-session";
+import { PlayerSession, title, type PlayerSnapshot, type PlaybackSession } from "./player-session";
+import { WindowsPlayerSession } from "./windows-player-session";
+import { redact } from "./redact";
 
 export const idlePlayback: PlaybackState = {
   status: "idle",
@@ -20,7 +22,7 @@ export const idlePlayback: PlaybackState = {
 };
 export class PlaybackManager extends EventEmitter {
   state: PlaybackState = structuredClone(idlePlayback);
-  private player?: PlayerSession;
+  private player?: PlaybackSession;
   private client?: PlaybackClient;
   private media: PreparedMedia[] = [];
   private current = -1;
@@ -31,8 +33,10 @@ export class PlaybackManager extends EventEmitter {
   private lastIntentAt = 0;
   private positions = new Map<number, number>();
   constructor(
-    private readonly createSession: (player: Player) => PlayerSession = (player) =>
-      new PlayerSession(player),
+    private readonly createSession: (player: Player) => PlaybackSession = (player) =>
+      ["potplayer", "mpc-hc", "mpc-be"].includes(player.kind)
+        ? new WindowsPlayerSession(player)
+        : new PlayerSession(player),
   ) {
     super();
   }
@@ -46,12 +50,14 @@ export class PlaybackManager extends EventEmitter {
     if (key === this.lastIntent && Date.now() - this.lastIntentAt < 1_500) return;
     this.lastIntent = key;
     this.lastIntentAt = Date.now();
-    await this.stop();
-    const generation = ++this.generation;
-    this.client = client;
+    const stopping = this.stop(false);
+    const generation = this.generation;
     this.state = { ...idlePlayback, status: "preparing", playerName: player.name };
     this.publish();
     try {
+      await stopping;
+      if (generation !== this.generation) return;
+      this.client = client;
       let items = await client.resolveQueue(intent);
       if (!settings.autoNext) items = items.slice(0, 1);
       const prepared = [await client.prepare(items[0], intent)];
@@ -62,13 +68,21 @@ export class PlaybackManager extends EventEmitter {
       this.current = -1;
       this.positions.clear();
       const session = (this.player = this.createSession(player));
+      session.on("diagnostic", (message: string) => this.emit("diagnostic", redact(message)));
       session.on("snapshot", (snapshot: PlayerSnapshot) => {
         if (generation === this.generation) this.onSnapshot(snapshot);
       });
       session.on("stopped", () => {
         if (generation === this.generation) {
           this.reportStop();
-          this.state.status = "idle";
+          if (this.state.status !== "error") this.state.status = "idle";
+          this.publish();
+        }
+      });
+      session.on("loading", () => {
+        if (generation === this.generation) {
+          this.reportStop();
+          this.state.status = "preparing";
           this.publish();
         }
       });
@@ -116,11 +130,20 @@ export class PlaybackManager extends EventEmitter {
     }
   }
   private onSnapshot(snapshot: PlayerSnapshot): void {
-    if (!this.media[snapshot.index]) return;
-    if (snapshot.index !== this.current) {
+    if (
+      !this.media[snapshot.index] ||
+      !Number.isFinite(snapshot.position) ||
+      !(snapshot.duration > 0)
+    )
+      return;
+    const changed = snapshot.index !== this.current;
+    const pausedChanged = (this.state.status === "paused") !== snapshot.paused;
+    const sought = !changed && Math.abs(snapshot.position - this.state.position) > 3;
+    if (changed) {
       this.reportStop();
       this.current = snapshot.index;
       this.report(this.media[this.current], "start", snapshot.position, snapshot.paused);
+      this.lastSync = Date.now();
     }
     this.positions.set(snapshot.index, snapshot.position);
     this.state = {
@@ -131,7 +154,7 @@ export class PlaybackManager extends EventEmitter {
       duration: snapshot.duration,
       index: snapshot.index,
     };
-    if (Date.now() - this.lastSync > 10_000) {
+    if (!changed && (pausedChanged || sought || Date.now() - this.lastSync >= 10_000)) {
       this.lastSync = Date.now();
       this.report(this.media[this.current], "progress", snapshot.position, snapshot.paused);
     }
@@ -142,25 +165,50 @@ export class PlaybackManager extends EventEmitter {
     event: "start" | "progress" | "stop",
     position: number,
     paused = false,
+    client = this.client,
+    generation = this.generation,
   ): void {
-    const client = this.client;
     if (!client) return;
     this.reports = this.reports
       .catch(() => {})
       .then(async () => {
+        if (generation === this.generation) {
+          this.state.sync = { status: "pending", event };
+          this.publish();
+        }
+        let failure = "";
         for (let attempt = 0; attempt < 3; attempt++) {
           try {
-            await client.report(media, event, position, paused);
-            this.state.syncError = undefined;
-            this.publish();
+            const record = await client.report(media, event, position, paused);
+            if (generation === this.generation) {
+              this.state.syncError = undefined;
+              this.state.sync = {
+                status: "success",
+                event,
+                time: new Date().toISOString(),
+                record: record || undefined,
+              };
+              this.publish();
+            }
+            this.emit("report", { event, status: "success" });
             return;
-          } catch {
+          } catch (error) {
+            failure = redact(error instanceof Error ? error.message : error);
             if (attempt < 2)
               await new Promise((resolve) => setTimeout(resolve, 1_000 * (attempt + 1)));
           }
         }
-        this.state.syncError = errorToken("syncFailed");
-        this.publish();
+        if (generation === this.generation) {
+          this.state.syncError = errorToken("syncFailed");
+          this.state.sync = {
+            status: "error",
+            event,
+            time: new Date().toISOString(),
+            error: failure,
+          };
+          this.publish();
+        }
+        this.emit("report", { event, status: "error", error: failure });
       });
   }
   private reportStop(): void {
@@ -183,13 +231,29 @@ export class PlaybackManager extends EventEmitter {
     if (control.action === "stop") await this.stop();
     else await this.player?.control(control);
   }
-  async stop(): Promise<void> {
-    this.generation++;
-    await this.player?.stop();
-    this.reportStop();
+  async stop(publishIdle = true): Promise<void> {
+    const generation = ++this.generation;
+    const player = this.player;
+    const client = this.client;
+    const media = this.media[this.current];
+    const index = this.current;
+    const position = this.positions.get(index) ?? this.state.position;
+    this.current = -1;
     this.player = undefined;
-    this.state.status = "idle";
-    this.publish();
+    await player?.stop();
+    if (media)
+      this.report(
+        media,
+        "stop",
+        player?.snapshot?.index === index ? player.snapshot.position : position,
+        false,
+        client,
+        publishIdle ? generation : generation - 1,
+      );
+    if (publishIdle && generation === this.generation) {
+      this.state.status = "idle";
+      this.publish();
+    }
   }
   async flush(): Promise<void> {
     await this.stop();

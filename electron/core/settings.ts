@@ -34,7 +34,7 @@ const serverSchema = z.object({
 const playerSchema = z.object({
   id: z.string(),
   name: z.string(),
-  kind: z.enum(["iina", "mpv", "mpvnet", "vlc"]),
+  kind: z.enum(["iina", "mpv", "mpvnet", "vlc", "potplayer", "mpc-hc", "mpc-be"]),
   executable: z.string().min(1),
   prefixArgs: z.array(z.string()),
   manual: z.boolean().optional(),

@@ -10,9 +10,11 @@ import {
   Menu,
   screen,
   safeStorage,
+  clipboard,
   type IpcMainInvokeEvent,
 } from "electron";
 import { join } from "node:path";
+import { release } from "node:os";
 import { writeFile, access, mkdir } from "node:fs/promises";
 import { constants } from "node:fs";
 import { z } from "zod";
@@ -21,6 +23,7 @@ import { discoverPlayers, manualPlayer, playerGuides } from "./core/players";
 import { PlaybackManager } from "./core/playback-manager";
 import { ProviderRegistry } from "./providers/registry";
 import { embyProvider } from "./providers/emby";
+import type { PlaybackClient } from "./providers/types";
 import { migrateLegacyProfile } from "./core/profile-migration";
 import {
   translate,
@@ -34,6 +37,7 @@ import type { AppState, AppPage, SettingsPage, Platform, Server } from "../src/s
 import { redact } from "./core/redact";
 import { CredentialStore, credentialsSchema, credentialOriginMatches } from "./core/credentials";
 import { loadFavicon } from "./core/favicon";
+import { diagnosticSnapshot, productLink } from "./core/diagnostics";
 
 app.setName("Freebo");
 app.setPath("userData", join(app.getPath("appData"), "Freebo"));
@@ -71,9 +75,15 @@ let window: BrowserWindow;
 let guest: WebContentsView | undefined;
 let shown = false;
 let page: AppPage = "home";
-let settingsPage: SettingsPage = "players";
+let settingsPage: SettingsPage = "servers";
 let playbackPopup: BrowserWindow | undefined;
+let serverPopup: BrowserWindow | undefined;
+type PopupAnchor = { x: number; y: number; width: number; height: number };
+let serverPopupAnchor: PopupAnchor | undefined;
+let serverPopupLoading: Promise<void> | undefined;
+let serverPopupBlurTimer: ReturnType<typeof setTimeout> | undefined;
 let playbackServer: Server | undefined;
+let playbackClient: PlaybackClient | undefined;
 let popupAnchor: { x: number; y: number; width: number; height: number } | undefined;
 let popupBlurTimer: ReturnType<typeof setTimeout> | undefined;
 let errorVisible = false;
@@ -87,6 +97,19 @@ const diagnostics: { time: string; message: string }[] = [];
 function log(message: string) {
   diagnostics.push({ time: new Date().toISOString(), message: redact(message) });
   if (diagnostics.length > 200) diagnostics.shift();
+}
+function getDiagnostics() {
+  return diagnosticSnapshot(
+    state(),
+    {
+      arch: process.arch,
+      osRelease: release(),
+      electron: process.versions.electron,
+      chromium: process.versions.chrome,
+      node: process.versions.node,
+    },
+    diagnostics,
+  );
 }
 function state(): AppState {
   const contents = guest && !guest.webContents.isDestroyed() ? guest.webContents : undefined;
@@ -110,6 +133,7 @@ function state(): AppState {
     page,
     settingsPage,
     playbackPopupOpen: playbackPopup?.isVisible() ?? false,
+    serverPopupOpen: serverPopup?.isVisible() ?? false,
     playbackSource:
       playbackServer && playback.state.queue[playback.state.index]
         ? { serverId: playbackServer.id, itemId: playback.state.queue[playback.state.index].id }
@@ -125,7 +149,7 @@ function state(): AppState {
 }
 function publish() {
   const snapshot = state();
-  for (const target of [window, playbackPopup])
+  for (const target of [window, playbackPopup, serverPopup])
     if (target && !target.isDestroyed()) target.webContents.send("app:state", snapshot);
 }
 function layout() {
@@ -140,14 +164,14 @@ function layout() {
   });
 }
 function own(event: IpcMainInvokeEvent) {
-  const contents = [window, playbackPopup].find(
+  const contents = [window, playbackPopup, serverPopup].find(
     (target) => target && !target.isDestroyed() && event.sender === target.webContents,
   )?.webContents;
   if (!contents || event.senderFrame !== contents.mainFrame)
     throw new UserFacingError("invalidOrigin");
 }
 const idSchema = z.string().min(1).max(200);
-const kindSchema = z.enum(["iina", "mpv", "mpvnet", "vlc"]);
+const kindSchema = z.enum(["iina", "mpv", "mpvnet", "vlc", "potplayer", "mpc-hc", "mpc-be"]);
 const controlSchema = z.discriminatedUnion("action", [
   z.object({ action: z.enum(["pause", "next", "previous", "stop"]) }),
   z.object({ action: z.literal("seek"), seconds: z.number().finite().min(0) }),
@@ -180,6 +204,7 @@ function closeGuest() {
   webStatus = "closed";
 }
 async function openServer(id: string, destination?: string) {
+  hideServerPopup();
   const server = store.value.servers.find((s) => s.id === id);
   if (!server) throw new UserFacingError("serverMissing");
   if (
@@ -363,6 +388,7 @@ async function togglePlaybackPopup(anchor: {
   width: number;
   height: number;
 }) {
+  hideServerPopup();
   clearTimeout(popupBlurTimer);
   if (playbackPopup?.isVisible()) {
     hidePlaybackPopup();
@@ -411,6 +437,102 @@ async function togglePlaybackPopup(anchor: {
   if (window.isDestroyed() || playbackPopup.isDestroyed()) return;
   positionPlaybackPopup();
   playbackPopup.show();
+  publish();
+}
+
+function hideServerPopup() {
+  clearTimeout(serverPopupBlurTimer);
+  serverPopupAnchor = undefined;
+  serverPopup?.hide();
+  publish();
+}
+function positionServerPopup() {
+  if (!serverPopup || !serverPopupAnchor || !window || window.isDestroyed()) return;
+  const bounds = window.getContentBounds();
+  const area = screen.getDisplayMatching(window.getBounds()).workArea;
+  const width = Math.min(360, area.width - 24);
+  const height = Math.min(
+    496,
+    Math.max(160, 101 + store.value.servers.length * 64),
+    bounds.height - 64,
+    area.height - 24,
+  );
+  serverPopup.setBounds({
+    width,
+    height,
+    x: Math.max(
+      area.x + 12,
+      Math.min(bounds.x + serverPopupAnchor.x, area.x + area.width - width - 12),
+    ),
+    y: Math.max(
+      area.y + 12,
+      Math.min(
+        bounds.y + serverPopupAnchor.y + serverPopupAnchor.height + 6,
+        area.y + area.height - height - 12,
+      ),
+    ),
+  });
+}
+async function toggleServerPopup(anchor: PopupAnchor) {
+  clearTimeout(serverPopupBlurTimer);
+  if (serverPopupAnchor) {
+    hideServerPopup();
+    return;
+  }
+  hidePlaybackPopup();
+  serverPopupAnchor = anchor;
+  if (!serverPopup || serverPopup.isDestroyed()) {
+    const panel = (serverPopup = new BrowserWindow({
+      parent: window,
+      width: 360,
+      height: 240,
+      frame: false,
+      show: false,
+      resizable: false,
+      minimizable: false,
+      maximizable: false,
+      fullscreenable: false,
+      skipTaskbar: true,
+      hasShadow: true,
+      backgroundColor: nativeTheme.shouldUseDarkColors ? "#1d2c25" : "#ffffff",
+      webPreferences: {
+        preload: join(__dirname, "preload.cjs"),
+        sandbox: true,
+        contextIsolation: true,
+        nodeIntegration: false,
+      },
+    }));
+    panel.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+    panel.webContents.on("will-navigate", (event) => event.preventDefault());
+    panel.webContents.on("before-input-event", (event, input) => {
+      if (input.type === "keyDown" && input.key === "Escape") {
+        event.preventDefault();
+        hideServerPopup();
+        window.focus();
+      }
+    });
+    panel.on("blur", () => {
+      serverPopupBlurTimer = setTimeout(hideServerPopup, 150);
+    });
+    panel.on("closed", () => {
+      serverPopup = undefined;
+      serverPopupAnchor = undefined;
+      publish();
+    });
+    if (process.env.FREEBO_DEV_URL) {
+      const url = new URL(process.env.FREEBO_DEV_URL);
+      url.searchParams.set("surface", "servers");
+      serverPopupLoading = panel.loadURL(url.toString());
+    } else
+      serverPopupLoading = panel.loadFile(join(__dirname, "../dist/index.html"), {
+        query: { surface: "servers" },
+      });
+  }
+  await serverPopupLoading;
+  if (window.isDestroyed() || !serverPopup || serverPopup.isDestroyed() || !serverPopupAnchor)
+    return;
+  positionServerPopup();
+  serverPopup.show();
   publish();
 }
 
@@ -543,6 +665,7 @@ function setupIPC() {
     if (request.section) settingsPage = request.section;
     shown = page === "library";
     hidePlaybackPopup();
+    hideServerPopup();
     layout();
     publish();
   });
@@ -557,11 +680,34 @@ function setupIPC() {
       .parse(input);
     await togglePlaybackPopup(anchor);
   });
+  handle("app:server-popup", async (input) => {
+    if (input === null) {
+      hideServerPopup();
+      return;
+    }
+    const coordinate = z.number().finite().min(0).max(100_000);
+    const anchor = z
+      .object({ x: coordinate, y: coordinate, width: coordinate, height: coordinate })
+      .parse(input);
+    await toggleServerPopup(anchor);
+  });
+  handle("app:add-server", () => {
+    hideServerPopup();
+    hidePlaybackPopup();
+    page = "settings";
+    settingsPage = "servers";
+    shown = false;
+    layout();
+    publish();
+    window.webContents.send("app:add-server");
+    window.show();
+    window.focus();
+  });
   handle("app:playback-item", async () => {
     const server = store.value.servers.find((server) => server.id === playbackServer?.id);
     const item = playback.state.queue[playback.state.index];
     if (!server || !item) throw new UserFacingError("itemMissing");
-    const destination = providers.get(server.providerId).itemUrl?.(server, item.id);
+    const destination = await playbackClient?.itemUrl?.(item.id);
     if (!destination) throw new UserFacingError("providerMissing");
     hidePlaybackPopup();
     await openServer(server.id, destination);
@@ -680,27 +826,17 @@ function setupIPC() {
       defaultPath: "freebo-diagnostics.json",
     });
     if (result.canceled || !result.filePath) return null;
-    await writeFile(
-      result.filePath,
-      JSON.stringify(
-        {
-          version: app.getVersion(),
-          platform: process.platform,
-          webStatus,
-          adapterStatus,
-          playback: {
-            status: playback.state.status,
-            error: playback.state.error,
-            syncError: playback.state.syncError,
-          },
-          players: store.value.players.map((p) => ({ name: p.name, kind: p.kind })),
-          diagnostics,
-        },
-        null,
-        2,
-      ),
-    );
+    await writeFile(result.filePath, JSON.stringify(getDiagnostics(), null, 2));
     return result.filePath;
+  });
+  handle("app:get-diagnostics", () => getDiagnostics());
+  handle("app:copy-diagnostics", async () => {
+    await clipboard.writeText(JSON.stringify(getDiagnostics(), null, 2));
+  });
+  handle("app:open-link", async (input) => {
+    await shell.openExternal(
+      productLink(z.enum(["product", "github", "issue"]).parse(input), getDiagnostics()),
+    );
   });
   ipcMain.on("server:ready", (event, status) => {
     if (
@@ -789,9 +925,16 @@ function setupIPC() {
       return response;
     };
     const client = request.createClient(fetcher);
+    playbackClient = client;
     const originalPrepare = client.prepare.bind(client);
     client.prepare = async (...args) => {
       const media = await originalPrepare(...args);
+      if (player.kind === "potplayer") {
+        // PotPlayer's documented control messages do not select embedded tracks.
+        // Do not report Emby's chosen indices as though the player applied them.
+        media.audioStreamIndex = undefined;
+        if (!media.subtitleUrl) media.subtitleStreamIndex = undefined;
+      }
       media.url = proxy.register(media.url, fetcher);
       if (media.subtitleUrl) media.subtitleUrl = proxy.register(media.subtitleUrl, fetcher);
       return media;
@@ -955,16 +1098,26 @@ void app.whenReady().then(async () => {
     if (playback.state.status === "idle") proxy.clear();
     publish();
   });
+  playback.on("report", (result: { event: string; status: string; error?: string }) => {
+    log(
+      `Playback sync ${result.event}: ${result.status}${result.error ? ` (${result.error})` : ""}`,
+    );
+  });
+  playback.on("diagnostic", (message: string) => log(message));
   window.on("resize", () => {
     layout();
     if (playbackPopup?.isVisible()) positionPlaybackPopup();
+    if (serverPopup?.isVisible()) positionServerPopup();
   });
   window.on("move", () => {
     if (playbackPopup?.isVisible()) positionPlaybackPopup();
+    if (serverPopup?.isVisible()) positionServerPopup();
   });
   window.on("minimize", hidePlaybackPopup);
+  window.on("minimize", hideServerPopup);
   window.on("closed", () => {
     playbackPopup?.destroy();
+    serverPopup?.destroy();
   });
   window.on("enter-full-screen", () => {
     layout();
