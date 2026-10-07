@@ -5,9 +5,9 @@
 
 [![English](https://img.shields.io/badge/English-193C35?style=flat&logo=googletranslate&logoColor=white)](README.en.md)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-193C35?style=flat)](LICENSE)
-[![下载 Freebo](https://img.shields.io/badge/%E4%B8%8B%E8%BD%BD-Freebo-193C35?style=flat)](https://github.com/elonzh/freebo/releases/latest)
 [![macOS, Windows, Linux](https://img.shields.io/badge/Platforms-macOS%20%C2%B7%20Windows%20%C2%B7%20Linux-193C35?style=flat)](#功能)
 [![产品官网](https://img.shields.io/badge/%E5%AE%98%E7%BD%91-Freebo-193C35?style=flat)](https://elonzh.cn/toys/freebo)
+[![下载 Freebo](https://img.shields.io/badge/%E4%B8%8B%E8%BD%BD-Freebo-193C35?style=flat)](https://github.com/elonzh/freebo/releases/latest)
 [![更新说明](https://img.shields.io/badge/%E6%9B%B4%E6%96%B0%E8%AF%B4%E6%98%8E-193C35?style=flat)](CHANGELOG.md)
 
 **免费开源的桌面影音客户端。在熟悉的媒体库里浏览，用喜欢的本地播放器观看。**

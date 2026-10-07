@@ -198,7 +198,7 @@ The frontmatter extracts the current semantic palette from [src/style.css](../sr
 
 ### Primary
 
-- **Deep Pine** (`pine`, `primary`): brand structure, light-theme actions, links and focus feedback.
+- **Deep Pine** (`pine`, `primary`): brand structure, light-theme actions and links.
 - **Lime** (`lime`, `dark-primary`): the dog-mark accent, sharing materials and dark-theme actions. It is not a blanket background for every panel.
 - **Soft Green Selection** (`accent`, `dark-accent`): selected navigation, player rows and playback items.
 
@@ -237,7 +237,7 @@ The native window opens at 1280 × 850 with a minimum of 820 × 600. At 1000px, 
 
 ## Elevation & Depth
 
-The shell, utility pages and ordinary settings/server rows remain flat. Surface tones and one-pixel boundaries establish hierarchy. shadcn outline controls and inputs retain their small component shadow; Select uses a bordered popover and soft shadow. The playback popup receives the operating system's native window shadow. Keyboard focus stays visible through shadcn rings; the address field uses a primary outline around its entire pill.
+The shell, utility pages and ordinary settings/server rows remain flat. Surface tones and one-pixel boundaries establish hierarchy. shadcn outline controls and inputs retain their small component shadow; Select uses a bordered popover and soft shadow. The playback popup receives the operating system's native window shadow. Owned controls retain their standard interaction behavior without focus rings or outlines. Text fields retain normal typing and editing.
 
 **The Task Depth Rule.** Keep routine settings flat. Use a native window for the temporary playback task layer.
 
@@ -251,9 +251,9 @@ The mark preserves the asymmetric ears, face and three-color silhouette in the e
 
 ### Buttons and fields
 
-Use shadcn Button default, outline, ghost and link variants for primary, supporting, icon and text actions. Default buttons are 36px tall; the selected icon surface uses `accent` with `primary` ink. Keep hover, disabled, destructive and keyboard-focus states in the shared components. Buttons default to `type="button"`; form saving explicitly uses submit.
+Use shadcn Button default, outline, ghost and link variants for primary, supporting, icon and text actions. Default buttons are 36px tall; the selected icon surface uses `accent` with `primary` ink. Keep hover, disabled and destructive states in the shared components. Buttons default to `type="button"`; form saving explicitly uses submit.
 
-shadcn Input and Label supply field states and accessible labeling. OptionSelect uses shadcn Select with its Portal menu, selected-item check and keyboard behavior. The provider is disabled when only one exists or a server is edited. The server form accepts optional credentials and exposes password visibility; saved credentials fill the Emby login page without submitting it. Keep field help beside the relevant field and saving feedback inside the action.
+shadcn Input and Label supply field states and accessible labeling. OptionSelect uses shadcn Select with its Portal menu, selected-item check and standard primitive behavior. The provider is disabled when only one exists or a server is edited. The server form accepts optional credentials and exposes password visibility; saved credentials fill the Emby login page without submitting it. Keep field help beside the relevant field and saving feedback inside the action.
 
 ### Browser tabs and address toolbar
 
@@ -284,7 +284,7 @@ Recovery uses readable destructive text with an action named for reload, close o
 - Do preserve Chrome-style desktop tabs, navigation and the rounded address field.
 - Do keep shell and recovery geometry synchronized with native guest bounds.
 - Do use shadcn controls and existing semantic variables for both appearances.
-- Do keep translated labels, keyboard focus and action-specific icon names readable.
+- Do keep translated labels and action-specific icon names readable.
 - Do use clean actual-app screenshots and retain source information with the assets.
 
 ### Don't:

@@ -5,9 +5,9 @@
 
 [![中文](https://img.shields.io/badge/%E4%B8%AD%E6%96%87-193C35?style=flat&logo=googletranslate&logoColor=white)](README.md)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-193C35?style=flat)](LICENSE)
-[![Download Freebo](https://img.shields.io/badge/Download-Freebo-193C35?style=flat)](https://github.com/elonzh/freebo/releases/latest)
 [![macOS, Windows, Linux](https://img.shields.io/badge/Platforms-macOS%20%C2%B7%20Windows%20%C2%B7%20Linux-193C35?style=flat)](#features)
 [![Product website](https://img.shields.io/badge/Website-Freebo-193C35?style=flat)](https://elonzh.cn/en/toys/freebo)
+[![Download Freebo](https://img.shields.io/badge/Download-Freebo-193C35?style=flat)](https://github.com/elonzh/freebo/releases/latest)
 [![Changelog](https://img.shields.io/badge/Changelog-193C35?style=flat)](CHANGELOG.md)
 
 **A free, open-source desktop media client. Browse your familiar library and watch with your favorite local player.**

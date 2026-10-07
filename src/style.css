@@ -89,6 +89,7 @@
 @layer base {
   * {
     @apply border-border;
+    outline: none;
     scrollbar-width: thin;
     scrollbar-color: var(--muted-foreground) transparent;
   }
@@ -250,10 +251,6 @@
   background: transparent;
   transition: none;
 }
-.tab-select:focus-visible {
-  border-radius: 9px;
-  box-shadow: inset 0 0 0 2px var(--primary);
-}
 .tab-close {
   display: grid;
   place-items: center;
@@ -299,10 +296,6 @@
   background: var(--address);
   color: var(--muted-foreground);
 }
-.address-bar:focus-within {
-  outline: 2px solid var(--primary);
-  outline-offset: 0;
-}
 .address-bar input {
   height: 100%;
   padding: 0;
@@ -314,9 +307,6 @@
   background: transparent;
   color: var(--foreground);
   font-size: 13px;
-  outline: none;
-}
-.address-bar input:focus-visible {
   outline: none;
 }
 .navigation {

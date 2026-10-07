@@ -566,13 +566,6 @@ async function toggleServerPopup(anchor: PopupAnchor) {
     }));
     panel.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
     panel.webContents.on("will-navigate", (event) => event.preventDefault());
-    panel.webContents.on("before-input-event", (event, input) => {
-      if (input.type === "keyDown" && input.key === "Escape") {
-        event.preventDefault();
-        hideServerPopup();
-        if (isLiveWindow(window)) window.focus();
-      }
-    });
     panel.on("blur", () => {
       serverPopupBlurTimer = setTimeout(hideServerPopup, 150);
     });

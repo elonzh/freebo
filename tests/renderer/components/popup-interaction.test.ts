@@ -23,7 +23,7 @@ afterEach(async () => {
 });
 
 it.each(["servers", "playback"] as const)(
-  "resets %s popup focus on every opening without stealing focus during updates",
+  "closes %s popup through its close button",
   async (surface) => {
     const Component = surface === "servers" ? ServerMenu : PlaybackPanel;
     const close = vi.fn(async () => {});
@@ -54,21 +54,9 @@ it.each(["servers", "playback"] as const)(
     };
     await render(false);
     const closeButton = container.querySelector<HTMLButtonElement>('button[aria-label^="关闭"]')!;
-    await act(async () => closeButton.focus());
     await render(true);
-    expect(document.activeElement).toBe(container.querySelector("main"));
-    expect(closeButton.tabIndex).toBe(0);
-    await act(async () => closeButton.focus());
-    await render(true);
-    expect(document.activeElement).toBe(closeButton);
-    await render(false);
-    await render(true);
-    expect(document.activeElement).toBe(container.querySelector("main"));
-    await act(async () =>
-      container
-        .querySelector("main")!
-        .dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })),
-    );
+    expect(close).not.toHaveBeenCalled();
+    await act(async () => closeButton.click());
     expect(close).toHaveBeenCalledOnce();
   },
 );

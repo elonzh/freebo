@@ -39,11 +39,7 @@ export function PlaybackPanel({
   const playable = playback.status === "playing" || playback.status === "paused";
   const problem = error || playback.error || playback.syncError;
   return (
-    <PopupSurface
-      open={state.playbackPopupOpen}
-      onClose={() => void run("close-popup", (desktop) => desktop.hidePlaybackPopup())}
-      className="bg-card"
-    >
+    <PopupSurface className="bg-card">
       <header className="flex shrink-0 items-center justify-between gap-3 border-b py-3 pr-4 pl-5 [&>h1]:flex [&>h1]:items-center [&>h1]:gap-2.5 [&>h1]:text-[15px]">
         <h1>
           <ListVideo size={18} />

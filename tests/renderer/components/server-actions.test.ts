@@ -45,7 +45,7 @@ afterEach(async () => {
   container.remove();
   delete (globalThis as any).IS_REACT_ACT_ENVIRONMENT;
 });
-it("uses an app dialog, focuses Cancel, and does not remove a server when cancelled", async () => {
+it("uses an app dialog and does not remove a server when cancelled", async () => {
   const trigger = container.querySelector<HTMLButtonElement>('button[aria-label^="移除"]')!;
   await act(async () => trigger.click());
   const dialog = document.querySelector('[role="alertdialog"]')!;
@@ -61,7 +61,7 @@ it("uses an app dialog, focuses Cancel, and does not remove a server when cancel
   expect(onRemove).not.toHaveBeenCalled();
   expect(onSignOut).not.toHaveBeenCalled();
   expect(onEdit).not.toHaveBeenCalled();
-  await vi.waitFor(() => expect(document.activeElement).toBe(trigger));
+  expect(document.body.querySelector('[role="alertdialog"]')).toBeNull();
 });
 it("performs exactly the selected action after confirmation", async () => {
   const signOut = container.querySelector<HTMLButtonElement>('button[aria-label="退出登录"]')!;

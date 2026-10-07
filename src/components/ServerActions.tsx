@@ -1,5 +1,5 @@
 import { useAppTranslation } from "../i18n";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { LogOut, Trash2 } from "lucide-react";
 import { Button, buttonVariants } from "./ui/button";
 import {
@@ -24,7 +24,6 @@ export function ServerActions({
 }) {
   const { t } = useAppTranslation();
   const [action, setAction] = useState<"remove" | "sign-out" | null>(null);
-  const opener = useRef<HTMLButtonElement | null>(null);
   const removing = action === "remove";
   return (
     <AlertDialog
@@ -39,8 +38,7 @@ export function ServerActions({
         aria-label={t("signOut")}
         title={t("signOut")}
         disabled={disabled}
-        onClick={(event) => {
-          opener.current = event.currentTarget;
+        onClick={() => {
           setAction("sign-out");
         }}
       >
@@ -53,19 +51,13 @@ export function ServerActions({
         disabled={disabled}
         aria-label={t("removeServer")}
         title={t("removeServer")}
-        onClick={(event) => {
-          opener.current = event.currentTarget;
+        onClick={() => {
           setAction("remove");
         }}
       >
         <Trash2 size={16} />
       </Button>
-      <AlertDialogContent
-        onCloseAutoFocus={(event) => {
-          event.preventDefault();
-          if (opener.current?.isConnected) opener.current.focus({ preventScroll: true });
-        }}
-      >
+      <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{t(removing ? "removeServerTitle" : "signOutTitle")}</AlertDialogTitle>
           <AlertDialogDescription>

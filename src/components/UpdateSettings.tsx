@@ -95,7 +95,7 @@ export function UpdateSettings({ state, run }: { state: AppState; run: RunAction
             <AlertDialogDescription>{t("updateStopsPlayback")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel autoFocus>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={install}>{t("restartUpdate")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

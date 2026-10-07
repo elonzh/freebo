@@ -19,11 +19,7 @@ export function ServerMenu({
 }) {
   const { t } = useAppTranslation();
   return (
-    <PopupSurface
-      open={state.serverPopupOpen}
-      onClose={() => void run("close", (desktop) => desktop.hideServerPopup())}
-      className="bg-popover text-popover-foreground"
-    >
+    <PopupSurface className="bg-popover text-popover-foreground">
       <header className="flex shrink-0 items-center justify-between px-4 py-2">
         <h2 className="text-sm">{t("chooseServer")}</h2>
         <Button
