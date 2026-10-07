@@ -2,6 +2,8 @@ export type PlayerKind = "iina" | "mpv" | "mpvnet" | "vlc" | "potplayer" | "mpc-
 export type Platform = "darwin" | "win32" | "linux";
 export type AppPage = "home" | "library" | "settings" | "setup";
 export type SettingsPage = "players" | "general" | "servers" | "diagnostics" | "about";
+export type AppDirectory = "program" | "data";
+export type AppDirectories = Record<AppDirectory, string>;
 export interface Server {
   id: string;
   name: string;
@@ -230,7 +232,8 @@ export interface DesktopAPI {
   resetSession(this: void, id: string): Promise<AppState>;
   openGuide(this: void, kind: PlayerKind): Promise<void>;
   exportDiagnostics(this: void): Promise<string | null>;
-  getDiagnostics(this: void): Promise<Diagnostics>;
+  getDiagnostics(this: void): Promise<Diagnostics & { directories: AppDirectories }>;
+  openDirectory(this: void, target: AppDirectory): Promise<void>;
   copyDiagnostics(this: void): Promise<void>;
   openLink(this: void, target: "product" | "github" | "issue"): Promise<void>;
   checkForUpdates(this: void): Promise<void>;

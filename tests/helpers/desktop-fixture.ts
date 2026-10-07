@@ -124,6 +124,7 @@ export function createDesktopFixture() {
     getDiagnostics: vi.fn(async () => {
       throw new Error("No diagnostics fixture");
     }),
+    openDirectory: vi.fn(async () => {}),
     copyDiagnostics: vi.fn(async () => {}),
     openLink: vi.fn(async () => {}),
     checkForUpdates: vi.fn(async () => {}),

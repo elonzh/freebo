@@ -113,6 +113,12 @@ export const en = {
   diagnosticsDescription:
     "Check the environment, connection and playback sync. Saved credentials are excluded; links and access tokens in logs are hidden.",
   runtimeInfo: "Environment",
+  directories: "Directories",
+  programDirectory: "Program directory",
+  dataDirectory: "Data directory",
+  openDirectory: "Open {{name}}",
+  directoryOpenFailed:
+    "Cannot open this directory. Check that it exists and you have permission to access it.",
   systemInfo: "System",
   connectionInfo: "Connection and playback",
   serverCount: "Saved servers",

@@ -58,6 +58,7 @@ import { redact } from "./core/redact";
 import { CredentialStore, credentialsSchema, credentialOriginMatches } from "./core/credentials";
 import { loadFavicon } from "./core/favicon";
 import { diagnosticSnapshot, productLink } from "./core/diagnostics";
+import { applicationDirectories, openApplicationDirectory } from "./core/app-directories";
 import { AppLifecycle } from "./core/app-lifecycle";
 import { UpdateManager, hasMacUpdateSignature, updateDisabledReason } from "./core/updates";
 import { autoUpdater } from "electron-updater";
@@ -896,7 +897,13 @@ function setupIPC() {
     await writeFile(result.filePath, JSON.stringify(getDiagnostics(), null, 2));
     return result.filePath;
   });
-  handle("app:get-diagnostics", () => getDiagnostics());
+  handle("app:get-diagnostics", () => ({
+    ...getDiagnostics(),
+    directories: applicationDirectories(app),
+  }));
+  handle("app:open-directory", (input) =>
+    openApplicationDirectory(app, input, (path) => shell.openPath(path)),
+  );
   handle("app:copy-diagnostics", async () => {
     await clipboard.writeText(JSON.stringify(getDiagnostics(), null, 2));
   });

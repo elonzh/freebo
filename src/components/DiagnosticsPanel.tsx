@@ -3,11 +3,11 @@ import { useRuntime } from "../runtime/context";
 import { diagnosticsKey } from "../runtime/desktop";
 import { useAppTranslation } from "../i18n";
 import { useEffect, useState, type ReactNode } from "react";
-import { Check, Copy, Download, ExternalLink, RefreshCw } from "lucide-react";
+import { Check, Copy, Download, ExternalLink, FolderOpen, RefreshCw } from "lucide-react";
 import { Button } from "./ui/button";
 import { PlayerIcon } from "./IntegrationIcon";
 import { localizeError, type MessageKey } from "../shared/i18n";
-import type { AppState, Diagnostics } from "../shared/types";
+import type { AppDirectory, AppState, Diagnostics } from "../shared/types";
 import { formatTime, type RunAction } from "../ui";
 
 function Details({ rows }: { rows: [string, ReactNode][] }) {
@@ -45,6 +45,7 @@ export function DiagnosticsPanel({ state, run }: { state: AppState; run: RunActi
   const error = query.error ? localizeError(state.locale, query.error) : "";
   const refreshing = query.isFetching;
   const [copied, setCopied] = useState(false);
+  const [openingDirectory, setOpeningDirectory] = useState<AppDirectory>();
   useEffect(() => {
     if (!copied) return;
     const timer = setTimeout(() => setCopied(false), 3_000);
@@ -109,6 +110,42 @@ export function DiagnosticsPanel({ state, run }: { state: AppState; run: RunActi
           </p>
         )}
       </div>
+      {data && (
+        <section aria-label={t("directories")}>
+          <h3>{t("directories")}</h3>
+          <Details
+            rows={(["program", "data"] as const).map((target) => {
+              const name = t(target === "program" ? "programDirectory" : "dataDirectory");
+              return [
+                name,
+                <div key={target} className="flex items-start gap-3">
+                  <span className="min-w-0 flex-1 select-text wrap-anywhere">
+                    {data.directories[target]}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0"
+                    aria-label={t("openDirectory", { name })}
+                    disabled={openingDirectory !== undefined}
+                    onClick={async () => {
+                      setOpeningDirectory(target);
+                      try {
+                        await run("open-directory", (api) => api.openDirectory(target));
+                      } finally {
+                        setOpeningDirectory(undefined);
+                      }
+                    }}
+                  >
+                    <FolderOpen size={15} />
+                    {t("open")}
+                  </Button>
+                </div>,
+              ];
+            })}
+          />
+        </section>
+      )}
       <section aria-label={t("connectionInfo")}>
         <h3>{t("connectionInfo")}</h3>
         <Details

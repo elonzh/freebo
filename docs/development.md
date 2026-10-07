@@ -126,6 +126,23 @@ pnpm integration:reset
 
 ## 打包与发布
 
-`pnpm package` 构建应用并使用 electron-builder 生成当前平台产物，输出至 `release/`。构建、升级与发行验证边界见 [架构文档](architecture.md#构建与升级)。
+`pnpm package` 构建应用并使用 electron-builder 生成当前平台产物，输出至 `release/`。升级机制与支持范围见 [架构文档](architecture.md#构建与升级)。
+
+[GitHub Actions](../.github/workflows/ci.yml) 对外部 fork 的 Pull Request 执行三平台检查；普通分支推送及仓库内的 Pull Request 不重复检查。推送 `v*` 标签后构建安装包并创建草稿 Release，标签须与 `package.json` 版本一致。
+
+发布时保留安装包、ZIP、blockmap、`latest*.yml` 和校验和；macOS arm64/x64 在同一次 builder 调用中生成，共用一份更新元数据。手动发布草稿后，更新器才会发现版本。
+
+macOS 签名与公证使用 GitHub Actions secrets：
+
+- `MAC_CSC_LINK`：Developer ID Application 的 P12 证书；`MAC_CSC_KEY_PASSWORD`：证书密码。
+- `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID`：公证凭据。
+
+流水线已接入这些变量，是否已配置及签名安装行为仍需实际验收。本地检查未签名 ZIP 可运行：
+
+```sh
+pnpm exec electron-builder --mac zip --arm64 --x64 --publish never --config.mac.identity=null
+```
+
+此检查验证打包和更新元数据，不能作为 macOS 自动安装验收。
 
 容器配置参考 [Emby 镜像说明](https://hub.docker.com/r/emby/embyserver)、[Jellyfin 容器文档](https://jellyfin.org/docs/general/installation/container/)、[LinuxServer Plex 镜像说明](https://docs.linuxserver.io/images/docker-plex/)，卷和清理行为参考 [Docker Compose 文档](https://docs.docker.com/reference/cli/docker/compose/down/)。

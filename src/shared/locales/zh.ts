@@ -107,6 +107,11 @@ export const zh = {
   diagnosticsDescription:
     "查看运行环境、连接状态和播放进度回传结果。诊断不包含保存的账号密码，日志中的链接与访问令牌会隐藏。",
   runtimeInfo: "运行环境",
+  directories: "目录位置",
+  programDirectory: "程序目录",
+  dataDirectory: "数据目录",
+  openDirectory: "打开{{name}}",
+  directoryOpenFailed: "无法打开目录，请检查目录是否存在及访问权限。",
   systemInfo: "系统",
   connectionInfo: "连接与播放",
   serverCount: "已保存服务器",

@@ -26,6 +26,7 @@ const api: DesktopAPI = {
   openGuide: (kind) => ipcRenderer.invoke("app:guide", kind),
   exportDiagnostics: () => ipcRenderer.invoke("app:diagnostics"),
   getDiagnostics: () => ipcRenderer.invoke("app:get-diagnostics"),
+  openDirectory: (target) => ipcRenderer.invoke("app:open-directory", target),
   copyDiagnostics: () => ipcRenderer.invoke("app:copy-diagnostics"),
   openLink: (target) => ipcRenderer.invoke("app:open-link", target),
   checkForUpdates: () => ipcRenderer.invoke("app:check-updates"),
