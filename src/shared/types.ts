@@ -56,6 +56,8 @@ export interface PlaybackItem {
   title: string;
   seriesTitle?: string;
   providerData?: unknown;
+  // A following file segment of the same item, independent of the auto-next preference.
+  continuation?: boolean;
 }
 export interface PlaybackSource {
   id: string;
@@ -163,7 +165,7 @@ export interface AppState {
   serverFavicons: Record<string, string>;
   adapterStatus?: "waiting" | "sign-in" | "ready" | "error";
   locale: import("./i18n").Locale;
-  providers: { id: string; name: string }[];
+  providers: { id: string; name: string; supportsCredentials?: boolean }[];
   page: AppPage;
   settingsPage: SettingsPage;
   playbackPopupOpen: boolean;

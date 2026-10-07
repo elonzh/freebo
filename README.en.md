@@ -20,9 +20,9 @@ Your library already organizes your videos, and your computer already has a play
 
 ## Features
 
-- Multiple server tabs with separate persistent sign-in sessions.
+- Emby, Jellyfin and Plex servers, with separate persistent sign-in sessions in each tab.
 - Movies, episodes and video playlists with resume, continuous playback and watch progress sync.
-- Emby audio, subtitle and video-version selections.
+- Your library's audio, subtitle and video-version selections.
 - A floating panel for pause, seeking and queue navigation.
 - Installed player discovery and manual path selection.
 - English and Chinese, light and dark appearance, and remembered window size and position.
@@ -34,59 +34,21 @@ Your library already organizes your videos, and your computer already has a play
 | Windows | mpv.net, PotPlayer, MPC-HC, MPC-BE, mpv, VLC |
 | Linux   | mpv, VLC                                     |
 
-Music and live TV continue to play on the Emby website.
+Music and live TV continue to play on the server website.
 
 ## Quick start
 
 1. [Download the installer](https://github.com/elonzh/freebo/releases/latest), open Freebo, and select an installed player during initial setup.
-2. Add your Emby server address and sign in on its website.
+2. Choose Emby, Jellyfin or Plex, add your media server address and sign in on its website.
 3. Press play in your library. Use the playback button beside the address bar to open the floating controls.
 
-Servers and players can be changed in Settings. Server names are optional; saved credentials fill the sign-in form. Choose a path manually for portable players. Server addresses support ports and reverse proxy subpaths.
+Servers and players can be changed in Settings. Server names are optional; saved Emby and Jellyfin credentials fill the sign-in form. Plex keeps its Web sign-in session; enter the media server address (for example `http://192.168.1.10:32400`). Choose a path manually for portable players. Server addresses support ports and reverse proxy subpaths.
 
 Supported installed builds check for updates and download them automatically. Restart to install from Settings → About; other builds link to the download page. See [architecture](docs/architecture.md#构建与升级) for supported packages.
 
-## Run from source
-
-```sh
-pnpm install
-pnpm dev
-```
-
 ## Development guide
 
-### Environment and startup
-
-Use Node.js 22.12 or later and the pnpm version specified in `package.json`.
-
-```sh
-pnpm install
-prek install
-pnpm dev
-```
-
-`pnpm dev` builds the main process and preloads, then starts Vite and Electron. Restart after changing `electron/`; Vite hot-reloads React pages. The app depends on IPC, so connect to Electron’s browser engine for debugging.
-
-`pnpm start` builds the full app before launching the local production version. `pnpm dev:web` and `pnpm preview` serve only the renderer and do not replace Electron runtime checks.
-
-### Checks and commits
-
-During development, run correctness checks relevant to your changes:
-
-| Command                            | Purpose                                   |
-| ---------------------------------- | ----------------------------------------- |
-| `pnpm typecheck`                   | TypeScript type checking                  |
-| `pnpm exec vitest run <test-file>` | Targeted tests                            |
-| `pnpm test`                        | All Vitest tests                          |
-| `pnpm build`                       | Renderer, main process and preload builds |
-
-Commit checks are configured in [prek.toml](prek.toml). Oxlint applies safe fixes, then Oxfmt formats the files in the commit. Application types, Vitest, the app build, brand-page types and the brand-page build run as separate steps. If automatic fixes change files, review and stage the changes before committing again. Use `prek run --all-files` to check the entire repository.
-
-Leave formatting and style-only checks to the commit hook. Use Conventional Commits with Chinese descriptions of the changes and validation.
-
-### Packaging and releases
-
-`pnpm package` builds the app and uses electron-builder to generate packages for the current platform in `release/`.
+See the [development workflow](docs/development.md) for running from source, checks, commits, Emby/Jellyfin/Plex integration tests, and packaging.
 
 ## Acknowledgments
 

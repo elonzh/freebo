@@ -42,6 +42,8 @@ export function ServerForm({
   const [name, setName] = useState(server.name ?? "");
   const [url, setUrl] = useState(server.url ?? "");
   const [providerId, setProviderId] = useState(server.providerId ?? providers[0]?.id ?? "emby");
+  const supportsCredentials =
+    providers.find((provider) => provider.id === providerId)?.supportsCredentials !== false;
   const [usernameDraft, setUsername] = useState<string>();
   const [passwordDraft, setPassword] = useState<string>();
   const [showPassword, setShowPassword] = useState(false);
@@ -55,7 +57,9 @@ export function ServerForm({
   const credentialQuery = useQuery({
     queryKey: ["credentials", server.id, server.url],
     queryFn: () => loadCredentials!(server.id!),
-    enabled: Boolean(server.id && loadCredentials && credentialsAvailable && !editedUrl),
+    enabled: Boolean(
+      server.id && loadCredentials && credentialsAvailable && supportsCredentials && !editedUrl,
+    ),
     staleTime: Infinity,
     gcTime: 0,
     retry: false,
@@ -81,7 +85,10 @@ export function ServerForm({
         id: server.id,
         url: url.trim(),
         providerId,
-        credentials: username.trim() ? { username: username.trim(), password } : undefined,
+        credentials:
+          supportsCredentials && username.trim()
+            ? { username: username.trim(), password }
+            : undefined,
       }),
     retry: false,
     gcTime: 0,
@@ -115,7 +122,10 @@ export function ServerForm({
       name: name.trim(),
       url: url.trim(),
       providerId,
-      credentials: username.trim() ? { username: username.trim(), password } : undefined,
+      credentials:
+        supportsCredentials && username.trim()
+          ? { username: username.trim(), password }
+          : undefined,
     });
   };
   const checkConnection = async () => {
@@ -146,6 +156,7 @@ export function ServerForm({
             value={providerId}
             onValueChange={(value) => {
               setProviderId(value);
+              resetAccountFields();
               invalidateTest();
             }}
             options={providers.map((provider) => ({
@@ -179,7 +190,11 @@ export function ServerForm({
           required
           type="text"
           inputMode="url"
-          placeholder="https://emby.example.com"
+          placeholder={
+            providerId === "plex"
+              ? "http://192.168.1.10:32400"
+              : `https://${providerId}.example.com`
+          }
           value={url}
           onChange={(event) => {
             setUrl(event.target.value);
@@ -192,66 +207,70 @@ export function ServerForm({
           autoComplete="off"
         />
       </div>
-      <div className="mt-4">
-        {loadingCredentials && <LoaderCircle className="mt-3 animate-spin" size={15} />}
-        {credentialsError && (
-          <p role="alert" className="mt-3 text-xs text-destructive">
-            {localizeError(locale, credentialsError)}
-          </p>
-        )}
-        <div className="grid gap-4 @min-[24rem]:grid-cols-2">
-          <div className="grid gap-2">
-            <Label htmlFor={`${fieldId}-username`}>{t("username")}</Label>
-            <Input
-              id={`${fieldId}-username`}
-              autoComplete="username"
-              required={Boolean(password)}
-              maxLength={200}
-              value={username}
-              disabled={saving || loadingCredentials || !credentialsAvailable}
-              onChange={(event) => {
-                setUsername(event.target.value);
-                setCredentialsDismissed(true);
-                invalidateTest();
-              }}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor={`${fieldId}-password`}>{t("password")}</Label>
-            <div className="relative">
+      {supportsCredentials ? (
+        <div className="mt-4">
+          {loadingCredentials && <LoaderCircle className="mt-3 animate-spin" size={15} />}
+          {credentialsError && (
+            <p role="alert" className="mt-3 text-xs text-destructive">
+              {localizeError(locale, credentialsError)}
+            </p>
+          )}
+          <div className="grid gap-4 @min-[24rem]:grid-cols-2">
+            <div className="grid gap-2">
+              <Label htmlFor={`${fieldId}-username`}>{t("username")}</Label>
               <Input
-                id={`${fieldId}-password`}
-                type={showPassword ? "text" : "password"}
-                autoComplete="current-password"
-                maxLength={4096}
-                value={password}
-                className="pr-10"
+                id={`${fieldId}-username`}
+                autoComplete="username"
+                required={Boolean(password)}
+                maxLength={200}
+                value={username}
                 disabled={saving || loadingCredentials || !credentialsAvailable}
                 onChange={(event) => {
-                  setPassword(event.target.value);
+                  setUsername(event.target.value);
                   setCredentialsDismissed(true);
                   invalidateTest();
                 }}
               />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                className="absolute top-0.5 right-0.5 text-muted-foreground"
-                aria-label={t(showPassword ? "hidePassword" : "showPassword")}
-                aria-controls={`${fieldId}-password`}
-                disabled={saving || loadingCredentials || !credentialsAvailable}
-                onClick={() => setShowPassword((visible) => !visible)}
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </Button>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor={`${fieldId}-password`}>{t("password")}</Label>
+              <div className="relative">
+                <Input
+                  id={`${fieldId}-password`}
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  maxLength={4096}
+                  value={password}
+                  className="pr-10"
+                  disabled={saving || loadingCredentials || !credentialsAvailable}
+                  onChange={(event) => {
+                    setPassword(event.target.value);
+                    setCredentialsDismissed(true);
+                    invalidateTest();
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  className="absolute top-0.5 right-0.5 text-muted-foreground"
+                  aria-label={t(showPassword ? "hidePassword" : "showPassword")}
+                  aria-controls={`${fieldId}-password`}
+                  disabled={saving || loadingCredentials || !credentialsAvailable}
+                  onClick={() => setShowPassword((visible) => !visible)}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </Button>
+              </div>
             </div>
           </div>
+          <p className="mt-2 text-xs">
+            {t(credentialsAvailable ? "credentialsHint" : "credentialsUnavailable")}
+          </p>
         </div>
-        <p className="mt-2 text-xs">
-          {t(credentialsAvailable ? "credentialsHint" : "credentialsUnavailable")}
-        </p>
-      </div>
+      ) : (
+        <p className="mt-4 text-xs text-muted-foreground">{t("plexWebSignIn")}</p>
+      )}
       <div className="mt-4 flex flex-col gap-3 @min-[24rem]:flex-row @min-[24rem]:items-center">
         <div className="flex h-12 min-w-0 flex-1 items-center gap-3" aria-busy={testing}>
           <Button

@@ -120,7 +120,7 @@ export const en = {
   recordPlayCount: "Played {{count}} times",
   savedResumePosition: "Saved position: {{position}}",
   belowResumeThreshold: "This library retains a resume point only after {{position}}.",
-  resumePositionCleared: "The server saved a zero position. Check the Emby library's resume rules.",
+  resumePositionCleared: "The server saved a zero position. Check the library's resume rules.",
   syncFailure: "Sync failed",
   syncNone: "No reports yet",
   syncStart: "Playback started",
@@ -160,7 +160,11 @@ export const en = {
   connectionForbidden:
     "The server denied sign-in. Check allowed clients and account permissions, or sign in on the server website.",
   serverRateLimited: "The server has limited requests. Try again later.",
-  unexpectedServer: "The server did not return valid Emby data. Check the address.",
+  unexpectedServer:
+    "The server did not return valid media data. Check the address and server type.",
+  plexWebSignIn: "Save, then sign in on the Plex website. Your session will be kept.",
+  plexServerAddress:
+    "Enter your Plex media server address (e.g. http://192.168.1.10:32400), rather than a plex.tv address.",
   username: "Account",
   password: "Password",
   showPassword: "Show password",
@@ -231,12 +235,14 @@ export const en = {
   ipcClosed: "The player connection has closed. Start playback again.",
   ipcTimeout: "The player did not respond. Start playback again.",
   ipcCommand: "Player command failed: {{detail}}",
-  authExpired: "Your session has expired. Sign in again on the Emby website.",
-  serverRequest: "Emby request failed ({{code}}). Check your server connection.",
+  authExpired: "Your session has expired. Sign in again on the server website.",
+  serverRequest: "Server request failed ({{code}}). Check your server connection.",
   queueTooLarge: "This playlist exceeds 10,000 items. Choose a smaller playlist.",
-  noVideo: "There are no playable videos in this list. Play music and live TV on the Emby website.",
+  noVideo:
+    "There are no playable videos in this list. Play music and live TV on the server website.",
   noSource: "The server did not return a playable video version.",
-  sourceMissing: "This video version is no longer available. Select another version in Emby.",
+  sourceMissing:
+    "This video version is no longer available. Select another version in your library.",
   providerMissing: "This server type is not supported yet.",
   invalidInput: "Invalid input. Check the values you entered.",
   actionFailed: "The action failed. Check Settings or export the diagnostic log.",

@@ -60,7 +60,10 @@ export class PlaybackManager extends EventEmitter {
       if (generation !== this.generation) return;
       this.client = client;
       let items = await client.resolveQueue(intent);
-      if (!settings.autoNext) items = items.slice(0, 1);
+      if (!settings.autoNext) {
+        const end = items.findIndex((item, index) => index > 0 && !item.continuation);
+        if (end > 0) items = items.slice(0, end);
+      }
       const prepared = [await client.prepare(items[0], intent)];
       if (generation !== this.generation) return;
       this.media = prepared;

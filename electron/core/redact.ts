@@ -1,7 +1,7 @@
 export function redact(value: unknown): string {
   return String(value)
     .replace(
-      /([?&](?:api_key|token|access_token|X-Emby-Token|password)=)[^&\s"']*/gi,
+      /([?&](?:api_key|token|access_token|X-Emby-Token|X-Plex-Token|password)=)[^&\s"']*/gi,
       "$1[redacted]",
     )
     .replace(

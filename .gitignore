@@ -3,6 +3,7 @@ dist/
 dist-electron/
 release/
 coverage/
+.integration/
 .DS_Store
 .env*
 !.env.example

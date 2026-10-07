@@ -2,7 +2,11 @@ import { Globe2, MonitorPlay } from "lucide-react";
 import { cn } from "../lib/utils";
 import type { PlayerKind } from "../shared/types";
 
-const providerIcons = new Map([["emby", "emby.svg"]]);
+const providerIcons = new Map([
+  ["emby", "emby.svg"],
+  ["jellyfin", "jellyfin.svg"],
+  ["plex", "plex.svg"],
+]);
 const playerIcons: Record<PlayerKind, string> = {
   iina: "iina.png",
   mpv: "mpv.svg",

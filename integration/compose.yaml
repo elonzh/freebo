@@ -1,0 +1,136 @@
+name: "${FREEBO_INTEGRATION_PROJECT:-freebo-integration}"
+
+x-jellyfin-image: &jellyfin-image "${FREEBO_JELLYFIN_IMAGE:-jellyfin/jellyfin@sha256:357724bf0ae27a672c7cbaa899db2d9abeb13dbd8657ccce750258a4c059d037}"
+
+services:
+  media-init:
+    image: *jellyfin-image
+    user: "0:0"
+    entrypoint: ["/bin/sh", "-eu", "-c"]
+    command:
+      - |
+        if [ -f /media/.freebo-fixture-v2 ]; then exit 0; fi
+        movie='/media/Movies/Freebo Test (2026)/Freebo Test (2026).mp4'
+        next='/media/Movies/Freebo Next (2026)/Freebo Next (2026).mp4'
+        first='/media/Shows/Freebo Series (2026)/Season 01/Freebo Series - S01E01 - First.mp4'
+        second='/media/Shows/Freebo Series (2026)/Season 01/Freebo Series - S01E02 - Second.mp4'
+        mkdir -p "$$(dirname "$$movie")" "$$(dirname "$$next")" "$$(dirname "$$first")"
+        make_video() {
+        /usr/lib/jellyfin-ffmpeg/ffmpeg -y -hide_banner -loglevel error \
+          -f lavfi -i 'testsrc2=size=320x180:rate=10' \
+          -f lavfi -i 'sine=frequency=440:sample_rate=44100' \
+          -f lavfi -i 'sine=frequency=660:sample_rate=44100' \
+          -map 0:v -map 1:a -map 2:a -vf "hue=h=$$2" -t 600 -threads 2 \
+          -c:v libx264 -preset ultrafast -crf 32 -c:a aac -b:a 32k \
+          -metadata:s:a:0 language=eng -metadata:s:a:0 title='English tone' \
+          -metadata:s:a:1 language=zho -metadata:s:a:1 title='Chinese tone' \
+          -movflags +faststart "$$1"
+        }
+        rm -f "$$next" "$$first" "$$second"
+        make_video "$$movie" 0
+        make_video "$$next" 30
+        make_video "$$first" 120
+        make_video "$$second" 240
+        for video in "$$movie" "$$next" "$$first" "$$second"; do
+          printf '1\n00:00:00,000 --> 00:10:00,000\nFreebo integration subtitle\n' > "$${video%.mp4}.en.srt"
+        done
+        chmod -R a+rX /media
+        touch /media/.freebo-fixture-v2
+    volumes:
+      - fixture-media:/media
+      - init-config:/config
+      - init-cache:/cache
+    restart: "no"
+
+  plex-init:
+    image: *jellyfin-image
+    user: "0:0"
+    entrypoint: ["/bin/sh", "-eu", "-c"]
+    command:
+      - |
+        prefs='/config/Library/Application Support/Plex Media Server/Preferences.xml'
+        if [ -f "$$prefs" ]; then exit 0; fi
+        mkdir -p "$$(dirname "$$prefs")"
+        printf '%s\n' '<?xml version="1.0" encoding="utf-8"?><Preferences FriendlyName="Freebo Plex integration" allowedNetworks="127.0.0.1/255.255.255.255,10.0.0.0/255.0.0.0,172.16.0.0/255.240.0.0,192.168.0.0/255.255.0.0" AcceptedEULA="1" PublishServerOnPlexOnlineKey="0" DlnaEnabled="0" />' > "$$prefs"
+    volumes:
+      - plex-config:/config
+      - init-cache:/cache
+    restart: "no"
+
+  emby:
+    image: "${FREEBO_EMBY_IMAGE:-emby/embyserver@sha256:997e8c1ea1fde7d303eb455143e7be77dc4f20cb06acb11ffdcbcfaa87186ec2}"
+    environment:
+      UID: "1000"
+      GID: "1000"
+      GIDLIST: "1000"
+    ports:
+      - "127.0.0.1:${FREEBO_EMBY_PORT:-18097}:8096"
+    volumes:
+      - emby-config:/config
+      - fixture-media:/media:ro
+    depends_on:
+      media-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8096/emby/System/Info/Public"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    restart: "no"
+
+  jellyfin:
+    image: *jellyfin-image
+    user: "0:0"
+    ports:
+      - "127.0.0.1:${FREEBO_JELLYFIN_PORT:-18096}:8096"
+    volumes:
+      - jellyfin-config:/config
+      - jellyfin-cache:/cache
+      - fixture-media:/media:ro
+    depends_on:
+      media-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "--max-time", "5", "http://127.0.0.1:8096/System/Info/Public"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    restart: "no"
+
+  plex:
+    image: "${FREEBO_PLEX_IMAGE:-lscr.io/linuxserver/plex@sha256:06e07af2851e6a822e89062b148435495dd794d6d5aaf36247dee05fb3dcc4b8}"
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: Etc/UTC
+      VERSION: docker
+    ports:
+      - "127.0.0.1:${FREEBO_PLEX_PORT:-13240}:32400"
+    volumes:
+      - plex-config:/config
+      - fixture-media:/media:ro
+    tmpfs:
+      - /transcode
+    depends_on:
+      media-init:
+        condition: service_completed_successfully
+      plex-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "--max-time", "5", "http://127.0.0.1:32400/identity"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    restart: "no"
+
+volumes:
+  fixture-media:
+  emby-config:
+  jellyfin-config:
+  jellyfin-cache:
+  plex-config:
+  init-config:
+  init-cache:

@@ -1,35 +1,8 @@
-import { z } from "zod";
 import { EmbyClient } from "./client";
 import { normalizeServerUrl } from "../../core/settings";
-import { UserFacingError } from "../../../src/shared/i18n";
+import { assertServerUrl, mediaBrowserRequestSchema } from "../playback-request";
 import type { MediaServerProvider } from "../types";
 import { testEmbyConnection } from "./connection-test";
-const id = z.string().min(1).max(200);
-const requestSchema = z.object({
-  auth: z.object({
-    baseUrl: z.url(),
-    userId: id,
-    token: z.string().min(1).max(4096),
-    deviceId: id,
-    serverId: id.optional(),
-    clientName: id,
-    clientVersion: id,
-    deviceName: id,
-  }),
-  intent: z.object({
-    itemIds: z.array(id).min(1).max(10_000),
-    startIndex: z.number().int().min(0).optional(),
-    startTicks: z.number().min(0).optional(),
-    mediaSourceId: z.preprocess(
-      (value) => (value === "" || value === null ? undefined : value),
-      id.optional(),
-    ),
-    audioIndex: z.number().int().min(0).optional(),
-    subtitleIndex: z.number().int().min(-1).optional(),
-    shuffle: z.boolean().optional(),
-    expand: z.boolean().optional(),
-  }),
-});
 export const embyProvider: MediaServerProvider = {
   id: "emby",
   name: "Emby Server",
@@ -44,15 +17,8 @@ export const embyProvider: MediaServerProvider = {
   },
   entryUrl: (server) => `${server.url}/web/index.html#!/home`,
   parsePlayback(input, server) {
-    const { auth, intent } = requestSchema.parse(input);
-    const registered = new URL(server.url);
-    const base = new URL(auth.baseUrl);
-    const prefix = registered.pathname.replace(/\/$/, "");
-    if (
-      base.origin !== registered.origin ||
-      !(base.pathname === prefix || base.pathname.startsWith(`${prefix}/`))
-    )
-      throw new UserFacingError("playbackOrigin");
+    const { auth, intent } = mediaBrowserRequestSchema.parse(input);
+    assertServerUrl(auth.baseUrl, server);
     return {
       intent,
       createClient: (fetcher) =>

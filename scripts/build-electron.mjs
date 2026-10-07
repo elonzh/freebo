@@ -7,6 +7,8 @@ await build({
     main: "electron/main.ts",
     preload: "electron/preload.ts",
     "emby-preload": "electron/providers/emby/emby-preload.ts",
+    "jellyfin-preload": "electron/providers/jellyfin/jellyfin-preload.ts",
+    "plex-preload": "electron/providers/plex/plex-preload.ts",
   },
   outdir: "dist-electron",
   bundle: true,

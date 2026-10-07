@@ -3,8 +3,8 @@ Copyright 2026 elonzh
 
 Licensed under the Apache License, Version 2.0.
 
-This project is an independent companion for Emby Server and is not affiliated
-with Emby LLC, IINA, mpv, or VideoLAN. Player applications are not included.
+This project is an independent companion for Emby, Jellyfin and Plex and is not affiliated
+with Emby LLC, Jellyfin, Plex, IINA, mpv, or VideoLAN. Player applications are not included.
 
 embyToLocalPlayer (https://github.com/kjtsune/embyToLocalPlayer), by Kjtsune,
 was used as a reference for Emby playback behavior. The implementation in this
@@ -15,7 +15,7 @@ UI components in src/components/ui are derived from shadcn/ui
 They are licensed under the MIT License; see docs/licenses/shadcn-ui.txt.
 
 Third-party server and player identification icons are bundled in
-public/integrations. Emby and mpv SVGs come from Simple Icons (CC0); IINA,
+public/integrations. Emby, Jellyfin, Plex and mpv SVGs come from Simple Icons (CC0); IINA,
 mpv.net, VLC, PotPlayer, MPC-HC and MPC-BE icons come from the respective official projects. Names and
 marks belong to their respective owners. See docs/integration-icons.md for sources.
 

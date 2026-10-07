@@ -13,8 +13,12 @@ export class ProviderRegistry {
     if (!provider) throw new UserFacingError("providerMissing");
     return provider;
   }
-  list(): { id: string; name: string }[] {
-    return [...this.providers.values()].map(({ id, name }) => ({ id, name }));
+  list(): { id: string; name: string; supportsCredentials?: boolean }[] {
+    return [...this.providers.values()].map(({ id, name, supportsCredentials }) => ({
+      id,
+      name,
+      ...(supportsCredentials === false ? { supportsCredentials: false } : {}),
+    }));
   }
   partition(server: { id: string; providerId: string }): string {
     this.get(server.providerId);

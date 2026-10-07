@@ -40,6 +40,8 @@ import { discoverPlayers, manualPlayer, playerGuides } from "./core/players";
 import { PlaybackManager } from "./core/playback-manager";
 import { ProviderRegistry } from "./providers/registry";
 import { embyProvider } from "./providers/emby";
+import { jellyfinProvider } from "./providers/jellyfin";
+import { plexProvider } from "./providers/plex";
 import type { PlaybackClient } from "./providers/types";
 import { migrateLegacyProfile } from "./core/profile-migration";
 import {
@@ -84,7 +86,7 @@ const windowIcon = join(
   __dirname,
   process.env.FREEBO_DEV_URL ? "../public/icon.png" : "../dist/icon.png",
 );
-const providers = new ProviderRegistry([embyProvider]);
+const providers = new ProviderRegistry([embyProvider, jellyfinProvider, plexProvider]);
 const playback = new PlaybackManager();
 function locale() {
   return resolveLocale(store.value.language, app.getLocale());
@@ -641,6 +643,8 @@ function setupIPC() {
       })
       .parse(input);
     const provider = providers.get(server.providerId);
+    if (server.credentials && provider.supportsCredentials === false)
+      throw new UserFacingError("plexWebSignIn");
     const savedServer = await store.upsertServer(
       { ...server, url: provider.normalizeUrl(server.url) },
       async (saved) => {
@@ -965,7 +969,7 @@ function setupIPC() {
     const fetcher = async (url: string, init?: RequestInit) => {
       const response = await fetch(url, init);
       if (!response.ok) {
-        const message = `Emby API ${init?.method ?? "GET"} ${new URL(url).pathname}: ${response.status}, ${response.headers.get("content-type")}, ${response.headers.get("cf-mitigated") ?? ""}`;
+        const message = `${provider.name} API ${init?.method ?? "GET"} ${new URL(url).pathname}: ${response.status}, ${response.headers.get("content-type")}, ${response.headers.get("cf-mitigated") ?? ""}`;
         log(message);
         if (process.env.FREEBO_DEV_URL) console.warn(message);
       }
@@ -982,8 +986,10 @@ function setupIPC() {
         media.audioStreamIndex = undefined;
         if (!media.subtitleUrl) media.subtitleStreamIndex = undefined;
       }
-      media.url = proxy.register(media.url, fetcher);
-      if (media.subtitleUrl) media.subtitleUrl = proxy.register(media.subtitleUrl, fetcher);
+      media.url = proxy.register(media.url, fetcher, media.headers);
+      if (media.subtitleUrl)
+        media.subtitleUrl = proxy.register(media.subtitleUrl, fetcher, media.headers);
+      media.headers = {};
       return media;
     };
     // Keep old proxy routes while queued stop reports are draining; playback replaces the queue.

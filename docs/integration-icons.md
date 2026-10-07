@@ -5,6 +5,8 @@
 | 类型      | 资源                                | 来源                                                                                                                                     |
 | --------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | Emby      | `public/integrations/emby.svg`      | [Simple Icons 的 Emby 图标](https://github.com/simple-icons/simple-icons/blob/develop/icons/emby.svg)，CC0                               |
+| Jellyfin  | `public/integrations/jellyfin.svg`  | [Simple Icons 的 Jellyfin 图标](https://github.com/simple-icons/simple-icons/blob/develop/icons/jellyfin.svg)，CC0                       |
+| Plex      | `public/integrations/plex.svg`      | [Simple Icons 的 Plex 图标](https://github.com/simple-icons/simple-icons/blob/develop/icons/plex.svg)，CC0                               |
 | IINA      | `public/integrations/iina.png`      | [IINA 官方仓库应用图标](https://github.com/iina/iina/blob/master/iina/Assets.xcassets/AppIcon.appiconset/icon_512x512.png)，缩放至 128px |
 | mpv       | `public/integrations/mpv.svg`       | [Simple Icons 的 mpv 图标](https://github.com/simple-icons/simple-icons/blob/develop/icons/mpv.svg)，CC0                                 |
 | mpv.net   | `public/integrations/mpvnet.png`    | [mpv.net 官方仓库应用图标](https://github.com/mpvnet-player/mpv.net/blob/main/src/MpvNet.Windows/mpv-icon.ico)，由 ICO 导出 PNG          |

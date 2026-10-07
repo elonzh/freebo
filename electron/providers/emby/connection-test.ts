@@ -7,6 +7,7 @@ const publicInfo = z.object({
   Id: z.string().min(1),
   ServerName: z.string().min(1),
   Version: z.string().min(1),
+  ProductName: z.string().optional(),
 });
 const authentication = z.object({
   AccessToken: z.string().min(1),
@@ -18,6 +19,7 @@ export async function testEmbyConnection(
   credentials: ServerCredentials | undefined,
   fetcher: Fetcher,
   identity: BrowserClientIdentity,
+  protocol: "emby" | "jellyfin" = "emby",
 ): Promise<ServerConnectionResult> {
   const signal = AbortSignal.timeout(15_000);
   const request = (url: string, init?: RequestInit) => {
@@ -35,9 +37,9 @@ export async function testEmbyConnection(
   };
   try {
     // Emby's web client uses /emby; older reverse proxies may expose the root API instead.
-    let api = `${baseUrl}/emby`;
+    let api = protocol === "jellyfin" ? baseUrl : `${baseUrl}/emby`;
     let response = await request(`${api}/System/Info/Public`);
-    if (response.status === 404) {
+    if (response.status === 404 && protocol === "emby") {
       api = baseUrl;
       response = await request(`${api}/System/Info/Public`);
     }
@@ -46,6 +48,11 @@ export async function testEmbyConnection(
     if (response.ok) {
       const info = publicInfo.safeParse(await parse(response));
       if (!info.success) throw new UserFacingError("unexpectedServer");
+      if (
+        info.data.ProductName &&
+        info.data.ProductName.toLowerCase().includes("jellyfin") !== (protocol === "jellyfin")
+      )
+        throw new UserFacingError("unexpectedServer");
       serverName = info.data.ServerName;
       version = info.data.Version;
     } else if (!credentials || ![401, 403].includes(response.status)) {
@@ -55,10 +62,15 @@ export async function testEmbyConnection(
     // Never guess a web version or retry with another client identity.
     if (!version) throw new UserFacingError("connectionForbidden");
     const quote = (value: string) => value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-    const authorization = `Emby Client="Emby Web", Device="${quote(identity.deviceName)}", DeviceId="${quote(identity.deviceId)}", Version="${quote(version)}"`;
-    const headers = { "X-Emby-Authorization": authorization, Accept: "application/json" };
+    const clientName = protocol === "jellyfin" ? "Jellyfin Web" : "Emby Web";
+    const authorization = `${protocol === "jellyfin" ? "MediaBrowser" : "Emby"} Client="${clientName}", Device="${quote(identity.deviceName)}", DeviceId="${quote(identity.deviceId)}", Version="${quote(version)}"`;
+    const headers = {
+      [protocol === "jellyfin" ? "Authorization" : "X-Emby-Authorization"]: authorization,
+      Accept: "application/json",
+    };
     const authenticatedUrl = (path: string, token: string) => {
       const url = new URL(`${api}/${path}`);
+      if (protocol === "jellyfin") return url.href;
       const params = {
         "X-Emby-Client": "Emby Web",
         "X-Emby-Device-Name": identity.deviceName,
@@ -94,8 +106,9 @@ export async function testEmbyConnection(
         method: "POST",
         headers: {
           Accept: "application/json",
-          "X-Emby-Authorization": `${authorization}, Token="${quote(result.data.AccessToken)}"`,
-          "X-Emby-Token": result.data.AccessToken,
+          [protocol === "jellyfin" ? "Authorization" : "X-Emby-Authorization"]:
+            `${authorization}, Token="${quote(result.data.AccessToken)}"`,
+          ...(protocol === "emby" ? { "X-Emby-Token": result.data.AccessToken } : {}),
         },
         redirect: "error",
         signal: AbortSignal.timeout(5_000),

@@ -42,6 +42,7 @@ export interface MediaServerProvider {
   readonly name: string;
   readonly preload: string;
   readonly adapterScript: string;
+  readonly supportsCredentials?: boolean;
   normalizeUrl(input: string): string;
   testConnection?(
     url: string,

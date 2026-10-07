@@ -10,19 +10,21 @@ import type {
 } from "../../../src/shared/types";
 import type { Fetcher, PlaybackClient } from "../types";
 import { ServerAccessError } from "../types";
+import { assertServerUrl } from "../playback-request";
 export type { Fetcher } from "../types";
 
 export class EmbyClient implements PlaybackClient {
   private pausedSessions = new Map<string, boolean>();
   private accessError?: ServerAccessError;
   get identity(): string {
-    return `emby:${this.auth.baseUrl}:${this.auth.userId}`;
+    return `${this.protocol}:${this.auth.baseUrl}:${this.auth.userId}`;
   }
   constructor(
     readonly auth: AuthContext,
     private readonly fetcher: Fetcher,
     readonly playbackHeaders: Record<string, string> = {},
     private readonly webBaseUrl = auth.baseUrl.replace(/\/emby\/?$/, ""),
+    private readonly protocol: "emby" | "jellyfin" = "emby",
   ) {}
   async itemUrl(itemId: string): Promise<string> {
     // Emby's item route requires the remote server ID, not Freebo's local server UUID.
@@ -30,7 +32,11 @@ export class EmbyClient implements PlaybackClient {
       this.auth.serverId ?? (await this.request<{ Id: string }>("System/Info/Public")).Id;
     if (!serverId) throw new UserFacingError("serverMissing");
     const params = new URLSearchParams({ id: itemId, serverId });
-    return `${this.webBaseUrl.replace(/\/$/, "")}/web/index.html#!/item?${params}`;
+    return `${this.webBaseUrl.replace(/\/$/, "")}/web/index.html${this.protocol === "jellyfin" ? "#/details" : "#!/item"}?${params}`;
+  }
+  private authorization(): string {
+    const quote = (value: string) => value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+    return `MediaBrowser Client="${quote(this.auth.clientName)}", Device="${quote(this.auth.deviceName)}", DeviceId="${quote(this.auth.deviceId)}", Version="${quote(this.auth.clientVersion)}", Token="${quote(this.auth.token)}"`;
   }
   url(path: string, params: Record<string, string | number | boolean | undefined> = {}): string {
     const url = new URL(`${this.auth.baseUrl.replace(/\/$/, "")}/${path.replace(/^\//, "")}`);
@@ -47,17 +53,23 @@ export class EmbyClient implements PlaybackClient {
     const response = await this.fetcher(
       this.url(path, {
         ...params,
-        "X-Emby-Client": this.auth.clientName,
-        "X-Emby-Device-Name": this.auth.deviceName,
-        "X-Emby-Device-Id": this.auth.deviceId,
-        "X-Emby-Client-Version": this.auth.clientVersion,
-        "X-Emby-Token": this.auth.token,
+        ...(this.protocol === "emby"
+          ? {
+              "X-Emby-Client": this.auth.clientName,
+              "X-Emby-Device-Name": this.auth.deviceName,
+              "X-Emby-Device-Id": this.auth.deviceId,
+              "X-Emby-Client-Version": this.auth.clientVersion,
+              "X-Emby-Token": this.auth.token,
+            }
+          : {}),
       }),
       {
         method: body === undefined ? "GET" : "POST",
         headers: {
           Accept: "application/json",
-          "X-Emby-Token": this.auth.token,
+          ...(this.protocol === "jellyfin"
+            ? { Authorization: this.authorization() }
+            : { "X-Emby-Token": this.auth.token }),
           ...(body === undefined ? {} : { "Content-Type": "application/json" }),
         },
         ...(body === undefined ? {} : { body: JSON.stringify(body) }),
@@ -191,6 +203,19 @@ export class EmbyClient implements PlaybackClient {
       },
       {
         UserId: this.auth.userId,
+        ...(this.protocol === "jellyfin"
+          ? {
+              IsPlayback: true,
+              EnableDirectPlay: true,
+              EnableDirectStream: true,
+              EnableTranscoding: false,
+              AutoOpenLiveStream: false,
+              MediaSourceId: intent.mediaSourceId,
+              AudioStreamIndex: intent.audioIndex,
+              SubtitleStreamIndex: intent.subtitleIndex,
+              StartTimeTicks: intent.startTicks ?? item.UserData?.PlaybackPositionTicks ?? 0,
+            }
+          : {}),
         DeviceProfile: {
           Name: this.auth.clientName,
           MaxStreamingBitrate: 1_000_000_000,
@@ -207,7 +232,7 @@ export class EmbyClient implements PlaybackClient {
       MediaSourceId: source.Id,
       PlaySessionId: playSessionId,
       DeviceId: this.auth.deviceId,
-      api_key: this.auth.token,
+      api_key: this.protocol === "emby" ? this.auth.token : undefined,
     });
     const audioIndex =
       intent.audioIndex ??
@@ -239,7 +264,10 @@ export class EmbyClient implements PlaybackClient {
             `Videos/${encodeURIComponent(item.Id)}/${encodeURIComponent(source.Id)}/Subtitles/${subtitle.Index}/Stream.${subtitle.Codec === "ass" ? "ass" : "srt"}`,
           );
       const authenticated = new URL(subtitleUrl);
-      authenticated.searchParams.set("api_key", this.auth.token);
+      if (this.protocol === "jellyfin") {
+        assertServerUrl(authenticated.href, { url: this.auth.baseUrl });
+        authenticated.searchParams.delete("api_key");
+      } else authenticated.searchParams.set("api_key", this.auth.token);
       subtitleUrl = authenticated.toString();
     }
     return {
@@ -262,7 +290,10 @@ export class EmbyClient implements PlaybackClient {
             ? ordinalTrack(internalSubs, subtitle.Index)
             : undefined,
       subtitleUrl,
-      headers: this.playbackHeaders,
+      headers: {
+        ...this.playbackHeaders,
+        ...(this.protocol === "jellyfin" ? { Authorization: this.authorization() } : {}),
+      },
     };
   }
   async report(
