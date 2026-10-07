@@ -48,7 +48,7 @@
 | 分享封面       | [1280 × 640](../../assets/brand/freebo/social/social.png) / [1600 × 900](../../assets/brand/freebo/social/cover-16x9.png)，均保留 SVG                                                                                                           |
 | 桌面壁纸       | 2560 × 1440：[深松绿](../../assets/brand/freebo/wallpapers/wallpaper-pine.png) / [浅底](../../assets/brand/freebo/wallpapers/wallpaper-paper.png)，均保留 SVG                                                                                   |
 
-下载页实现为 [BrandKit.tsx](brand-kit/src/BrandKit.tsx)。应用通过 [Brand.tsx](../../src/components/Brand.tsx) 使用便携组合，名称使用本地 Atma WOFF2。生成过程同步 `public/brand/`、`public/fonts/`、`public/icon.*`、`resources/`与 `docs/assets/social.png`。这些副本应重新生成，不应各自修改。下载预览直接读取 `assets/brand/freebo/`，不另存一份完整品牌素材。
+下载页实现为 [BrandKit.tsx](brand-kit/src/BrandKit.tsx)。应用通过 [Brand.tsx](../../src/components/shared/Brand.tsx) 使用便携组合，名称使用本地 Atma WOFF2。生成过程同步 `public/brand/`、`public/fonts/`、`public/icon.*`、`resources/`与 `docs/assets/brand/social.png`。这些副本应重新生成，不应各自修改。下载预览直接读取 `assets/brand/freebo/`，不另存一份完整品牌素材。
 
 ## 复现与预览
 
@@ -60,7 +60,7 @@ pnpm brand:generate
 pnpm brand:preview
 ```
 
-`brand:generate` 依次运行 `uv run scripts/generate-brand.py`、Electron 渲染和 `uv run scripts/package-brand.py`：从路径主稿和固定字体生成便携/编辑 SVG、栅格 PNG、PDF、原生图标容器、清单与 ZIP，并同步运行副本。`source/mark.svg`、`fonts/Atma-SemiBold.ttf` 和 `fonts/OFL.txt` 是保留的正式输入，是生成素材的输入。
+`brand:generate` 依次运行 `uv run scripts/brand/generate.py`、Electron 渲染和 `uv run scripts/brand/package.py`：从路径主稿和固定字体生成便携/编辑 SVG、栅格 PNG、PDF、原生图标容器、清单与 ZIP，并同步运行副本。`source/mark.svg`、`fonts/Atma-SemiBold.ttf` 和 `fonts/OFL.txt` 是保留的正式输入，是生成素材的输入。
 
 路径调整应先编辑 `source/mark.svg`，再运行完整生成并核对导出。
 

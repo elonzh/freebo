@@ -1,9 +1,9 @@
 import { useNavigate } from "@tanstack/react-router";
 import { MonitorPlay, Pencil, Plus, Settings2 } from "lucide-react";
 import { Button } from "../components/ui/button";
-import { BrandLogo } from "../components/Brand";
-import { PlayerIcon } from "../components/IntegrationIcon";
-import { ServerRow } from "../components/ServerRow";
+import { BrandLogo } from "../components/shared/Brand";
+import { PlayerIcon } from "../components/shared/IntegrationIcon";
+import { ServerRow } from "../components/servers/ServerRow";
 import { serverLabel } from "../shared/servers";
 import type { Server } from "../shared/types";
 import { useApp } from "../runtime/context";

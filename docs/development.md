@@ -2,6 +2,8 @@
 
 ## 环境与源码运行
 
+源码、资源与工具的目录归属见 [架构文档](architecture.md#源码与资源归属)。
+
 使用 Node.js 22.12 或更新版本，以及 `package.json` 指定的 pnpm 版本。
 
 ```sh

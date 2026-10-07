@@ -8,7 +8,7 @@ import { resolveLocale, localizeError, translate } from "./shared/i18n";
 import { createDesktopRuntime } from "./runtime/desktop";
 import { RuntimeContext } from "./runtime/context";
 import { createAppRouter, connectNativeNavigation } from "./router";
-import { BrandLogo } from "./components/Brand";
+import { BrandLogo } from "./components/shared/Brand";
 import { Button } from "./components/ui/button";
 import "./style.css";
 

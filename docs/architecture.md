@@ -2,7 +2,7 @@
 
 Freebo 保留媒体服务器的网页浏览与登录体验，将视频播放交给本地播放器，并把观看进度同步回服务器。当前支持 Emby、Jellyfin 和 Plex；服务器发现、媒体库管理和转码由服务器负责。
 
-本文件说明当前架构与关键设计决策。开发、集成测试和发布步骤见 [开发流程](development.md)，视觉与交互规范见 [界面设计](../DESIGN.md)。
+本文件说明当前架构与关键设计决策。开发、集成测试和发布步骤见 [开发流程](development.md)，视觉与交互规范见 [界面设计](design.md)。
 
 ## 整体结构
 
@@ -23,6 +23,16 @@ flowchart LR
 React 提供 Freebo 自身的界面，服务器网页由独立的 `WebContentsView` 承载，保留服务器原有功能。播放控制和服务器选择使用原生子窗口，避免被位于 React 页面上方的网页视图遮挡。
 
 主进程协调原生窗口、服务器会话和播放资源。自有界面与远端网页使用不同的预加载接口，各自只能调用所需能力。
+
+## 源码与资源归属
+
+渲染端页面入口位于 `src/pages/`，组件按 `servers/`、`players/`、`playback/`、`settings/`、`setup/` 和 `browser/` 归档；跨功能组件位于 `src/components/shared/`，shadcn 基础组件保留在 `src/components/ui/`。渲染组件测试按相同功能放在 `tests/renderer/` 下。
+
+`electron/` 保留主进程、Provider、播放器与原生窗口边界，跨进程类型和语义键位于 `src/shared/`。目录调整不改变 IPC 接口和用户数据布局。
+
+集成图标位于 `public/integrations/servers/` 和 `public/integrations/players/`，来源见 [集成图标](integration-icons.md)。应用截图与品牌配图分别放在 `docs/assets/app/` 和 `docs/assets/brand/`。
+
+品牌主稿与生成素材保留在 `assets/brand/freebo/`，`public/` 与 `resources/` 保存渲染和原生打包所需的运行副本，生成规则见 [品牌规范](brand/README.md)。相关生成与验证脚本集中于 `scripts/brand/`；媒体服务器诊断工具位于 `scripts/diagnostics/`，集成测试工具位于 `scripts/integration/`。开发、构建与联调的命令入口保留在 `scripts/` 根目录。
 
 ## 状态与导航
 

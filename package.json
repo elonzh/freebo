@@ -32,9 +32,9 @@
     "integration:reset": "node scripts/integration.mjs reset",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm brand:check",
     "package": "pnpm build && electron-builder --publish never",
-    "brand:generate": "uv run scripts/generate-brand.py && pnpm exec electron scripts/render-brand.cjs && uv run scripts/package-brand.py",
+    "brand:generate": "uv run scripts/brand/generate.py && pnpm exec electron scripts/brand/render.cjs && uv run scripts/brand/package.py",
     "brand:preview": "vite --config docs/brand/brand-kit/vite.config.ts",
-    "tray:generate": "electron scripts/render-tray.cjs",
+    "tray:generate": "electron scripts/brand/render-tray.cjs",
     "brand:typecheck": "tsc --project docs/brand/brand-kit/tsconfig.json",
     "brand:build": "vite build --config docs/brand/brand-kit/vite.config.ts",
     "brand:check": "pnpm brand:typecheck && pnpm brand:build"
