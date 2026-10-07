@@ -8,7 +8,14 @@ export type RunAction = (
 export type SettingsPatch = Partial<
   Pick<
     Settings,
-    "defaultPlayerId" | "autoNext" | "fullscreen" | "theme" | "language" | "setupCompleted"
+    | "defaultPlayerId"
+    | "autoNext"
+    | "fullscreen"
+    | "theme"
+    | "language"
+    | "setupCompleted"
+    | "runInBackground"
+    | "remindOnClose"
   >
 >;
 export function formatTime(value: number) {

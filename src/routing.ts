@@ -4,7 +4,7 @@ import { z } from "zod";
 export const settingsPaths = {
   servers: "/settings/servers",
   players: "/settings/players",
-  appearance: "/settings/appearance",
+  general: "/settings/general",
   diagnostics: "/settings/diagnostics",
   about: "/settings/about",
 } as const satisfies Record<SettingsPage, string>;

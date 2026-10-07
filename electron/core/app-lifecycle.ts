@@ -13,10 +13,18 @@ export class AppLifecycle {
     return this.phase !== "running";
   }
 
-  close(event: CloseEvent, backgroundAvailable: boolean, hide: () => void): boolean {
-    if (this.phase === "ready" || (this.phase === "running" && !backgroundAvailable)) return true;
+  close(
+    event: CloseEvent,
+    backgroundAvailable: boolean,
+    hide: () => void,
+    quit: () => void,
+  ): boolean {
+    if (this.phase === "ready") return true;
     event.preventDefault();
-    if (this.phase === "running") hide();
+    if (this.phase === "running") {
+      if (backgroundAvailable) hide();
+      else quit();
+    }
     return false;
   }
 

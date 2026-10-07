@@ -4,7 +4,7 @@ import {
   ExternalLink,
   Globe2,
   Info,
-  Languages,
+  Settings2,
   MonitorPlay,
   Plus,
   RefreshCw,
@@ -28,7 +28,7 @@ import { settingsPaths } from "../routing";
 const settingPages = [
   { id: "servers", icon: Globe2 },
   { id: "players", icon: MonitorPlay },
-  { id: "appearance", icon: Languages },
+  { id: "general", icon: Settings2 },
   { id: "diagnostics", icon: Bug },
   { id: "about", icon: Info },
 ] as const;
@@ -183,12 +183,12 @@ export function PlayersPage() {
     </>
   );
 }
-export function AppearancePage() {
-  const { state, update } = useApp();
+export function GeneralPage() {
+  const { state, update, isPending } = useApp();
   const { t } = useAppTranslation();
   return (
     <>
-      <Heading title={t("appearance")} />
+      <Heading title={t("general")} />
       <SettingRow title={t("theme")}>
         <OptionSelect
           label={t("theme")}
@@ -211,6 +211,22 @@ export function AppearancePage() {
             { value: "zh", label: "中文" },
             { value: "en", label: "English" },
           ]}
+        />
+      </SettingRow>
+      <SettingRow title={t("runInBackground")} description={t("runInBackgroundDescription")}>
+        <Switch
+          aria-label={t("runInBackground")}
+          checked={state.settings.runInBackground}
+          disabled={isPending("settings")}
+          onCheckedChange={(checked) => update({ runInBackground: checked })}
+        />
+      </SettingRow>
+      <SettingRow title={t("remindOnClose")} description={t("remindOnCloseDescription")}>
+        <Switch
+          aria-label={t("remindOnClose")}
+          checked={state.settings.remindOnClose}
+          disabled={!state.settings.runInBackground || isPending("settings")}
+          onCheckedChange={(checked) => update({ remindOnClose: checked })}
         />
       </SettingRow>
     </>

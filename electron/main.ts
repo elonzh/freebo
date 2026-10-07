@@ -71,7 +71,15 @@ mkdirSync(userDataPath, { recursive: true });
 app.setPath("userData", userDataPath);
 const instance = new SingleInstance(app, showMainWindow);
 if (!instance.primary) app.quit();
-const store = new SettingsStore(join(userDataPath, "settings.json"));
+const store = new SettingsStore(join(userDataPath, "settings.json"), (event) => {
+  if (event.type === "reset") log(t("settingsReset"));
+  else
+    log(
+      t(event.type === "read-failed" ? "settingsReadFailed" : "settingsResetFailed", {
+        reason: event.reason,
+      }),
+    );
+});
 const windowStateStore = new WindowStateStore(join(userDataPath, "window-state.json"));
 const credentials = new CredentialStore(join(userDataPath, "credentials.json"), {
   available: async () => {
@@ -729,7 +737,7 @@ function setupIPC() {
     const request = z
       .object({
         page: z.enum(["home", "library", "settings", "setup"]),
-        section: z.enum(["players", "appearance", "servers", "diagnostics", "about"]).optional(),
+        section: z.enum(["players", "general", "servers", "diagnostics", "about"]).optional(),
       })
       .parse(input);
     page = request.page;
@@ -823,6 +831,8 @@ function setupIPC() {
         theme: z.enum(["system", "dark", "light"]).optional(),
         language: z.enum(["system", "zh", "en"]).optional(),
         setupCompleted: z.boolean().optional(),
+        runInBackground: z.boolean().optional(),
+        remindOnClose: z.boolean().optional(),
       })
       .strict()
       .parse(input);
@@ -836,7 +846,7 @@ function setupIPC() {
     nativeTheme.themeSource = store.value.theme;
     updateChrome();
     buildMenu();
-    buildTrayMenu();
+    syncTray();
     publish();
     return state();
   });
@@ -1142,7 +1152,62 @@ function createTray() {
     buildTrayMenu();
   } catch (error) {
     // A machine without a usable tray must retain a way to exit the app.
+    tray?.destroy();
+    tray = undefined;
     log(`Could not create tray: ${String(error)}`);
+  }
+}
+function syncTray() {
+  if (store.value.runInBackground) {
+    if (!tray || tray.isDestroyed()) createTray();
+    else buildTrayMenu();
+  } else {
+    if (!lifecycle.isQuitting && isLiveWindow(window) && !window.isVisible()) showMainWindow();
+    tray?.destroy();
+    tray = undefined;
+  }
+}
+let backgroundClosePending = false;
+async function closeToBackground() {
+  if (backgroundClosePending || lifecycle.isQuitting) return;
+  const hide = () => {
+    hidePlaybackPopup();
+    hideServerPopup();
+    window.hide();
+  };
+  if (!store.value.remindOnClose) {
+    hide();
+    return;
+  }
+  backgroundClosePending = true;
+  try {
+    const result = await dialog.showMessageBox(window, {
+      type: "info",
+      message: t("backgroundCloseTitle"),
+      detail: t("backgroundDescription"),
+      buttons: [t("continueInBackground"), t("quit"), t("cancel")],
+      defaultId: 0,
+      cancelId: 2,
+      checkboxLabel: t("doNotRemindAgain"),
+    });
+    if (lifecycle.isQuitting || !isLiveWindow(window) || result.response === 2) return;
+    if (result.checkboxChecked) {
+      await store.save({ ...store.value, remindOnClose: false });
+      publish();
+    }
+    if (lifecycle.isQuitting) return;
+    if (result.response === 1 || !store.value.runInBackground || !tray || tray.isDestroyed())
+      app.quit();
+    else hide();
+  } catch (error) {
+    log(`Could not close to background: ${String(error)}`);
+    if (!lifecycle.isQuitting && isLiveWindow(window))
+      await dialog.showMessageBox(window, {
+        type: "error",
+        message: localizeError(locale(), error),
+      });
+  } finally {
+    backgroundClosePending = false;
   }
 }
 async function setupUpdates() {
@@ -1224,14 +1289,7 @@ app.on("web-contents-created", (_event, contents) => {
 });
 void app.whenReady().then(async () => {
   if (!instance.primary) return;
-  try {
-    await store.load();
-  } catch (error) {
-    log(String(error));
-    await dialog.showMessageBox({ type: "error", message: localizeError(locale(), error) });
-    app.quit();
-    return;
-  }
+  await store.load();
   try {
     await credentials.load();
     credentialsAvailable = await credentials.available();
@@ -1291,7 +1349,7 @@ void app.whenReady().then(async () => {
   window.on("close", saveWindowState);
   if (process.platform === "darwin") app.dock?.setIcon(windowIcon);
   buildMenu();
-  createTray();
+  syncTray();
   setupIPC();
   playback.on("state", () => {
     if (playback.state.status === "idle") proxy.clear();
@@ -1316,11 +1374,14 @@ void app.whenReady().then(async () => {
   window.on("minimize", hideServerPopup);
   window.on("close", (event) => {
     if (
-      !lifecycle.close(event, Boolean(tray && !tray.isDestroyed()), () => {
-        hidePlaybackPopup();
-        hideServerPopup();
-        window.hide();
-      })
+      !lifecycle.close(
+        event,
+        Boolean(store.value.runInBackground && tray && !tray.isDestroyed()),
+        () => {
+          void closeToBackground();
+        },
+        () => app.quit(),
+      )
     )
       return;
     mainWindowClosing = true;

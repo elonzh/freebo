@@ -22,32 +22,6 @@ export function normalizeServerUrl(input: string): string {
   return url.toString().replace(/\/$/, "");
 }
 
-const serverSchema = z.object({
-  id: z.uuid(),
-  providerId: z.string().regex(/^[a-z][a-z0-9-]*$/),
-  name: z.string().trim().max(100),
-  url: z.string().transform(normalizeServerUrl),
-});
-const playerSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  kind: z.enum(["iina", "mpv", "mpvnet", "vlc", "potplayer", "mpc-hc", "mpc-be"]),
-  executable: z.string().min(1),
-  prefixArgs: z.array(z.string()),
-  manual: z.boolean().optional(),
-});
-export const settingsSchema = z.object({
-  servers: z.array(serverSchema),
-  activeServerId: z.string().optional(),
-  players: z.array(playerSchema),
-  defaultPlayerId: z.string().optional(),
-  autoNext: z.boolean(),
-  fullscreen: z.boolean(),
-  theme: z.enum(["system", "dark", "light"]),
-  language: z.enum(["system", "zh", "en"]),
-  setupCompleted: z.boolean(),
-  playerScanCompleted: z.boolean(),
-});
 export const defaultSettings: Settings = {
   servers: [],
   players: [],
@@ -57,18 +31,83 @@ export const defaultSettings: Settings = {
   language: "system",
   setupCompleted: false,
   playerScanCompleted: false,
+  runInBackground: true,
+  remindOnClose: true,
 };
+
+const serverSchema = z.object({
+  id: z.uuid(),
+  providerId: z
+    .string()
+    .regex(/^[a-z][a-z0-9-]*$/)
+    .default("emby"),
+  name: z.string().trim().max(100).default(""),
+  url: z.string().transform(normalizeServerUrl),
+});
+const playerSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  kind: z.enum(["iina", "mpv", "mpvnet", "vlc", "potplayer", "mpc-hc", "mpc-be"]),
+  executable: z.string().min(1),
+  prefixArgs: z.array(z.string()).default(() => []),
+  manual: z.boolean().optional(),
+});
+export const settingsSchema = z.object({
+  servers: z.array(serverSchema).default(() => structuredClone(defaultSettings.servers)),
+  activeServerId: z.string().optional(),
+  players: z.array(playerSchema).default(() => structuredClone(defaultSettings.players)),
+  defaultPlayerId: z.string().optional(),
+  autoNext: z.boolean().default(defaultSettings.autoNext),
+  fullscreen: z.boolean().default(defaultSettings.fullscreen),
+  theme: z.enum(["system", "dark", "light"]).default(defaultSettings.theme),
+  language: z.enum(["system", "zh", "en"]).default(defaultSettings.language),
+  setupCompleted: z.boolean().default(defaultSettings.setupCompleted),
+  playerScanCompleted: z.boolean().default(defaultSettings.playerScanCompleted),
+  runInBackground: z.boolean().default(defaultSettings.runInBackground),
+  remindOnClose: z.boolean().default(defaultSettings.remindOnClose),
+});
+
+export type SettingsDiagnostic =
+  | { type: "read-failed" | "reset-failed"; reason: string }
+  | { type: "reset" };
+
+function settingsFailureReason(error: unknown): string {
+  if (error instanceof z.ZodError)
+    return error.issues
+      .slice(0, 8)
+      .map((issue) => `${issue.path.join(".") || "settings"}: ${issue.code}`)
+      .join("; ");
+  if (error instanceof SyntaxError) {
+    // JSON parser messages can include fragments of the original file.
+    const location = error.message.match(/(?:position \d+|line \d+ column \d+)/)?.[0];
+    return location ? `Invalid JSON (${location})` : "Invalid JSON";
+  }
+  const code = (error as NodeJS.ErrnoException | undefined)?.code;
+  if (typeof code === "string" && /^[A-Z][A-Z0-9_]+$/.test(code)) return code;
+  if (error instanceof UserFacingError) return "Invalid server URL";
+  return "Unexpected settings error";
+}
 
 export class SettingsStore {
   value: Settings = structuredClone(defaultSettings);
   private writing: Promise<void> = Promise.resolve();
-  constructor(private readonly path: string) {}
+  constructor(
+    private readonly path: string,
+    private readonly report: (event: SettingsDiagnostic) => void = () => {},
+  ) {}
   async load(): Promise<Settings> {
     try {
       this.value = settingsSchema.parse(JSON.parse(await readFile(this.path, "utf8")));
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "ENOENT")
-        throw new UserFacingError("settingsUnreadable");
+      this.value = structuredClone(defaultSettings);
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return this.value;
+      this.report({ type: "read-failed", reason: settingsFailureReason(error) });
+      try {
+        await this.save(this.value);
+        this.report({ type: "reset" });
+      } catch (resetError) {
+        this.report({ type: "reset-failed", reason: settingsFailureReason(resetError) });
+      }
     }
     return this.value;
   }

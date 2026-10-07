@@ -87,7 +87,6 @@ export function UpdateSettings({ state, run }: { state: AppState; run: RunAction
           </Button>
         )}
       </div>
-      <p className="mt-6 text-xs text-muted-foreground">{t("backgroundDescription")}</p>
       <AlertDialog open={confirmRestart} onOpenChange={setConfirmRestart}>
         <AlertDialogContent>
           <AlertDialogHeader>

@@ -65,9 +65,9 @@ describe("native and renderer routing", () => {
     await fixture.api.addServer();
     await router.load();
     expect(router.state.location.pathname).toBe("/settings/servers/new");
-    fixture.push({ page: "settings", settingsPage: "appearance" });
+    fixture.push({ page: "settings", settingsPage: "general" });
     await router.load();
-    expect(router.state.location.pathname).toBe("/settings/appearance");
+    expect(router.state.location.pathname).toBe("/settings/general");
   });
   it("retains the wizard step when settings or playback are pushed", async () => {
     const { fixture, router } = await setup();

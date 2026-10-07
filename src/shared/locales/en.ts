@@ -62,7 +62,7 @@ export const en = {
   videos: "Movies, episodes and video playlists",
   choosePlayer: "Choose a player",
   players: "Players",
-  appearance: "Appearance and language",
+  general: "General",
   diagnostics: "Diagnostics",
   about: "About",
   showFreebo: "Show Freebo",
@@ -84,6 +84,15 @@ export const en = {
   updateStopsPlayback: "Restarting will stop playback. You can cancel and update after watching.",
   backgroundDescription:
     "Freebo keeps running and playing when you close the main window. Use the tray icon to reopen it or quit.",
+  runInBackground: "Keep running after closing the window",
+  runInBackgroundDescription:
+    "Show a tray icon. When off, closing the window stops playback and quits Freebo.",
+  remindOnClose: "Ask before running in the background",
+  remindOnCloseDescription:
+    "Confirm when closing the window. You can choose not to be reminded again.",
+  backgroundCloseTitle: "Keep Freebo running in the background?",
+  continueInBackground: "Run in background",
+  doNotRemindAgain: "Do not remind me again",
   scan: "Scan again",
   defaultPlayer: "Default player",
   default: "Default",
@@ -216,8 +225,10 @@ export const en = {
   playbackOrigin: "The playback address does not match the server.",
   noPlayer: "No player found. Install or select a player in Settings.",
   invalidUrl: "Enter an HTTP or HTTPS server address without a username or password.",
-  settingsUnreadable:
-    "Cannot read the settings file. Keep the original file and check the diagnostic log.",
+  settingsReadFailed: "Could not read the settings file. Reason: {{reason}}.",
+  settingsReset: "Settings reset to defaults. Startup will continue.",
+  settingsResetFailed:
+    "Could not save default settings. Startup will continue with defaults in memory. Reason: {{reason}}.",
   serverDuplicate:
     "This server has already been added. Open it from Home or edit the existing server in Settings.",
   mediaUnreadable:

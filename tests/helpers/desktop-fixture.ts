@@ -16,6 +16,8 @@ export function createDesktopFixture() {
       language: "zh",
       setupCompleted: true,
       playerScanCompleted: true,
+      runInBackground: true,
+      remindOnClose: true,
     },
     platform: "darwin",
     version: "1.0.0",

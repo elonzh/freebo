@@ -20,7 +20,7 @@ const SettingsLayout = lazyRouteComponent(settingsModule, "SettingsLayout");
 const ServersPage = lazyRouteComponent(settingsModule, "ServersPage");
 const ServerEditorPage = lazyRouteComponent(settingsModule, "ServerEditorPage");
 const PlayersPage = lazyRouteComponent(settingsModule, "PlayersPage");
-const AppearancePage = lazyRouteComponent(settingsModule, "AppearancePage");
+const GeneralPage = lazyRouteComponent(settingsModule, "GeneralPage");
 const DiagnosticsPage = lazyRouteComponent(settingsModule, "DiagnosticsPage");
 const AboutPage = lazyRouteComponent(settingsModule, "AboutPage");
 const LibraryPage = lazyRouteComponent(settingsModule, "LibraryPage");
@@ -168,11 +168,11 @@ const players = createRoute({
   component: PlayersPage,
   beforeLoad: ({ context }) => preparePage(context, "settings", "players"),
 });
-const appearance = createRoute({
+const general = createRoute({
   getParentRoute: () => settings,
-  path: "appearance",
-  component: AppearancePage,
-  beforeLoad: ({ context }) => preparePage(context, "settings", "appearance"),
+  path: "general",
+  component: GeneralPage,
+  beforeLoad: ({ context }) => preparePage(context, "settings", "general"),
 });
 const diagnostics = createRoute({
   getParentRoute: () => settings,
@@ -201,16 +201,7 @@ const routeTree = root.addChildren([
     home,
     library,
     setup,
-    settings.addChildren([
-      settingsIndex,
-      servers,
-      add,
-      edit,
-      players,
-      appearance,
-      diagnostics,
-      about,
-    ]),
+    settings.addChildren([settingsIndex, servers, add, edit, players, general, diagnostics, about]),
   ]),
   playbackSurface,
   serverSurface,

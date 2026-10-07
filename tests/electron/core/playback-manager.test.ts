@@ -21,6 +21,8 @@ const settings: Settings = {
   language: "system",
   setupCompleted: true,
   playerScanCompleted: true,
+  runInBackground: true,
+  remindOnClose: true,
 };
 const media = (id: string): PreparedMedia => ({
   item: { id, title: id },

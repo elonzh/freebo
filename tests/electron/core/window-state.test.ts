@@ -25,6 +25,15 @@ describe("window geometry", () => {
       expect(store.load()).toBeUndefined();
     }
   });
+  it("keeps saved geometry when the maximized flag is absent and ignores extra fields", async () => {
+    const file = join(await mkdtemp(join(tmpdir(), "freebo-window-")), "window-state.json");
+    const bounds = { x: 100, y: 80, width: 900, height: 650 };
+    await writeFile(
+      file,
+      JSON.stringify({ bounds: { ...bounds, futureBoundsField: true }, futureWindowField: true }),
+    );
+    expect(new WindowStateStore(file).load()).toEqual({ bounds, maximized: false });
+  });
   it("preserves visible bounds, including displays with negative coordinates", () => {
     const bounds = { x: 100, y: 80, width: 900, height: 650 };
     expect(fitWindowBounds(bounds, workArea)).toEqual(bounds);

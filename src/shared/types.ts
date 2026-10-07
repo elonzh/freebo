@@ -1,7 +1,7 @@
 export type PlayerKind = "iina" | "mpv" | "mpvnet" | "vlc" | "potplayer" | "mpc-hc" | "mpc-be";
 export type Platform = "darwin" | "win32" | "linux";
 export type AppPage = "home" | "library" | "settings" | "setup";
-export type SettingsPage = "players" | "appearance" | "servers" | "diagnostics" | "about";
+export type SettingsPage = "players" | "general" | "servers" | "diagnostics" | "about";
 export interface Server {
   id: string;
   name: string;
@@ -50,6 +50,8 @@ export interface Settings {
   language: import("./i18n").Language;
   setupCompleted: boolean;
   playerScanCompleted: boolean;
+  runInBackground: boolean;
+  remindOnClose: boolean;
 }
 export interface PlaybackItem {
   id: string;
@@ -211,7 +213,14 @@ export interface DesktopAPI {
     settings: Partial<
       Pick<
         Settings,
-        "defaultPlayerId" | "autoNext" | "fullscreen" | "theme" | "language" | "setupCompleted"
+        | "defaultPlayerId"
+        | "autoNext"
+        | "fullscreen"
+        | "theme"
+        | "language"
+        | "setupCompleted"
+        | "runInBackground"
+        | "remindOnClose"
       >
     >,
   ): Promise<AppState>;
