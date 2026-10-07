@@ -10,7 +10,7 @@ const boundsSchema = z.object({
 });
 const windowStateSchema = z.object({
   bounds: boundsSchema,
-  maximized: z.boolean().default(false),
+  maximized: z.boolean(),
 });
 export type WindowBounds = z.infer<typeof boundsSchema>;
 export type WindowState = z.infer<typeof windowStateSchema>;

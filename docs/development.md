@@ -86,6 +86,8 @@ Compose 的 `media-init` 服务生成四段 10 分钟的 MP4 测试视频，包�
 
 首次打开测试应用时选择已安装的播放器，再打开相应媒体库。需要连接 Electron 的 CDP 调试时，可设置 `FREEBO_INTEGRATION_DEBUG_PORT=9228` 后运行 `pnpm integration:app`；调试端口绑定回环地址，默认不开启。Emby、Jellyfin 的测试账号在网页中输入；Plex 首次网页设置选择完成配置即可。
 
+测试应用可以与日常 Freebo 同时运行。实例检测的范围和工作原理见 [架构文档](architecture.md#托盘与退出)。
+
 ### 自动检查范围
 
 `pnpm test:integration` 使用项目实际的 Provider 和 PlaybackClient，对三个真实服务器逐一检查：

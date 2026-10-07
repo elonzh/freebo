@@ -24,10 +24,7 @@ export function normalizeServerUrl(input: string): string {
 
 const serverSchema = z.object({
   id: z.uuid(),
-  providerId: z
-    .string()
-    .regex(/^[a-z][a-z0-9-]*$/)
-    .default("emby"),
+  providerId: z.string().regex(/^[a-z][a-z0-9-]*$/),
   name: z.string().trim().max(100),
   url: z.string().transform(normalizeServerUrl),
 });
@@ -39,23 +36,18 @@ const playerSchema = z.object({
   prefixArgs: z.array(z.string()),
   manual: z.boolean().optional(),
 });
-export const settingsSchema = z
-  .object({
-    servers: z.array(serverSchema),
-    activeServerId: z.string().optional(),
-    players: z.array(playerSchema),
-    defaultPlayerId: z.string().optional(),
-    autoNext: z.boolean(),
-    fullscreen: z.boolean(),
-    theme: z.enum(["system", "dark", "light"]),
-    language: z.enum(["system", "zh", "en"]).default("system"),
-    setupCompleted: z.boolean().default(false),
-    playerScanCompleted: z.boolean().optional(),
-  })
-  .transform((settings) => ({
-    ...settings,
-    playerScanCompleted: settings.playerScanCompleted ?? settings.players.length > 0,
-  }));
+export const settingsSchema = z.object({
+  servers: z.array(serverSchema),
+  activeServerId: z.string().optional(),
+  players: z.array(playerSchema),
+  defaultPlayerId: z.string().optional(),
+  autoNext: z.boolean(),
+  fullscreen: z.boolean(),
+  theme: z.enum(["system", "dark", "light"]),
+  language: z.enum(["system", "zh", "en"]),
+  setupCompleted: z.boolean(),
+  playerScanCompleted: z.boolean(),
+});
 export const defaultSettings: Settings = {
   servers: [],
   players: [],
@@ -98,7 +90,7 @@ export class SettingsStore {
       id?: string;
       name: string;
       url: string;
-      providerId?: string;
+      providerId: string;
     },
     beforeSave?: (server: Server) => Promise<void>,
   ): Promise<Server> {

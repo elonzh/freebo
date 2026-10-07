@@ -19,7 +19,7 @@ import {
 import { join } from "node:path";
 import { release } from "node:os";
 import { writeFile, access, mkdir } from "node:fs/promises";
-import { constants, existsSync, readFileSync } from "node:fs";
+import { constants, existsSync, mkdirSync, readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import {
   browserUserAgent,
@@ -28,6 +28,7 @@ import {
   guardServerAccess,
 } from "./core/browser-http";
 import { isLiveWindow, sendWindowState } from "./core/window-lifecycle";
+import { SingleInstance } from "./core/single-instance";
 import { z } from "zod";
 import { SettingsStore } from "./core/settings";
 import {
@@ -43,9 +44,9 @@ import { embyProvider } from "./providers/emby";
 import { jellyfinProvider } from "./providers/jellyfin";
 import { plexProvider } from "./providers/plex";
 import type { PlaybackClient } from "./providers/types";
-import { migrateLegacyProfile } from "./core/profile-migration";
 import {
   translate,
+  localizeError,
   resolveLocale,
   UserFacingError,
   errorToken,
@@ -62,13 +63,17 @@ import { UpdateManager, hasMacUpdateSignature, updateDisabledReason } from "./co
 import { autoUpdater } from "electron-updater";
 
 app.setName("Freebo");
-app.setPath("userData", join(app.getPath("appData"), "Freebo"));
-if (!app.isPackaged && process.env.FREEBO_USER_DATA_DIR)
-  app.setPath("userData", process.env.FREEBO_USER_DATA_DIR);
-let primaryInstance = false;
-const store = new SettingsStore(join(app.getPath("userData"), "settings.json"));
-const windowStateStore = new WindowStateStore(join(app.getPath("userData"), "window-state.json"));
-const credentials = new CredentialStore(join(app.getPath("userData"), "credentials.json"), {
+const userDataPath =
+  !app.isPackaged && process.env.FREEBO_USER_DATA_DIR
+    ? process.env.FREEBO_USER_DATA_DIR
+    : join(app.getPath("appData"), "Freebo");
+mkdirSync(userDataPath, { recursive: true });
+app.setPath("userData", userDataPath);
+const instance = new SingleInstance(app, showMainWindow);
+if (!instance.primary) app.quit();
+const store = new SettingsStore(join(userDataPath, "settings.json"));
+const windowStateStore = new WindowStateStore(join(userDataPath, "window-state.json"));
+const credentials = new CredentialStore(join(userDataPath, "credentials.json"), {
   available: async () => {
     if (!(await safeStorage.isAsyncEncryptionAvailable())) return false;
     // Linux's basic fallback uses a hardcoded key rather than a system secret store.
@@ -1218,23 +1223,14 @@ app.on("web-contents-created", (_event, contents) => {
   contents.on("will-attach-webview", (event) => event.preventDefault());
 });
 void app.whenReady().then(async () => {
-  if (!process.env.FREEBO_USER_DATA_DIR) {
-    await migrateLegacyProfile(app.getPath("userData"), [
-      join(app.getPath("appData"), "Emby Free Play"),
-      join(app.getPath("appData"), "emby-free-play"),
-    ]).catch((error) => log(String(error)));
-  }
-  // Electron's instance lock can create userData. Preserve first-launch migration.
-  primaryInstance = app.requestSingleInstanceLock();
-  if (!primaryInstance) {
-    app.quit();
-    return;
-  }
+  if (!instance.primary) return;
   try {
     await store.load();
   } catch (error) {
     log(String(error));
-    await dialog.showMessageBox({ type: "error", message: String(error) });
+    await dialog.showMessageBox({ type: "error", message: localizeError(locale(), error) });
+    app.quit();
+    return;
   }
   try {
     await credentials.load();
@@ -1349,10 +1345,11 @@ void app.whenReady().then(async () => {
   window.webContents.on("will-navigate", (event) => event.preventDefault());
   if (process.env.FREEBO_DEV_URL) await window.loadURL(process.env.FREEBO_DEV_URL);
   else await window.loadFile(join(__dirname, "../dist/index.html"));
+  instance.windowReady();
   await setupUpdates();
 });
 app.on("before-quit", (event) => {
-  if (primaryInstance) lifecycle.beforeQuit(event, () => app.quit());
+  if (instance.primary) lifecycle.beforeQuit(event, () => app.quit());
 });
 app.on("will-quit", () => {
   tray?.destroy();
@@ -1360,5 +1357,3 @@ app.on("will-quit", () => {
 app.on("window-all-closed", () => {
   if (lifecycle.isQuitting || !tray || tray.isDestroyed()) app.quit();
 });
-app.on("activate", showMainWindow);
-app.on("second-instance", showMainWindow);
