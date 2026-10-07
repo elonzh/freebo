@@ -132,6 +132,8 @@ pnpm integration:reset
 
 发布时保留安装包、ZIP、blockmap、`latest*.yml` 和校验和；macOS arm64/x64 在同一次 builder 调用中生成，共用一份更新元数据。手动发布草稿后，更新器才会发现版本。
 
+需要重新打包已有标签时，可手动运行同一工作流并指定 `release_tag`。工作流检出该标签并校验应用版本，使用当前工作流配置重新生成产物，无需移动版本标签。macOS 仅在对应 secret 非空时设置签名与公证环境变量；未配置时生成未签名安装包。
+
 macOS 签名与公证使用 GitHub Actions secrets：
 
 - `MAC_CSC_LINK`：Developer ID Application 的 P12 证书；`MAC_CSC_KEY_PASSWORD`：证书密码。
