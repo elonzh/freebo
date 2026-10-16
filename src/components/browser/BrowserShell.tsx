@@ -73,6 +73,7 @@ export function BrowserShell() {
   const mediaActive =
     state.playback.status === "playing" ||
     state.playback.status === "paused" ||
+    state.playback.status === "external" ||
     state.playback.status === "preparing";
   const mediaError = Boolean(state.playback.error || state.playback.syncError);
   const connection =

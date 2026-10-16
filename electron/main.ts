@@ -30,14 +30,19 @@ import {
 import { isLiveWindow, sendWindowState } from "./core/window-lifecycle";
 import { SingleInstance } from "./core/single-instance";
 import { z } from "zod";
-import { SettingsStore } from "./core/settings";
+import { SettingsStore, customPlayerInputSchema } from "./core/settings";
 import {
   WindowStateStore,
   defaultWindowSize,
   minimumWindowSize,
   fitWindowBounds,
 } from "./core/window-state";
-import { discoverPlayers, manualPlayer, playerGuides } from "./core/players";
+import {
+  customPlayerExecutable,
+  discoverPlayers,
+  manualPlayer,
+  playerGuides,
+} from "./core/players";
 import { PlaybackManager } from "./core/playback-manager";
 import { ProviderRegistry } from "./providers/registry";
 import { embyProvider } from "./providers/emby";
@@ -244,7 +249,16 @@ function own(event: IpcMainInvokeEvent) {
     throw new UserFacingError("invalidOrigin");
 }
 const idSchema = z.string().min(1).max(200);
-const kindSchema = z.enum(["iina", "mpv", "mpvnet", "vlc", "potplayer", "mpc-hc", "mpc-be"]);
+const kindSchema = z.enum([
+  "iina",
+  "mpv",
+  "mpvnet",
+  "vlc",
+  "potplayer",
+  "mpc-hc",
+  "mpc-be",
+  "cine",
+]);
 const controlSchema = z.discriminatedUnion("action", [
   z.object({ action: z.enum(["pause", "next", "previous", "stop"]) }),
   z.object({ action: z.literal("seek"), seconds: z.number().finite().min(0) }),
@@ -820,6 +834,30 @@ function setupIPC() {
         playerScanCompleted: true,
       });
     }
+    publish();
+    return state();
+  });
+  handle("app:remove-player", async (input) => {
+    await store.removePlayer(z.string().min(1).parse(input));
+    publish();
+    return state();
+  });
+  handle("app:choose-player-executable", async () => {
+    const result = await dialog.showOpenDialog(window, {
+      title: t("choosePlayerExecutable"),
+      properties: ["openFile"],
+      ...(process.platform === "darwin"
+        ? { filters: [{ name: t("playerApp"), extensions: ["app", "*"] }] }
+        : {}),
+    });
+    return result.canceled || !result.filePaths[0]
+      ? null
+      : customPlayerExecutable(result.filePaths[0]);
+  });
+  handle("app:save-custom-player", async (input) => {
+    const parsed = customPlayerInputSchema.parse(input);
+    const executable = await customPlayerExecutable(parsed.executable);
+    await store.upsertCustomPlayer({ ...parsed, executable });
     publish();
     return state();
   });

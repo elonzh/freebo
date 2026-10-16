@@ -10,7 +10,13 @@ import type {
 import type { PlaybackClient } from "../providers/types";
 import { ServerAccessError } from "../providers/types";
 import { UserFacingError, errorToken } from "../../src/shared/i18n";
-import { PlayerSession, title, type PlayerSnapshot, type PlaybackSession } from "./player-session";
+import {
+  launchExternalPlayer,
+  PlayerSession,
+  title,
+  type PlayerSnapshot,
+  type PlaybackSession,
+} from "./player-session";
 import { WindowsPlayerSession } from "./windows-player-session";
 import { redact } from "./redact";
 
@@ -71,6 +77,18 @@ export class PlaybackManager extends EventEmitter {
       this.lastSync = 0;
       this.current = -1;
       this.positions.clear();
+      if (player.kind === "cine" || (player.kind === "custom" && !player.mpvIpc)) {
+        await launchExternalPlayer(player, prepared[0]);
+        if (generation !== this.generation) return;
+        // Keep the media proxy alive without inventing playback or progress.
+        this.state = {
+          ...this.state,
+          status: "external",
+          title: title(prepared[0]),
+        };
+        this.publish();
+        return;
+      }
       const session = (this.player = this.createSession(player));
       session.on("diagnostic", (message: string) => this.emit("diagnostic", redact(message)));
       session.on("snapshot", (snapshot: PlayerSnapshot) => {

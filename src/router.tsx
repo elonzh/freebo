@@ -20,6 +20,7 @@ const SettingsLayout = lazyRouteComponent(settingsModule, "SettingsLayout");
 const ServersPage = lazyRouteComponent(settingsModule, "ServersPage");
 const ServerEditorPage = lazyRouteComponent(settingsModule, "ServerEditorPage");
 const PlayersPage = lazyRouteComponent(settingsModule, "PlayersPage");
+const PlayerEditorPage = lazyRouteComponent(settingsModule, "PlayerEditorPage");
 const GeneralPage = lazyRouteComponent(settingsModule, "GeneralPage");
 const DiagnosticsPage = lazyRouteComponent(settingsModule, "DiagnosticsPage");
 const AboutPage = lazyRouteComponent(settingsModule, "AboutPage");
@@ -168,6 +169,27 @@ const players = createRoute({
   component: PlayersPage,
   beforeLoad: ({ context }) => preparePage(context, "settings", "players"),
 });
+const addPlayer = createRoute({
+  getParentRoute: () => settings,
+  path: "players/new",
+  component: PlayerEditorPage,
+  beforeLoad: ({ context }) => preparePage(context, "settings", "players"),
+});
+const editPlayer = createRoute({
+  getParentRoute: () => settings,
+  path: "players/$playerId/edit",
+  component: PlayerEditorPage,
+  beforeLoad: async ({ context, params }) => {
+    const state = await context.runtime.queryClient.ensureQueryData(context.runtime.stateOptions);
+    if (
+      !state.settings.players.some(
+        (player) => player.id === params.playerId && player.kind === "custom",
+      )
+    )
+      throw new UserFacingError("playerMissing");
+    await preparePage(context, "settings", "players");
+  },
+});
 const general = createRoute({
   getParentRoute: () => settings,
   path: "general",
@@ -201,7 +223,18 @@ const routeTree = root.addChildren([
     home,
     library,
     setup,
-    settings.addChildren([settingsIndex, servers, add, edit, players, general, diagnostics, about]),
+    settings.addChildren([
+      settingsIndex,
+      servers,
+      add,
+      edit,
+      players,
+      addPlayer,
+      editPlayer,
+      general,
+      diagnostics,
+      about,
+    ]),
   ]),
   playbackSurface,
   serverSurface,

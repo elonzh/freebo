@@ -48,6 +48,108 @@ function configuredSettings(): Settings {
 }
 
 describe("server settings", () => {
+  it("creates and edits custom profiles on the same executable, preserving their argument templates", async () => {
+    const file = await settingsFile();
+    const store = new SettingsStore(file);
+    const input = {
+      name: "Custom player",
+      executable: "/Player Folder/player",
+      arguments: ["--title={title}", "{url}", "--start={start}"],
+    };
+    await store.upsertCustomPlayer(input);
+    const firstId = store.value.defaultPlayerId!;
+    await store.upsertCustomPlayer({ ...input, name: "Second profile" });
+    expect(store.value.players).toHaveLength(2);
+    expect(store.value.defaultPlayerId).toBe(firstId);
+    const ids = store.value.players.map((player) => player.id);
+    await store.upsertCustomPlayer({ ...input, id: firstId, name: "Updated profile" });
+    const reloaded = await new SettingsStore(file).load();
+    expect(reloaded.players).toHaveLength(2);
+    expect(reloaded.players.map((player) => player.id)).toEqual(ids);
+    expect(reloaded.defaultPlayerId).toBe(firstId);
+    expect(reloaded.players.find((player) => player.id === firstId)).toMatchObject({
+      ...input,
+      name: "Updated profile",
+      kind: "custom",
+      manual: true,
+    });
+  });
+  it("persists optional mpv IPC without replacing a selected built-in player and rejects conflicting session flags", async () => {
+    const file = await settingsFile();
+    const store = new SettingsStore(file);
+    await store.save(configuredSettings());
+    const input = {
+      name: "mpv profile",
+      executable: "/test/mpv",
+      arguments: ["--profile=high-quality", "{url}"],
+      mpvIpc: true,
+    };
+    await store.upsertCustomPlayer(input);
+    const loaded = await new SettingsStore(file).load();
+    expect(loaded.players.at(-1)).toMatchObject(input);
+    expect(loaded.defaultPlayerId).toBe("mpv");
+    for (const argument of [
+      "--input-ipc-server=/tmp/user.sock",
+      "--no-idle",
+      "--start=20",
+      "--sid=no",
+      "--",
+    ]) {
+      await expect(
+        store.upsertCustomPlayer({ ...input, arguments: [argument, "{url}"] }),
+      ).rejects.toThrow("playerMpvArgumentsConflict");
+    }
+    expect(await new SettingsStore(file).load()).toEqual(loaded);
+  });
+  it("rejects custom profiles without a URL or with an ID belonging to a built-in player", async () => {
+    const store = new SettingsStore(await settingsFile());
+    await store.save(configuredSettings());
+    const before = structuredClone(store.value);
+    const input = { name: "Custom player", executable: "/test/player", arguments: ["{url}"] };
+    await expect(
+      store.upsertCustomPlayer({ ...input, arguments: ["--fullscreen"] }),
+    ).rejects.toThrow("playerUrlRequired");
+    await expect(store.upsertCustomPlayer({ ...input, id: "mpv" })).rejects.toThrow(
+      "playerMissing",
+    );
+    expect(store.value).toEqual(before);
+  });
+  it("persists player removal and replaces or clears a removed default without changing other settings", async () => {
+    const file = await settingsFile();
+    const store = new SettingsStore(file);
+    const settings = configuredSettings();
+    const alternative = {
+      ...settings.players[0],
+      id: "other-mpv",
+      executable: "/other/mpv",
+      manual: true,
+    };
+    await store.save({ ...settings, players: [...settings.players, alternative] });
+    await store.removePlayer("missing");
+    expect(store.value.defaultPlayerId).toBe("mpv");
+    await store.removePlayer("mpv");
+    expect(await new SettingsStore(file).load()).toEqual({
+      ...settings,
+      players: [alternative],
+      defaultPlayerId: alternative.id,
+    });
+    await store.removePlayer(alternative.id);
+    expect(await new SettingsStore(file).load()).toEqual({
+      ...settings,
+      players: [],
+      defaultPlayerId: undefined,
+    });
+  });
+  it("keeps the selected player when removing a different installation", async () => {
+    const store = new SettingsStore(await settingsFile());
+    const settings = configuredSettings();
+    await store.save({
+      ...settings,
+      players: [...settings.players, { ...settings.players[0], id: "other" }],
+    });
+    await store.removePlayer("other");
+    expect(store.value).toEqual(settings);
+  });
   it("persists an empty optional name and uses the normalized address as its display label", async () => {
     const file = await settingsFile();
     const store = new SettingsStore(file);

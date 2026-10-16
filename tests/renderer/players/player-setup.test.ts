@@ -11,17 +11,31 @@ import type { RunAction } from "../../../src/ui";
 let container: HTMLDivElement;
 let root: Root;
 const update = vi.fn();
+const onEdit = vi.fn();
 const openGuide = vi.fn();
 const choosePlayer = vi.fn();
+const removePlayer = vi.fn();
+const choosePlayerExecutable = vi.fn();
+const saveCustomPlayer = vi.fn();
 const run: RunAction = async (_key, action) => {
-  await action({ openGuide, choosePlayer } as unknown as DesktopAPI);
+  await action({
+    openGuide,
+    choosePlayer,
+    removePlayer,
+    choosePlayerExecutable,
+    saveCustomPlayer,
+  } as unknown as DesktopAPI);
 };
 
 beforeEach(() => {
   (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
   update.mockReset();
+  onEdit.mockReset();
   openGuide.mockReset();
   choosePlayer.mockReset();
+  removePlayer.mockReset();
+  choosePlayerExecutable.mockReset();
+  saveCustomPlayer.mockReset();
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
@@ -47,6 +61,7 @@ async function render(
 
           run,
           update,
+          onEdit,
         }),
       ),
     ),
@@ -90,7 +105,7 @@ it("shows introductions for missing paths and keeps download and manual actions 
 it.each([
   ["darwin", ["IINA", "mpv", "VLC"]],
   ["win32", ["mpv.net", "PotPlayer", "MPC-HC", "MPC-BE", "mpv", "VLC"]],
-  ["linux", ["mpv", "VLC"]],
+  ["linux", ["mpv", "VLC", "Cine"]],
 ] as const)("lists supported players before installation on %s", async (platform, names) => {
   await render([], platform);
   const downloads = [
@@ -101,4 +116,41 @@ it.each([
   );
   expect(container.querySelector('[role="radio"]')).toBeNull();
   expect(container.textContent).not.toContain("安装与配置指引");
+});
+it("removes only the chosen path without selecting it or opening the file picker", async () => {
+  await render([player("mpv-a", "/first/mpv"), player("mpv-b", "/second/mpv")]);
+  await act(async () =>
+    container
+      .querySelector<HTMLButtonElement>('button[aria-label="移除 mpv · /second/mpv"]')!
+      .click(),
+  );
+  expect(removePlayer).toHaveBeenCalledExactlyOnceWith("mpv-b");
+  expect(update).not.toHaveBeenCalled();
+  expect(choosePlayer).not.toHaveBeenCalled();
+});
+it("explains Cine's capabilities after configuring its executable", async () => {
+  await render(
+    [{ ...player("cine", "/home/me/.local/bin/cine"), name: "Cine", kind: "cine" }],
+    "linux",
+  );
+  expect(container.textContent).toContain("/home/me/.local/bin/cine");
+  expect(container.textContent).toContain("不支持 Freebo 续播、连播、轨道选择或进度回传");
+});
+
+it("opens a custom profile for editing without changing the default", async () => {
+  const custom: Player = {
+    ...player("custom-one", "/custom/player"),
+    kind: "custom",
+    name: "My player",
+    arguments: ["{url}"],
+    mpvIpc: true,
+  };
+  await render([custom]);
+  await act(async () =>
+    container.querySelector<HTMLButtonElement>('[aria-label="编辑 My player"]')!.click(),
+  );
+  expect(onEdit).toHaveBeenCalledExactlyOnceWith(custom);
+  expect(update).not.toHaveBeenCalled();
+  expect(container.querySelector("form")).toBeNull();
+  expect(container.textContent).toContain("支持播放控制、连播和进度回传");
 });

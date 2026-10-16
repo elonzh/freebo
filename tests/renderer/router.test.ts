@@ -32,6 +32,30 @@ describe("native and renderer routing", () => {
     expect(router.state.location.pathname).toBe(`/settings/servers/${fixtureServerId}/edit`);
     await router.navigate({ to: "/settings/players" });
     expect(fixture.state()).toMatchObject({ page: "settings", settingsPage: "players" });
+    await router.navigate({ to: "/settings/players/new" });
+    fixture.push({ playback: { ...fixture.state().playback, position: 60 } });
+    expect(router.state.location.pathname).toBe("/settings/players/new");
+    fixture.push({
+      settings: {
+        ...fixture.state().settings,
+        players: [
+          {
+            id: "custom:test",
+            kind: "custom",
+            name: "Test",
+            executable: "/test/mpv",
+            prefixArgs: [],
+            arguments: ["{url}"],
+          },
+        ],
+      },
+    });
+    await router.navigate({
+      to: "/settings/players/$playerId/edit",
+      params: { playerId: "custom:test" },
+    });
+    fixture.push({ playback: { ...fixture.state().playback, position: 70 } });
+    expect(router.state.location.pathname).toBe("/settings/players/custom%3Atest/edit");
     await router.navigate({ to: "/library/$serverId", params: { serverId: fixtureServerId } });
     expect(fixture.api.openServer).toHaveBeenCalledOnce();
     await router.navigate({ to: "/" });

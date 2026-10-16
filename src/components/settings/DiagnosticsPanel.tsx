@@ -186,6 +186,7 @@ export function DiagnosticsPanel({ state, run }: { state: AppState; run: RunActi
                     preparing: "preparing",
                     playing: "playing",
                     paused: "paused",
+                    external: "openedExternally",
                     error: "playbackFailed",
                   } as const
                 )[state.playback.status],

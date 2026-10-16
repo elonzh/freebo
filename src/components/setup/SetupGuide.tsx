@@ -14,10 +14,12 @@ import {
   Globe2,
   LoaderCircle,
   MonitorPlay,
+  Plus,
   RefreshCw,
 } from "lucide-react";
 import type { ServerInput } from "../../shared/types";
 import { PlayerSetup } from "../players/PlayerSetup";
+import { CustomPlayerForm } from "../players/CustomPlayerForm";
 import { ServerForm } from "../servers/ServerForm";
 import { BrandLogo } from "../shared/Brand";
 import { PlayerIcon, ServerIcon } from "../shared/IntegrationIcon";
@@ -25,7 +27,7 @@ import { PlayerIcon, ServerIcon } from "../shared/IntegrationIcon";
 export function SetupGuide() {
   const { state, runtime, run, update, pending } = useApp();
   const { t } = useAppTranslation();
-  const { step = "welcome", serverId } = useSearch({ strict: false });
+  const { step = "welcome", serverId, playerId } = useSearch({ strict: false });
   const navigate = useNavigate();
   const setStep = (step: SetupStep) => void navigate({ to: "/setup", search: { step, serverId } });
   const fieldId = useId();
@@ -49,7 +51,10 @@ export function SetupGuide() {
   );
   const server = state.settings.servers.find((server) => server.id === serverId);
   const steps = ["setupPlayer", "setupServer", "setupComplete"] as const;
-  const stepIndex = step === "player" ? 0 : step === "server" ? 1 : 2;
+  const stepIndex = step === "player" || step === "custom-player" ? 0 : step === "server" ? 1 : 2;
+  const customPlayer = state.settings.players.find(
+    (entry) => entry.id === playerId && entry.kind === "custom",
+  );
   const saveServer = (input: ServerInput) =>
     void run("setup-server", async (desktop) => {
       const updated = await desktop.saveServer(input);
@@ -113,17 +118,23 @@ export function SetupGuide() {
               <>
                 <div className="flex items-center justify-between gap-5 [&_p]:mt-[7px] [&>span]:text-xs [&>span]:text-muted-foreground">
                   <h1>{t("setupPlayer")}</h1>
-                  <Button
-                    variant="outline"
-                    disabled={Boolean(pending)}
-                    onClick={() => void run("setup-scan", (desktop) => desktop.discoverPlayers())}
-                  >
-                    <RefreshCw
-                      size={15}
-                      className={pending === "setup-scan" ? "animate-spin" : ""}
-                    />
-                    {t("scan")}
-                  </Button>
+                  <div className="flex flex-wrap justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      disabled={Boolean(pending)}
+                      onClick={() => void run("setup-scan", (desktop) => desktop.discoverPlayers())}
+                    >
+                      <RefreshCw
+                        size={15}
+                        className={pending === "setup-scan" ? "animate-spin" : ""}
+                      />
+                      {t("scan")}
+                    </Button>
+                    <Button onClick={() => setStep("custom-player")} disabled={Boolean(pending)}>
+                      <Plus size={16} />
+                      {t("addCustomPlayer")}
+                    </Button>
+                  </div>
                 </div>
                 {pending === "setup-scan" ? (
                   <div className="flex items-center gap-3 py-9 text-muted-foreground" role="status">
@@ -131,7 +142,17 @@ export function SetupGuide() {
                     {t("scanningPlayers")}
                   </div>
                 ) : (
-                  <PlayerSetup state={state} run={run} update={update} />
+                  <PlayerSetup
+                    state={state}
+                    run={run}
+                    update={update}
+                    onEdit={(player) =>
+                      void navigate({
+                        to: "/setup",
+                        search: { step: "custom-player", serverId, playerId: player.id },
+                      })
+                    }
+                  />
                 )}
                 <div className="mt-7 flex flex-wrap items-center justify-end gap-3 [&>:first-child]:mr-auto">
                   <Button variant="outline" onClick={() => setStep("welcome")}>
@@ -145,6 +166,35 @@ export function SetupGuide() {
                 </div>
               </>
             )}
+            {step === "custom-player" &&
+              (playerId && !customPlayer ? (
+                <p role="alert">{t("playerMissing")}</p>
+              ) : (
+                <>
+                  <h1>{t(playerId ? "editCustomPlayer" : "addCustomPlayer")}</h1>
+                  <CustomPlayerForm
+                    key={playerId ?? "new"}
+                    player={customPlayer}
+                    saving={pending === "setup-custom-player"}
+                    chooseExecutable={async () => {
+                      let selected: string | null = null;
+                      await run("choose-custom-player", async (api) => {
+                        selected = await api.choosePlayerExecutable();
+                      });
+                      return selected;
+                    }}
+                    onCancel={() => setStep("player")}
+                    onSave={(input) =>
+                      void run("setup-custom-player", async (api) => {
+                        const updated = await api.saveCustomPlayer(input);
+                        runtime.applyState(updated);
+                        await navigate({ to: "/setup", search: { step: "player", serverId } });
+                        return updated;
+                      })
+                    }
+                  />
+                </>
+              ))}
             {step === "server" && (
               <>
                 <h1>{t("addServer")}</h1>

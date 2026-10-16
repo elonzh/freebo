@@ -1,4 +1,5 @@
 import { UserFacingError, errorToken } from "../../src/shared/i18n";
+import { customPlayerArgumentsError } from "../../src/shared/players";
 import { spawn, type ChildProcess } from "node:child_process";
 import { randomBytes, randomUUID } from "node:crypto";
 import { tmpdir } from "node:os";
@@ -23,6 +24,35 @@ export interface PlaybackSession extends EventEmitter {
   control(control: PlaybackControl): Promise<void>;
   stop(): Promise<void>;
 }
+
+// URL-only players may hand off to an existing instance owned by the user.
+export async function launchExternalPlayer(player: Player, media: PreparedMedia): Promise<void> {
+  const template =
+    player.kind === "cine" ? ["--new-window", "{url}"] : (player.arguments ?? ["{url}"]);
+  const args = customArguments(template, media);
+  await new Promise<void>((resolve, reject) => {
+    const child = spawn(player.executable, [...player.prefixArgs, ...args], {
+      shell: false,
+      stdio: "ignore",
+      detached: true,
+    });
+    child.once("error", () => reject(new UserFacingError("playerStartFailed")));
+    child.once("spawn", () => {
+      child.unref();
+      resolve();
+    });
+  });
+}
+
+function customArguments(template: string[], media: PreparedMedia, mpvIpc = false): string[] {
+  const error = customPlayerArgumentsError(template, mpvIpc);
+  if (error) throw new UserFacingError(error);
+  const values = { url: media.url, title: title(media), start: String(media.startSeconds) };
+  return template.map((argument) =>
+    argument.replace(/\{(url|title|start)\}/g, (_match, key: keyof typeof values) => values[key]),
+  );
+}
+
 export class PlayerSession extends EventEmitter {
   private child?: ChildProcess;
   private ipc?: MpvIPC;
@@ -63,7 +93,9 @@ export class PlayerSession extends EventEmitter {
     const args =
       this.player.kind === "iina"
         ? ["--no-stdin", ...options.map((option) => `--mpv-${option.slice(2)}`), first.url]
-        : [...options, first.url];
+        : this.player.kind === "custom"
+          ? [...options, ...customArguments(this.player.arguments ?? ["{url}"], first, true)]
+          : [...options, first.url];
     this.launch(args);
     const ipc = (this.ipc = new MpvIPC());
     await ipc.open(socket);
@@ -102,8 +134,8 @@ export class PlayerSession extends EventEmitter {
     this.windowPid = this.child.pid;
     this.child.on("error", () => this.emit("media-error", errorToken("playerStartFailed")));
     if (this.player.kind !== "iina") void activatePlayer(this.player, this.child.pid);
-    // iina-cli exits after handing the URL to IINA; IPC remains authoritative.
-    if (this.player.kind !== "iina")
+    // Launchers can exit after handing off; the custom mpv session also follows IPC.
+    if (this.player.kind !== "iina" && this.player.kind !== "custom")
       this.child.on("exit", () => {
         if (!this.stopped) this.finish();
       });

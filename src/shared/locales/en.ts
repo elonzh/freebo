@@ -101,6 +101,11 @@ export const en = {
   mpvnetGuide: "A graphical mpv player for Windows.",
   mpvGuide: "Available on all three platforms, mainly controlled with keyboard shortcuts.",
   vlcGuide: "Available on all three platforms, with familiar playback controls.",
+  cineGuide:
+    "For Linux. Opens the current video in Cine; Freebo resume, auto-next, track selection and progress sync are unavailable.",
+  openedExternally: "Opened in player",
+  externalPlaybackDescription:
+    "Control playback in the player and keep Freebo running to serve the media.",
   potplayerGuide:
     "For Windows, with queue controls and progress sync. Select audio and embedded subtitles in the player.",
   mpcGuide: "For Windows, with native playback controls and progress sync.",
@@ -152,6 +157,24 @@ export const en = {
   githubRepository: "GitHub repository",
   download: "Download from website",
   manualPlayer: "Select {{name}} manually",
+  addCustomPlayer: "Add custom player",
+  editCustomPlayer: "Edit custom player",
+  editCustomPlayerName: "Edit {{name}}",
+  playerExecutable: "Executable",
+  choosePlayerExecutable: "Choose player executable",
+  playerArguments: "Launch argument template",
+  playerArgumentsHint:
+    "One argument per line, without quotes. {url} is the video URL, {title} the title, and {start} the resume time in seconds. Include {url}.",
+  playerUrlRequired: "Include {url} in the launch arguments to pass the video URL.",
+  playerExecutableInvalid: "Cannot execute this file. Choose a valid player app or executable.",
+  customPlayerGuide:
+    "Opens the current video with controls in the player; Freebo auto-next, track selection and progress sync are unavailable.",
+  playerMpvIpc: "Enable mpv IPC",
+  customPlayerMpvGuide:
+    "For players that accept mpv command-line options. Freebo configures IPC, resume position and tracks, with playback controls, continuous playback and progress reporting.",
+  playerMpvArgumentsConflict:
+    "With mpv IPC enabled, Freebo manages connection, resume, title, fullscreen and track options. Remove those options and --, --{, --} from the template.",
+  removePlayer: "Remove {{name}} · {{path}}",
   manualHint: "Already installed? Select the app or executable",
   autoNext: "Continuous playback",
   autoNextDescription: "Play the next item in the queue automatically.",

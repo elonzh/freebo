@@ -24,7 +24,7 @@ Your library already organizes your videos, and your computer already has a play
 - Movies, episodes and video playlists with resume, continuous playback and watch progress sync.
 - Your library's audio, subtitle and video-version selections.
 - A floating panel for pause, seeking and queue navigation.
-- Installed player discovery and manual path selection.
+- Installed player discovery, manual path selection and [custom players](docs/development.md#自定义播放器).
 - English and Chinese, light and dark appearance, and remembered window size and position.
 - Keep playing in the background when the main window closes; reopen or quit from the tray.
 
@@ -32,9 +32,11 @@ Your library already organizes your videos, and your computer already has a play
 | ------- | -------------------------------------------- |
 | macOS   | IINA, mpv, VLC                               |
 | Windows | mpv.net, PotPlayer, MPC-HC, MPC-BE, mpv, VLC |
-| Linux   | mpv, VLC                                     |
+| Linux   | mpv, VLC, Cine                               |
 
 Music and live TV continue to play on the server website.
+
+Cine opens the current video only. See [player integration](docs/architecture.md#服务器与播放器扩展) for playback control and progress sync capabilities.
 
 ## Quick start
 

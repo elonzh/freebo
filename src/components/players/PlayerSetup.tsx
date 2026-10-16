@@ -4,8 +4,8 @@ import { cn } from "../../lib/utils";
 import { Label } from "../ui/label";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Button } from "../ui/button";
-import { Globe2, FolderOpen } from "lucide-react";
-import type { AppState, PlayerKind, Platform } from "../../shared/types";
+import { Globe2, FolderOpen, Trash2, Pencil } from "lucide-react";
+import type { AppState, PlayerKind, Platform, Player } from "../../shared/types";
 import type { MessageKey } from "../../shared/i18n";
 import type { RunAction, SettingsPatch } from "../../ui";
 import { PlayerIcon } from "../shared/IntegrationIcon";
@@ -23,17 +23,26 @@ const playerOptions: {
   { kind: "mpc-be", name: "MPC-BE", platforms: ["win32"], description: "mpcGuide" },
   { kind: "mpv", name: "mpv", platforms: ["darwin", "win32", "linux"], description: "mpvGuide" },
   { kind: "vlc", name: "VLC", platforms: ["darwin", "win32", "linux"], description: "vlcGuide" },
+  { kind: "cine", name: "Cine", platforms: ["linux"], description: "cineGuide" },
+  {
+    kind: "custom",
+    name: "",
+    platforms: ["darwin", "win32", "linux"],
+    description: "customPlayerGuide",
+  },
 ];
 
 export function PlayerSetup({
   state,
   run,
   update,
+  onEdit,
   children,
 }: {
   state: AppState;
   run: RunAction;
   update: (patch: SettingsPatch) => void;
+  onEdit: (player: Player) => void;
   children?: ReactNode;
 }) {
   const { t } = useAppTranslation();
@@ -52,7 +61,11 @@ export function PlayerSetup({
             const installed = state.settings.players.filter(
               (player) => player.kind === option.kind && player.executable.trim(),
             );
-            const choices = installed.length ? installed : [undefined];
+            const choices = installed.length
+              ? installed
+              : option.kind === "custom"
+                ? []
+                : [undefined];
             return choices.map((player, index) => {
               const rowId = `${fieldId}-${option.kind}-${index}`;
               const selected = Boolean(player && player.id === state.settings.defaultPlayerId);
@@ -69,6 +82,17 @@ export function PlayerSetup({
                     <span className="mt-1.5 block text-xs font-normal text-muted-foreground wrap-anywhere">
                       {player?.executable ?? t(option.description)}
                     </span>
+                    {(player?.kind === "cine" || player?.kind === "custom") && (
+                      <span className="mt-1.5 block text-xs font-normal text-muted-foreground">
+                        {t(
+                          player.kind === "cine"
+                            ? "cineGuide"
+                            : player.mpvIpc
+                              ? "customPlayerMpvGuide"
+                              : "customPlayerGuide",
+                        )}
+                      </span>
+                    )}
                   </span>
                   {selected && (
                     <span className="shrink-0 text-[11px] font-normal text-primary">
@@ -98,6 +122,24 @@ export function PlayerSetup({
                     </div>
                   )}
                   <div className="flex shrink-0 items-center gap-1">
+                    {player && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={t("removePlayer", {
+                          name: player.name,
+                          path: player.executable,
+                        })}
+                        title={t("remove")}
+                        onClick={() =>
+                          void run(`remove-player:${player.id}`, (desktop) =>
+                            desktop.removePlayer(player.id),
+                          )
+                        }
+                      >
+                        <Trash2 size={17} />
+                      </Button>
+                    )}
                     {!player && (
                       <Button
                         variant="ghost"
@@ -111,17 +153,29 @@ export function PlayerSetup({
                         <Globe2 size={17} />
                       </Button>
                     )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label={t("manualPlayer", { name: option.name })}
-                      title={t("manualHint")}
-                      onClick={() =>
-                        void run("choose", (desktop) => desktop.choosePlayer(option.kind))
-                      }
-                    >
-                      <FolderOpen size={17} />
-                    </Button>
+                    {option.kind === "custom" ? (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={t("editCustomPlayerName", { name: player?.name ?? "" })}
+                        title={t("editCustomPlayer")}
+                        onClick={() => player && onEdit(player)}
+                      >
+                        <Pencil size={17} />
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={t("manualPlayer", { name: option.name })}
+                        title={t("manualHint")}
+                        onClick={() =>
+                          void run("choose", (desktop) => desktop.choosePlayer(option.kind))
+                        }
+                      >
+                        <FolderOpen size={17} />
+                      </Button>
+                    )}
                   </div>
                 </div>
               );

@@ -1,4 +1,13 @@
-export type PlayerKind = "iina" | "mpv" | "mpvnet" | "vlc" | "potplayer" | "mpc-hc" | "mpc-be";
+export type PlayerKind =
+  | "iina"
+  | "mpv"
+  | "mpvnet"
+  | "vlc"
+  | "potplayer"
+  | "mpc-hc"
+  | "mpc-be"
+  | "cine"
+  | "custom";
 export type Platform = "darwin" | "win32" | "linux";
 export type AppPage = "home" | "library" | "settings" | "setup";
 export type SettingsPage = "players" | "general" | "servers" | "diagnostics" | "about";
@@ -39,7 +48,16 @@ export interface Player {
   kind: PlayerKind;
   executable: string;
   prefixArgs: string[];
+  arguments?: string[];
+  mpvIpc?: boolean;
   manual?: boolean;
+}
+export interface CustomPlayerInput {
+  id?: string;
+  name: string;
+  executable: string;
+  arguments: string[];
+  mpvIpc?: boolean;
 }
 export interface Settings {
   servers: Server[];
@@ -104,7 +122,7 @@ export type PlaybackRecord =
     }
   | { status: "unavailable" };
 export interface PlaybackState {
-  status: "idle" | "preparing" | "playing" | "paused" | "error";
+  status: "idle" | "preparing" | "playing" | "paused" | "external" | "error";
   title?: string;
   playerName?: string;
   position: number;
@@ -210,6 +228,9 @@ export interface DesktopAPI {
   showError(this: void, visible: boolean): Promise<void>;
   discoverPlayers(this: void): Promise<AppState>;
   choosePlayer(this: void, kind: PlayerKind): Promise<AppState>;
+  removePlayer(this: void, id: string): Promise<AppState>;
+  choosePlayerExecutable(this: void): Promise<string | null>;
+  saveCustomPlayer(this: void, player: CustomPlayerInput): Promise<AppState>;
   updateSettings(
     this: void,
     settings: Partial<

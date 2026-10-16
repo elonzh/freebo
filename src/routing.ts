@@ -9,7 +9,8 @@ export const settingsPaths = {
   about: "/settings/about",
 } as const satisfies Record<SettingsPage, string>;
 export const setupSearchSchema = z.object({
-  step: z.enum(["welcome", "player", "server", "done"]).catch("welcome"),
+  step: z.enum(["welcome", "player", "custom-player", "server", "done"]).catch("welcome"),
+  playerId: z.string().optional().catch(undefined),
   serverId: z.string().uuid().optional().catch(undefined),
 });
 export type SetupStep = z.infer<typeof setupSearchSchema>["step"];
