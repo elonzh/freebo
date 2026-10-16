@@ -106,6 +106,8 @@ export function createDesktopFixture() {
     ),
     choosePlayer: vi.fn(async () => state),
     removePlayer: vi.fn(async () => state),
+    choosePlayerExecutable: vi.fn(async () => null),
+    saveCustomPlayer: vi.fn(async () => state),
     resetSession: vi.fn(async () => state),
     surfaceReady: vi.fn(async () => {}),
     showError: vi.fn(async () => {}),

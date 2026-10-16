@@ -6,7 +6,8 @@ export type PlayerKind =
   | "potplayer"
   | "mpc-hc"
   | "mpc-be"
-  | "cine";
+  | "cine"
+  | "custom";
 export type Platform = "darwin" | "win32" | "linux";
 export type AppPage = "home" | "library" | "settings" | "setup";
 export type SettingsPage = "players" | "general" | "servers" | "diagnostics" | "about";
@@ -47,7 +48,16 @@ export interface Player {
   kind: PlayerKind;
   executable: string;
   prefixArgs: string[];
+  arguments?: string[];
+  mpvIpc?: boolean;
   manual?: boolean;
+}
+export interface CustomPlayerInput {
+  id?: string;
+  name: string;
+  executable: string;
+  arguments: string[];
+  mpvIpc?: boolean;
 }
 export interface Settings {
   servers: Server[];
@@ -219,6 +229,8 @@ export interface DesktopAPI {
   discoverPlayers(this: void): Promise<AppState>;
   choosePlayer(this: void, kind: PlayerKind): Promise<AppState>;
   removePlayer(this: void, id: string): Promise<AppState>;
+  choosePlayerExecutable(this: void): Promise<string | null>;
+  saveCustomPlayer(this: void, player: CustomPlayerInput): Promise<AppState>;
   updateSettings(
     this: void,
     settings: Partial<

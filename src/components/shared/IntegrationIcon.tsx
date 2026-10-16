@@ -16,6 +16,7 @@ const playerIcons: Record<PlayerKind, string | undefined> = {
   "mpc-hc": "players/mpc-hc.png",
   "mpc-be": "players/mpc-be.png",
   cine: undefined,
+  custom: undefined,
 };
 
 function IntegrationIcon({

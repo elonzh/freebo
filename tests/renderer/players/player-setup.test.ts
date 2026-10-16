@@ -11,19 +11,31 @@ import type { RunAction } from "../../../src/ui";
 let container: HTMLDivElement;
 let root: Root;
 const update = vi.fn();
+const onEdit = vi.fn();
 const openGuide = vi.fn();
 const choosePlayer = vi.fn();
 const removePlayer = vi.fn();
+const choosePlayerExecutable = vi.fn();
+const saveCustomPlayer = vi.fn();
 const run: RunAction = async (_key, action) => {
-  await action({ openGuide, choosePlayer, removePlayer } as unknown as DesktopAPI);
+  await action({
+    openGuide,
+    choosePlayer,
+    removePlayer,
+    choosePlayerExecutable,
+    saveCustomPlayer,
+  } as unknown as DesktopAPI);
 };
 
 beforeEach(() => {
   (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
   update.mockReset();
+  onEdit.mockReset();
   openGuide.mockReset();
   choosePlayer.mockReset();
   removePlayer.mockReset();
+  choosePlayerExecutable.mockReset();
+  saveCustomPlayer.mockReset();
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
@@ -49,6 +61,7 @@ async function render(
 
           run,
           update,
+          onEdit,
         }),
       ),
     ),
@@ -122,4 +135,22 @@ it("explains Cine's capabilities after configuring its executable", async () => 
   );
   expect(container.textContent).toContain("/home/me/.local/bin/cine");
   expect(container.textContent).toContain("不支持 Freebo 续播、连播、轨道选择或进度回传");
+});
+
+it("opens a custom profile for editing without changing the default", async () => {
+  const custom: Player = {
+    ...player("custom-one", "/custom/player"),
+    kind: "custom",
+    name: "My player",
+    arguments: ["{url}"],
+    mpvIpc: true,
+  };
+  await render([custom]);
+  await act(async () =>
+    container.querySelector<HTMLButtonElement>('[aria-label="编辑 My player"]')!.click(),
+  );
+  expect(onEdit).toHaveBeenCalledExactlyOnceWith(custom);
+  expect(update).not.toHaveBeenCalled();
+  expect(container.querySelector("form")).toBeNull();
+  expect(container.textContent).toContain("支持播放控制、连播和进度回传");
 });

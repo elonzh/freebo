@@ -62,6 +62,26 @@ const setup = () => {
 };
 describe("playback lifecycle", () => {
   afterEach(() => vi.useRealTimers());
+  it("controls custom mpv IPC profiles and reports real snapshots through the regular lifecycle", async () => {
+    const { session, manager, client, report } = setup();
+    await manager.play(
+      client,
+      { itemIds: ["a"] },
+      { ...player, kind: "custom", mpvIpc: true, arguments: ["{url}"] },
+      settings,
+    );
+    expect(session.start).toHaveBeenCalledOnce();
+    expect(session.enqueue).toHaveBeenCalledWith(media("b"));
+    expect(report).not.toHaveBeenCalled();
+    session.emit("snapshot", { index: 0, position: 150, duration: 600, paused: false });
+    await manager.control({ action: "pause" });
+    expect(session.control).toHaveBeenCalledWith({ action: "pause" });
+    await manager.flush();
+    expect(report.mock.calls.map(([, event, position]) => [event, position])).toEqual([
+      ["start", 150],
+      ["stop", 150],
+    ]);
+  });
   it("finishes the current item's file segments when auto-next is disabled", async () => {
     const { session, manager, client } = setup();
     vi.spyOn(client, "resolveQueue").mockResolvedValue([

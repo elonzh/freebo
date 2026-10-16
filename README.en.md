@@ -24,7 +24,7 @@ Your library already organizes your videos, and your computer already has a play
 - Movies, episodes and video playlists with resume, continuous playback and watch progress sync.
 - Your library's audio, subtitle and video-version selections.
 - A floating panel for pause, seeking and queue navigation.
-- Installed player discovery and manual path selection.
+- Installed player discovery, manual path selection and [custom players](docs/development.md#自定义播放器).
 - English and Chinese, light and dark appearance, and remembered window size and position.
 - Keep playing in the background when the main window closes; reopen or quit from the tray.
 

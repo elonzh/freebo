@@ -1,7 +1,55 @@
 import { describe, it, expect } from "vitest";
-import { candidatePlayers, manualPlayer } from "../../../electron/core/players";
+import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import {
+  candidatePlayers,
+  customPlayerExecutable,
+  discoverPlayers,
+  manualPlayer,
+} from "../../../electron/core/players";
 
 describe("player discovery", () => {
+  it("keeps custom profiles with distinct arguments for the same executable when scanning", async () => {
+    const profiles = ["one", "two"].map((id) => ({
+      id,
+      kind: "custom" as const,
+      name: id,
+      executable: process.execPath,
+      prefixArgs: [],
+      arguments: [id, "{url}"],
+      manual: true,
+    }));
+    const discovered = await discoverPlayers(
+      process.platform as "darwin" | "win32" | "linux",
+      profiles,
+    );
+    expect(discovered.filter((player) => player.kind === "custom")).toEqual(profiles);
+    expect(await customPlayerExecutable(process.execPath)).toBe(process.execPath);
+    await expect(customPlayerExecutable(tmpdir())).rejects.toThrow("playerExecutableInvalid");
+    await expect(
+      customPlayerExecutable(join(tmpdir(), "freebo-missing-player-executable")),
+    ).rejects.toThrow("playerExecutableInvalid");
+  });
+  it.skipIf(process.platform !== "darwin")(
+    "resolves a macOS application's declared executable rather than guessing mpv",
+    async () => {
+      const root = await mkdtemp(join(tmpdir(), "freebo-custom-player-"));
+      try {
+        const bundle = join(root, "Example Player.app");
+        await mkdir(join(bundle, "Contents/MacOS"), { recursive: true });
+        await writeFile(
+          join(bundle, "Contents/Info.plist"),
+          '<?xml version="1.0"?><plist version="1.0"><dict><key>CFBundleExecutable</key><string>Example Player</string></dict></plist>',
+        );
+        const executable = join(bundle, "Contents/MacOS/Example Player");
+        await writeFile(executable, "#!/bin/sh\n", { mode: 0o755 });
+        expect(await customPlayerExecutable(bundle)).toBe(executable);
+      } finally {
+        await rm(root, { recursive: true, force: true });
+      }
+    },
+  );
   it("finds Cine on Linux in user-local and PATH installations", () => {
     expect(candidatePlayers("linux", { PATH: "/custom/bin" }, "/home/me")).toEqual(
       expect.arrayContaining([

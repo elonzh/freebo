@@ -16,6 +16,7 @@ import { Switch } from "../components/ui/switch";
 import { OptionSelect } from "../components/shared/OptionSelect";
 import { SettingRow } from "../components/settings/SettingRow";
 import { PlayerSetup } from "../components/players/PlayerSetup";
+import { CustomPlayerForm } from "../components/players/CustomPlayerForm";
 import { ServerForm } from "../components/servers/ServerForm";
 import { ServerManagementRow } from "../components/servers/ServerManagementRow";
 import { BrandLogo, BrandName } from "../components/shared/Brand";
@@ -152,19 +153,36 @@ export function ServerEditorPage() {
 export function PlayersPage() {
   const { state, run, update, isPending } = useApp();
   const { t } = useAppTranslation();
+  const navigate = useNavigate();
   return (
     <>
       <Heading title={t("players")}>
-        <Button
-          variant="outline"
-          disabled={isPending("scan")}
-          onClick={() => void run("scan", (api) => api.discoverPlayers())}
-        >
-          <RefreshCw size={15} className={isPending("scan") ? "animate-spin" : ""} />
-          {t("scan")}
-        </Button>
+        <div className="flex flex-wrap justify-end gap-2">
+          <Button
+            variant="outline"
+            disabled={isPending("scan")}
+            onClick={() => void run("scan", (api) => api.discoverPlayers())}
+          >
+            <RefreshCw size={15} className={isPending("scan") ? "animate-spin" : ""} />
+            {t("scan")}
+          </Button>
+          <Button onClick={() => void navigate({ to: "/settings/players/new" })}>
+            <Plus size={16} />
+            {t("addCustomPlayer")}
+          </Button>
+        </div>
       </Heading>
-      <PlayerSetup state={state} run={run} update={update}>
+      <PlayerSetup
+        state={state}
+        run={run}
+        update={update}
+        onEdit={(player) =>
+          void navigate({
+            to: "/settings/players/$playerId/edit",
+            params: { playerId: player.id },
+          })
+        }
+      >
         <SettingRow title={t("autoNext")} description={t("autoNextDescription")}>
           <Switch
             aria-label={t("autoNext")}
@@ -180,6 +198,42 @@ export function PlayersPage() {
           />
         </SettingRow>
       </PlayerSetup>
+    </>
+  );
+}
+export function PlayerEditorPage() {
+  const { state, runtime, run, isPending } = useApp();
+  const { t } = useAppTranslation();
+  const { playerId } = useParams({ strict: false });
+  const player = state.settings.players.find(
+    (entry) => entry.id === playerId && entry.kind === "custom",
+  );
+  const navigate = useNavigate();
+  if (playerId && !player) return <p role="alert">{t("playerMissing")}</p>;
+  return (
+    <>
+      <Heading title={t(playerId ? "editCustomPlayer" : "addCustomPlayer")} />
+      <CustomPlayerForm
+        key={playerId ?? "new"}
+        player={player}
+        saving={isPending("save-custom-player")}
+        chooseExecutable={async () => {
+          let selected: string | null = null;
+          await run("choose-custom-player", async (api) => {
+            selected = await api.choosePlayerExecutable();
+          });
+          return selected;
+        }}
+        onCancel={() => void navigate({ to: "/settings/players" })}
+        onSave={(input) =>
+          void run("save-custom-player", async (api) => {
+            const updated = await api.saveCustomPlayer(input);
+            runtime.applyState(updated);
+            await navigate({ to: "/settings/players" });
+            return updated;
+          })
+        }
+      />
     </>
   );
 }

@@ -1,11 +1,14 @@
-import { access, readdir } from "node:fs/promises";
+import { access, readdir, stat } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { constants } from "node:fs";
 import { join, posix, win32, basename } from "node:path";
 import { homedir } from "node:os";
 import type { Platform, Player, PlayerKind } from "../../src/shared/types";
+import { UserFacingError } from "../../src/shared/i18n";
 
 export const playerGuides: Record<
-  PlayerKind,
+  Exclude<PlayerKind, "custom">,
   { name: string; url: string; platforms: Platform[] }
 > = {
   iina: { name: "IINA", url: "https://iina.io/download/", platforms: ["darwin"] },
@@ -48,8 +51,8 @@ export function candidatePlayers(
   home = homedir(),
 ): Player[] {
   const paths = platform === "win32" ? win32 : posix;
-  const candidates: { kind: PlayerKind; path: string; prefix?: string[] }[] = [];
-  const add = (kind: PlayerKind, path: string, prefix?: string[]) =>
+  const candidates: { kind: keyof typeof playerGuides; path: string; prefix?: string[] }[] = [];
+  const add = (kind: keyof typeof playerGuides, path: string, prefix?: string[]) =>
     candidates.push({ kind, path, prefix });
   if (platform === "darwin") {
     for (const root of ["/Applications", paths.join(home, "Applications")]) {
@@ -103,7 +106,7 @@ export function candidatePlayers(
   }
   for (const root of (env.PATH ?? "").split(paths.delimiter).filter(Boolean)) {
     if (platform === "linux") add("cine", paths.join(root, "cine"));
-    for (const kind of ["mpv", "mpvnet", "vlc"] as PlayerKind[])
+    for (const kind of ["mpv", "mpvnet", "vlc"] as const)
       add(kind, paths.join(root, `${kind}${platform === "win32" ? ".exe" : ""}`));
     if (platform === "win32")
       for (const [kind, binaries] of [
@@ -159,11 +162,13 @@ export async function discoverPlayers(
     .filter((p): p is Player => p !== null)
     .filter(
       (p, index, list) =>
-        list.findIndex((v) => v.executable === p.executable && v.kind === p.kind) === index,
+        list.findIndex((v) =>
+          p.kind === "custom" ? v.id === p.id : v.executable === p.executable && v.kind === p.kind,
+        ) === index,
     );
 }
 
-export function manualPlayer(kind: PlayerKind, path: string): Player {
+export function manualPlayer(kind: Exclude<PlayerKind, "custom">, path: string): Player {
   if (/\.app$/i.test(path))
     path = posix.join(
       path,
@@ -178,4 +183,35 @@ export function manualPlayer(kind: PlayerKind, path: string): Player {
     prefixArgs: [],
     manual: true,
   };
+}
+
+export async function customPlayerExecutable(input: string): Promise<string> {
+  let path = input;
+  try {
+    if (process.platform === "darwin" && /\.app$/i.test(path)) {
+      const { stdout } = await promisify(execFile)(
+        "/usr/bin/plutil",
+        [
+          "-extract",
+          "CFBundleExecutable",
+          "raw",
+          "-expect",
+          "string",
+          "-o",
+          "-",
+          posix.join(path, "Contents/Info.plist"),
+        ],
+        { timeout: 3000, maxBuffer: 8192 },
+      );
+      const binary = stdout.trim();
+      if (!binary || posix.basename(binary) !== binary)
+        throw new Error("Invalid bundle executable");
+      path = posix.join(path, "Contents/MacOS", binary);
+    }
+    if (!(await stat(path)).isFile()) throw new Error("Not a file");
+    await access(path, process.platform === "win32" ? constants.F_OK : constants.X_OK);
+    return path;
+  } catch {
+    throw new UserFacingError("playerExecutableInvalid");
+  }
 }

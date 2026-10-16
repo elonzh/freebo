@@ -11,7 +11,7 @@ import type { PlaybackClient } from "../providers/types";
 import { ServerAccessError } from "../providers/types";
 import { UserFacingError, errorToken } from "../../src/shared/i18n";
 import {
-  launchCine,
+  launchExternalPlayer,
   PlayerSession,
   title,
   type PlayerSnapshot,
@@ -77,8 +77,8 @@ export class PlaybackManager extends EventEmitter {
       this.lastSync = 0;
       this.current = -1;
       this.positions.clear();
-      if (player.kind === "cine") {
-        await launchCine(player, prepared[0]);
+      if (player.kind === "cine" || (player.kind === "custom" && !player.mpvIpc)) {
+        await launchExternalPlayer(player, prepared[0]);
         if (generation !== this.generation) return;
         // Keep the media proxy alive without inventing playback or progress.
         this.state = {

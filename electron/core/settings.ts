@@ -1,9 +1,10 @@
 import { UserFacingError } from "../../src/shared/i18n";
+import { customPlayerArgumentsError } from "../../src/shared/players";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
 import { readFile, writeFile, mkdir, rename } from "node:fs/promises";
 import { dirname } from "node:path";
-import type { Settings, Server } from "../../src/shared/types";
+import type { Settings, Server, Player, CustomPlayerInput } from "../../src/shared/types";
 
 export function normalizeServerUrl(input: string): string {
   let url: URL;
@@ -47,11 +48,22 @@ const serverSchema = z.object({
 const playerSchema = z.object({
   id: z.string(),
   name: z.string(),
-  kind: z.enum(["iina", "mpv", "mpvnet", "vlc", "potplayer", "mpc-hc", "mpc-be", "cine"]),
+  kind: z.enum(["iina", "mpv", "mpvnet", "vlc", "potplayer", "mpc-hc", "mpc-be", "cine", "custom"]),
   executable: z.string().min(1),
   prefixArgs: z.array(z.string()).default(() => []),
+  arguments: z.array(z.string().max(8192)).max(100).optional(),
+  mpvIpc: z.boolean().optional(),
   manual: z.boolean().optional(),
 });
+export const customPlayerInputSchema = z
+  .object({
+    id: z.string().min(1).optional(),
+    name: z.string().trim().min(1).max(100),
+    executable: z.string().trim().min(1),
+    arguments: z.array(z.string().max(8192)).min(1).max(100),
+    mpvIpc: z.boolean().default(false),
+  })
+  .strict();
 export const settingsSchema = z.object({
   servers: z.array(serverSchema).default(() => structuredClone(defaultSettings.servers)),
   activeServerId: z.string().optional(),
@@ -152,6 +164,31 @@ export class SettingsStore {
       players,
       defaultPlayerId:
         this.value.defaultPlayerId === id ? players[0]?.id : this.value.defaultPlayerId,
+    });
+  }
+  async upsertCustomPlayer(input: CustomPlayerInput): Promise<void> {
+    const parsed = customPlayerInputSchema.parse(input);
+    const argumentsError = customPlayerArgumentsError(parsed.arguments, parsed.mpvIpc);
+    if (argumentsError) throw new UserFacingError(argumentsError);
+    if (
+      parsed.id &&
+      !this.value.players.some((player) => player.id === parsed.id && player.kind === "custom")
+    )
+      throw new UserFacingError("playerMissing");
+    const player: Player = {
+      ...parsed,
+      id: parsed.id ?? `custom:${randomUUID()}`,
+      kind: "custom",
+      prefixArgs: [],
+      manual: true,
+    };
+    await this.save({
+      ...this.value,
+      players: parsed.id
+        ? this.value.players.map((entry) => (entry.id === player.id ? player : entry))
+        : this.value.players.concat(player),
+      defaultPlayerId: this.value.defaultPlayerId ?? player.id,
+      playerScanCompleted: true,
     });
   }
 }
