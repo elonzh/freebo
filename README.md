@@ -32,9 +32,11 @@ Freebo(福瑞播) 的 **Free** 既是免费，也是自由选择播放器。软�
 | ------- | -------------------------------------------- |
 | macOS   | IINA、mpv、VLC                               |
 | Windows | mpv.net、PotPlayer、MPC-HC、MPC-BE、mpv、VLC |
-| Linux   | mpv、VLC                                     |
+| Linux   | mpv、VLC、Cine                               |
 
 音乐和直播继续使用服务器网页播放。
+
+Cine 仅打开当前视频，播放控制与进度同步的支持范围见 [播放器接入说明](docs/architecture.md#服务器与播放器扩展)。
 
 ## 快速开始
 

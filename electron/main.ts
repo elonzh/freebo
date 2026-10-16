@@ -244,7 +244,16 @@ function own(event: IpcMainInvokeEvent) {
     throw new UserFacingError("invalidOrigin");
 }
 const idSchema = z.string().min(1).max(200);
-const kindSchema = z.enum(["iina", "mpv", "mpvnet", "vlc", "potplayer", "mpc-hc", "mpc-be"]);
+const kindSchema = z.enum([
+  "iina",
+  "mpv",
+  "mpvnet",
+  "vlc",
+  "potplayer",
+  "mpc-hc",
+  "mpc-be",
+  "cine",
+]);
 const controlSchema = z.discriminatedUnion("action", [
   z.object({ action: z.enum(["pause", "next", "previous", "stop"]) }),
   z.object({ action: z.literal("seek"), seconds: z.number().finite().min(0) }),
@@ -820,6 +829,11 @@ function setupIPC() {
         playerScanCompleted: true,
       });
     }
+    publish();
+    return state();
+  });
+  handle("app:remove-player", async (input) => {
+    await store.removePlayer(z.string().min(1).parse(input));
     publish();
     return state();
   });

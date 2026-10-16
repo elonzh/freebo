@@ -2,6 +2,25 @@ import { describe, it, expect } from "vitest";
 import { candidatePlayers, manualPlayer } from "../../../electron/core/players";
 
 describe("player discovery", () => {
+  it("finds Cine on Linux in user-local and PATH installations", () => {
+    expect(candidatePlayers("linux", { PATH: "/custom/bin" }, "/home/me")).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "cine", executable: "/home/me/.local/bin/cine" }),
+        expect.objectContaining({ kind: "cine", executable: "/custom/bin/cine" }),
+      ]),
+    );
+    expect(manualPlayer("cine", "/home/nix/.local/bin/cine")).toMatchObject({
+      kind: "cine",
+      executable: "/home/nix/.local/bin/cine",
+      manual: true,
+    });
+    expect(candidatePlayers("darwin", { PATH: "" }).some((player) => player.kind === "cine")).toBe(
+      false,
+    );
+    expect(candidatePlayers("win32", { PATH: "" }).some((player) => player.kind === "cine")).toBe(
+      false,
+    );
+  });
   it("looks for platform-specific installed applications and converts macOS app bundles", () => {
     expect(
       candidatePlayers("darwin", { PATH: "" }, "/home/me").some(

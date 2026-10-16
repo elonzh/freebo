@@ -23,6 +23,24 @@ export interface PlaybackSession extends EventEmitter {
   control(control: PlaybackControl): Promise<void>;
   stop(): Promise<void>;
 }
+
+// Cine's GTK application accepts URLs, but does not expose mpv's JSON IPC.
+// It may hand off to an existing instance; that process is owned by the user.
+export async function launchCine(player: Player, media: PreparedMedia): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    const child = spawn(player.executable, [...player.prefixArgs, "--new-window", media.url], {
+      shell: false,
+      stdio: "ignore",
+      detached: true,
+    });
+    child.once("error", () => reject(new UserFacingError("playerStartFailed")));
+    child.once("spawn", () => {
+      child.unref();
+      resolve();
+    });
+  });
+}
+
 export class PlayerSession extends EventEmitter {
   private child?: ChildProcess;
   private ipc?: MpvIPC;

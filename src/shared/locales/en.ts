@@ -101,6 +101,11 @@ export const en = {
   mpvnetGuide: "A graphical mpv player for Windows.",
   mpvGuide: "Available on all three platforms, mainly controlled with keyboard shortcuts.",
   vlcGuide: "Available on all three platforms, with familiar playback controls.",
+  cineGuide:
+    "For Linux. Opens the current video in Cine; Freebo resume, auto-next, track selection and progress sync are unavailable.",
+  openedExternally: "Opened in player",
+  externalPlaybackDescription:
+    "Control playback in the player and keep Freebo running to serve the media.",
   potplayerGuide:
     "For Windows, with queue controls and progress sync. Select audio and embedded subtitles in the player.",
   mpcGuide: "For Windows, with native playback controls and progress sync.",
@@ -152,6 +157,7 @@ export const en = {
   githubRepository: "GitHub repository",
   download: "Download from website",
   manualPlayer: "Select {{name}} manually",
+  removePlayer: "Remove {{name}} · {{path}}",
   manualHint: "Already installed? Select the app or executable",
   autoNext: "Continuous playback",
   autoNextDescription: "Play the next item in the queue automatically.",

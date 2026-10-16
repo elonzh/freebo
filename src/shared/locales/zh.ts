@@ -96,6 +96,10 @@ export const zh = {
   mpvnetGuide: "适合 Windows，带图形界面的 mpv 播放器。",
   mpvGuide: "支持三个平台，主要通过快捷键操作。",
   vlcGuide: "支持三个平台，提供常用的播放控件。",
+  cineGuide:
+    "适合 Linux，打开当前视频后在 Cine 中控制；不支持 Freebo 续播、连播、轨道选择或进度回传。",
+  openedExternally: "已交给播放器",
+  externalPlaybackDescription: "请在播放器中控制播放，并保持 Freebo 运行以提供媒体。",
   potplayerGuide: "适合 Windows，支持队列控制与进度回传。音轨与内嵌字幕请在播放器内选择。",
   mpcGuide: "适合 Windows，通过原生消息接口控制播放与回传进度。",
   playerConnection:
@@ -145,6 +149,7 @@ export const zh = {
   githubRepository: "GitHub 仓库",
   download: "官网下载安装",
   manualPlayer: "手动选择 {{name}}",
+  removePlayer: "移除 {{name}} · {{path}}",
   manualHint: "已经安装？选择应用或可执行文件",
   autoNext: "连续播放",
   autoNextDescription: "自动播放列表中的下一项。",

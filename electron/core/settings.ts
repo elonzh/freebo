@@ -47,7 +47,7 @@ const serverSchema = z.object({
 const playerSchema = z.object({
   id: z.string(),
   name: z.string(),
-  kind: z.enum(["iina", "mpv", "mpvnet", "vlc", "potplayer", "mpc-hc", "mpc-be"]),
+  kind: z.enum(["iina", "mpv", "mpvnet", "vlc", "potplayer", "mpc-hc", "mpc-be", "cine"]),
   executable: z.string().min(1),
   prefixArgs: z.array(z.string()).default(() => []),
   manual: z.boolean().optional(),
@@ -144,5 +144,14 @@ export class SettingsStore {
     const servers = this.value.servers.filter((s) => s.id !== server.id).concat(server);
     await this.save({ ...this.value, servers });
     return server;
+  }
+  async removePlayer(id: string): Promise<void> {
+    const players = this.value.players.filter((player) => player.id !== id);
+    await this.save({
+      ...this.value,
+      players,
+      defaultPlayerId:
+        this.value.defaultPlayerId === id ? players[0]?.id : this.value.defaultPlayerId,
+    });
   }
 }

@@ -4,7 +4,7 @@ import { cn } from "../../lib/utils";
 import { Label } from "../ui/label";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Button } from "../ui/button";
-import { Globe2, FolderOpen } from "lucide-react";
+import { Globe2, FolderOpen, Trash2 } from "lucide-react";
 import type { AppState, PlayerKind, Platform } from "../../shared/types";
 import type { MessageKey } from "../../shared/i18n";
 import type { RunAction, SettingsPatch } from "../../ui";
@@ -23,6 +23,7 @@ const playerOptions: {
   { kind: "mpc-be", name: "MPC-BE", platforms: ["win32"], description: "mpcGuide" },
   { kind: "mpv", name: "mpv", platforms: ["darwin", "win32", "linux"], description: "mpvGuide" },
   { kind: "vlc", name: "VLC", platforms: ["darwin", "win32", "linux"], description: "vlcGuide" },
+  { kind: "cine", name: "Cine", platforms: ["linux"], description: "cineGuide" },
 ];
 
 export function PlayerSetup({
@@ -69,6 +70,11 @@ export function PlayerSetup({
                     <span className="mt-1.5 block text-xs font-normal text-muted-foreground wrap-anywhere">
                       {player?.executable ?? t(option.description)}
                     </span>
+                    {player?.kind === "cine" && (
+                      <span className="mt-1.5 block text-xs font-normal text-muted-foreground">
+                        {t("cineGuide")}
+                      </span>
+                    )}
                   </span>
                   {selected && (
                     <span className="shrink-0 text-[11px] font-normal text-primary">
@@ -98,6 +104,24 @@ export function PlayerSetup({
                     </div>
                   )}
                   <div className="flex shrink-0 items-center gap-1">
+                    {player && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={t("removePlayer", {
+                          name: player.name,
+                          path: player.executable,
+                        })}
+                        title={t("remove")}
+                        onClick={() =>
+                          void run(`remove-player:${player.id}`, (desktop) =>
+                            desktop.removePlayer(player.id),
+                          )
+                        }
+                      >
+                        <Trash2 size={17} />
+                      </Button>
+                    )}
                     {!player && (
                       <Button
                         variant="ghost"

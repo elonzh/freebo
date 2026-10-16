@@ -32,9 +32,11 @@ Your library already organizes your videos, and your computer already has a play
 | ------- | -------------------------------------------- |
 | macOS   | IINA, mpv, VLC                               |
 | Windows | mpv.net, PotPlayer, MPC-HC, MPC-BE, mpv, VLC |
-| Linux   | mpv, VLC                                     |
+| Linux   | mpv, VLC, Cine                               |
 
 Music and live TV continue to play on the server website.
+
+Cine opens the current video only. See [player integration](docs/architecture.md#服务器与播放器扩展) for playback control and progress sync capabilities.
 
 ## Quick start
 

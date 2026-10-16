@@ -7,7 +7,7 @@ const providerIcons = new Map([
   ["jellyfin", "servers/jellyfin.svg"],
   ["plex", "servers/plex.svg"],
 ]);
-const playerIcons: Record<PlayerKind, string> = {
+const playerIcons: Record<PlayerKind, string | undefined> = {
   iina: "players/iina.png",
   mpv: "players/mpv.svg",
   mpvnet: "players/mpvnet.png",
@@ -15,6 +15,7 @@ const playerIcons: Record<PlayerKind, string> = {
   potplayer: "players/potplayer.png",
   "mpc-hc": "players/mpc-hc.png",
   "mpc-be": "players/mpc-be.png",
+  cine: undefined,
 };
 
 function IntegrationIcon({

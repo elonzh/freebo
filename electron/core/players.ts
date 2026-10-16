@@ -35,6 +35,11 @@ export const playerGuides: Record<
     url: "https://github.com/Aleksoid1978/MPC-BE/releases",
     platforms: ["win32"],
   },
+  cine: {
+    name: "Cine",
+    url: "https://github.com/diegopvlk/Cine",
+    platforms: ["linux"],
+  },
 };
 
 export function candidatePlayers(
@@ -93,9 +98,11 @@ export function candidatePlayers(
     for (const root of ["/usr/bin", "/usr/local/bin", paths.join(home, ".local/bin")]) {
       add("mpv", paths.join(root, "mpv"));
       add("vlc", paths.join(root, "vlc"));
+      add("cine", paths.join(root, "cine"));
     }
   }
   for (const root of (env.PATH ?? "").split(paths.delimiter).filter(Boolean)) {
+    if (platform === "linux") add("cine", paths.join(root, "cine"));
     for (const kind of ["mpv", "mpvnet", "vlc"] as PlayerKind[])
       add(kind, paths.join(root, `${kind}${platform === "win32" ? ".exe" : ""}`));
     if (platform === "win32")

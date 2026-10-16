@@ -48,6 +48,42 @@ function configuredSettings(): Settings {
 }
 
 describe("server settings", () => {
+  it("persists player removal and replaces or clears a removed default without changing other settings", async () => {
+    const file = await settingsFile();
+    const store = new SettingsStore(file);
+    const settings = configuredSettings();
+    const alternative = {
+      ...settings.players[0],
+      id: "other-mpv",
+      executable: "/other/mpv",
+      manual: true,
+    };
+    await store.save({ ...settings, players: [...settings.players, alternative] });
+    await store.removePlayer("missing");
+    expect(store.value.defaultPlayerId).toBe("mpv");
+    await store.removePlayer("mpv");
+    expect(await new SettingsStore(file).load()).toEqual({
+      ...settings,
+      players: [alternative],
+      defaultPlayerId: alternative.id,
+    });
+    await store.removePlayer(alternative.id);
+    expect(await new SettingsStore(file).load()).toEqual({
+      ...settings,
+      players: [],
+      defaultPlayerId: undefined,
+    });
+  });
+  it("keeps the selected player when removing a different installation", async () => {
+    const store = new SettingsStore(await settingsFile());
+    const settings = configuredSettings();
+    await store.save({
+      ...settings,
+      players: [...settings.players, { ...settings.players[0], id: "other" }],
+    });
+    await store.removePlayer("other");
+    expect(store.value).toEqual(settings);
+  });
   it("persists an empty optional name and uses the normalized address as its display label", async () => {
     const file = await settingsFile();
     const store = new SettingsStore(file);
