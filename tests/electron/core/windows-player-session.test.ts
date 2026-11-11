@@ -77,9 +77,20 @@ describe("Windows native player lifecycle", () => {
     expect(windowsPlayerArgs({ ...player, kind: "potplayer" }, item, false, "123")).toContain(
       "/seek=00:00:42",
     );
-    expect(windowsPlayerArgs({ ...player, kind: "potplayer" }, item, false, "123")).toContain(
-      `/title=${item.item.title}`,
-    );
+  });
+  it("passes PotPlayer an episode title without spaces or ASCII quotes", () => {
+    const item = media("episode");
+    item.item.title = `Don't open the "Door"`;
+    item.item.seriesTitle = "中文 剧集";
+    item.subtitleUrl = "http://127.0.0.1:1234/subtitle.srt";
+    expect(windowsPlayerArgs({ ...player, kind: "potplayer" }, item, true, "123")).toEqual([
+      item.url,
+      "/new",
+      "/seek=00:00:42",
+      "/title=中文-剧集-·-Don＇t-open-the-＂Door＂",
+      `/sub=${item.subtitleUrl}`,
+      "/fullscreen",
+    ]);
   });
   it.each(["mpc-hc", "mpc-be", "potplayer"] as const)(
     "waits for %s media and reads the final position before stop",

@@ -92,6 +92,9 @@
       "docs/licenses/**/*"
     ],
     "asar": true,
+    "toolsets": {
+      "appimage": "1.0.3"
+    },
     "mac": {
       "category": "public.app-category.video",
       "target": [
