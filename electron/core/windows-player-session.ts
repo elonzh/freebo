@@ -16,11 +16,16 @@ export function windowsPlayerArgs(
     const time = [Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60]
       .map((n) => String(n).padStart(2, "0"))
       .join(":");
+    // PotPlayer's /title parser can fail to open media when the title contains spaces or ASCII quotes.
+    const playerTitle = title(media)
+      .replace(/\s+/g, "-")
+      .replaceAll('"', "＂")
+      .replaceAll("'", "＇");
     return [
       media.url,
       "/new",
       `/seek=${time}`,
-      `/title=${title(media)}`,
+      `/title=${playerTitle}`,
       ...(media.subtitleUrl ? [`/sub=${media.subtitleUrl}`] : []),
       ...(fullscreen ? ["/fullscreen"] : []),
     ];
